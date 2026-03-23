@@ -57,7 +57,7 @@ export function Layout() {
         <NavLink to="/library" className="text-lg font-bold text-indigo-600">
           FlashMinds
         </NavLink>
-        <nav className="ml-4 flex gap-2">
+        <nav className="ml-4 hidden sm:flex gap-2">
           <NavLink
             to="/library"
             className={({ isActive }) =>
@@ -91,7 +91,7 @@ export function Layout() {
             Tags
           </NavLink>
         </nav>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto hidden sm:flex items-center gap-3">
           <NavLink
             to="/profile"
             className="text-sm text-gray-600 hover:text-gray-900"
@@ -111,11 +111,19 @@ export function Layout() {
       </header>
 
       {/* Body — fills remaining height, never overflows */}
-      <div className="flex flex-1 min-h-0">
+      <div className="relative flex flex-1 min-h-0">
 
-        {/* Sidebar — scrolls independently if needed */}
+        {/* Backdrop — mobile only, closes sidebar on tap */}
         {sidebarOpen && (
-          <aside className="w-56 shrink-0 bg-white border-r border-gray-200 p-4 overflow-y-auto">
+          <div
+            className="fixed inset-0 z-10 bg-black/20 sm:hidden"
+            onClick={toggleSidebar}
+          />
+        )}
+
+        {/* Sidebar — overlays on mobile, pushes content on desktop */}
+        {sidebarOpen && (
+          <aside className="absolute inset-y-0 left-0 z-20 w-64 sm:relative sm:inset-y-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white border-r border-gray-200 p-4 overflow-y-auto">
             <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Navigation</p>
             <nav className="flex flex-col gap-1">
               <NavLink to="/library" className="text-sm text-gray-700 hover:text-indigo-600 py-1">
@@ -144,6 +152,9 @@ export function Layout() {
                   Admin
                 </NavLink>
               )}
+              <button onClick={handleLogout} className="text-sm text-gray-700 hover:text-red-500 py-1 text-left transition-colors">
+                Logout
+              </button>
             </nav>
           </aside>
         )}

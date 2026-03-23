@@ -92,13 +92,14 @@ export function CategoryCollectionsPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => navigate('/categories')}
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-            ← Back
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+            <span className="hidden sm:inline">← Back</span>
+            <span className="sm:hidden">←</span>
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 min-w-0 truncate">
             {isLoading ? (
               <span className="inline-block h-7 w-40 bg-gray-200 rounded animate-pulse" />
             ) : (
@@ -106,11 +107,17 @@ export function CategoryCollectionsPage() {
             )}
           </h1>
           {!isLoading && (
-            <span className="text-sm text-gray-400">{collections.length} collections</span>
+            <span className="text-sm text-gray-400 shrink-0">
+              <span className="hidden sm:inline">{collections.length} collections</span>
+              <span className="sm:hidden">{collections.length}</span>
+            </span>
           )}
         </div>
-        <Link to="/collections/new">
-          <Button size="sm">+ New Collection</Button>
+        <Link to="/collections/new" className="shrink-0 ml-3">
+          <Button size="sm">
+            <span className="hidden sm:inline">+ New Collection</span>
+            <span className="sm:hidden">+ New</span>
+          </Button>
         </Link>
       </div>
 

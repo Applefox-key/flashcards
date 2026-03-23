@@ -483,7 +483,9 @@ export function CollectionDetailPage() {
   const [reorgMode, setReorgMode] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const tagPopoverRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const setCollectionTags = useSetCollectionTags();
   const { data: collectionTags = [] } = useQuery({
@@ -507,6 +509,17 @@ export function CollectionDetailPage() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [editingTags, collectionTags]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [mobileMenuOpen]);
 
   const parsed = rawData as unknown as CollectionContentResponse[] | undefined;
   const collectionData = parsed?.[0];
@@ -561,50 +574,236 @@ export function CollectionDetailPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">
-          ←
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900 flex-1">
-          {isLoading ? (
-            <span className="inline-block h-6 w-48 bg-gray-200 rounded animate-pulse" />
-          ) : (
-            (collection?.name ?? `Collection #${id}`)
-          )}
-        </h1>
-        <Link to={`/collections/${id}/edit`}>
-          <Button variant="secondary" size="sm">
-            Edit collection
-          </Button>
-        </Link>
-        {!isLoading && cards.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDeleteAllCards}
-            loading={deleteAllCards.isPending}
-            className="text-red-400 hover:text-red-600">
-            Clear cards
-          </Button>
-        )}
+      <div className="mb-2">
+        {/* Title row */}
+        <div className="flex items-center gap-3 mb-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-gray-400 hover:text-gray-600 text-lg leading-none shrink-0">
+            ←
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900 min-w-0 truncate flex-1">
+            {isLoading ? (
+              <span className="inline-block h-6 w-48 bg-gray-200 rounded animate-pulse" />
+            ) : (
+              (collection?.name ?? `Collection #${id}`)
+            )}
+          </h1>
+          {/* ··· button — mobile only */}
+          <div className="relative sm:hidden" ref={mobileMenuRef}>
+            <button
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-base leading-none">
+              •••
+            </button>
+            {mobileMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[220px] py-1">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate(`/collections/${id}/edit`);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  <span className="text-xs text-gray-400">✏</span> Edit collection
+                </button>
+                {cards.length > 1 && (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setReorgMode(true);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <span className="text-xs text-gray-400">⇅</span> Reorganize
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setPasteOpen(true);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  <span className="text-xs text-gray-400">⎘</span> Paste list
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setFileOpen(true);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  <span className="text-xs text-gray-400">↑</span> Import file
+                </button>
+                <div className="border-t border-gray-100 my-1" />
+                {cards.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleDeleteAllCards();
+                    }}
+                    disabled={deleteAllCards.isPending}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-50 transition-colors disabled:opacity-40">
+                    <span className="text-xs text-red-300">✕</span> Clear cards
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleDeleteCollection();
+                  }}
+                  disabled={deleteCollection.isPending}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-50 transition-colors disabled:opacity-40">
+                  <span className="text-xs text-red-300">🗑</span> Delete collection
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── MOBILE header (< sm) ── */}
         {!isLoading && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDeleteCollection}
-            loading={deleteCollection.isPending}
-            className="text-red-400 hover:text-red-600">
-            Delete
-          </Button>
+          <div className="sm:hidden flex flex-col gap-2 mb-4">
+            {/* Line 2: status badges + stat chips */}
+            <div className="ml-8 flex gap-2 flex-wrap items-center">
+              <button
+                onClick={() =>
+                  togglePublic.mutate(
+                    { id: collectionId, isPublic: !collection?.isPublic },
+                    { onError: () => toast.error("Failed to update visibility") },
+                  )
+                }
+                disabled={togglePublic.isPending}
+                className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
+                  collection?.isPublic
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : "bg-gray-50 text-gray-400 border-gray-200"
+                }`}>
+                {collection?.isPublic ? "public" : "private"}
+              </button>
+              <button
+                onClick={() =>
+                  toggleFavorite.mutate(
+                    { id: collectionId, isFavorite: !collection?.isFavorite },
+                    { onError: () => toast.error("Failed to update favorite") },
+                  )
+                }
+                disabled={toggleFavorite.isPending}
+                className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
+                  collection?.isFavorite
+                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : "bg-gray-50 text-gray-400 border-gray-200"
+                }`}>
+                {collection?.isFavorite ? "★ favorite" : "★"}
+              </button>
+              <span className="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
+                {cards.length} {cards.length === 1 ? "card" : "cards"}
+              </span>
+              <span className="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
+                {collection?.category
+                  ? typeof collection.category === "object"
+                    ? (collection.category as Category).name
+                    : (collection.category as unknown as string)
+                  : "—"}
+              </span>
+            </div>
+
+            {/* Line 3: tags + edit button (popover anchor) */}
+            <div className="ml-8 relative" ref={tagPopoverRef}>
+              <div className="flex items-center gap-2 flex-wrap">
+                {collectionTags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">
+                    {tag.name}
+                  </span>
+                ))}
+                {collectionTags.length === 0 && <span className="text-xs text-gray-300">no tags</span>}
+                <button
+                  onClick={() => setEditingTags(true)}
+                  className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+                  Edit tags
+                </button>
+              </div>
+              {editingTags && (
+                <div className="absolute left-0 top-6 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Edit tags</span>
+                    <button
+                      onClick={() => {
+                        setEditingTags(false);
+                        setPendingTagIds(collectionTags.map((t) => t.id));
+                      }}
+                      className="text-gray-400 hover:text-gray-600 text-lg leading-none">
+                      ×
+                    </button>
+                  </div>
+                  <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() =>
+                        setCollectionTags.mutate(
+                          { collectionId, tagIds: pendingTagIds },
+                          {
+                            onSuccess: () => {
+                              toast.success("Tags updated");
+                              setEditingTags(false);
+                            },
+                            onError: () => toast.error("Failed to update tags"),
+                          },
+                        )
+                      }
+                      disabled={setCollectionTags.isPending}
+                      className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Practice — full width */}
+            <Link to={`/play/${id}`} className="block w-full mt-1">
+              <Button size="sm" className="w-full justify-center">
+                ▶ Practice
+              </Button>
+            </Link>
+          </div>
         )}
-        <Link to={`/play/${id}`}>
-          <Button size="sm">▶ Practice</Button>
-        </Link>
+
+        {/* ── DESKTOP actions row (sm and above) ── */}
+        <div className="hidden sm:flex items-center gap-2 flex-wrap ml-8">
+          <Link to={`/collections/${id}/edit`}>
+            <Button variant="secondary" size="sm">
+              Edit collection
+            </Button>
+          </Link>
+          {!isLoading && cards.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteAllCards}
+              loading={deleteAllCards.isPending}
+              className="text-red-400 hover:text-red-600">
+              Clear cards
+            </Button>
+          )}
+          {!isLoading && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteCollection}
+              loading={deleteCollection.isPending}
+              className="text-red-400 hover:text-red-600">
+              Delete
+            </Button>
+          )}
+          <Link to={`/play/${id}`} className="ml-auto">
+            <Button size="sm">▶ Practice</Button>
+          </Link>
+        </div>
       </div>
 
-      {/* Meta */}
+      {/* Meta — desktop only (sm and above) */}
       {!isLoading && (
-        <div className="flex gap-3 ml-8 mb-6 text-sm text-gray-400">
+        <div className="hidden sm:flex gap-3 ml-8 mb-6 text-sm text-gray-400">
           <span>
             {cards.length} {cards.length === 1 ? "card" : "cards"}
           </span>
@@ -718,17 +917,17 @@ export function CollectionDetailPage() {
       {/* Actions bar */}
       {!isLoading && !addingCard && (
         <div className="flex gap-2 mb-4 flex-wrap">
-          <Button size="sm" onClick={() => setAddingCard(true)}>
+          <Button size="sm" className="hidden sm:inline-flex" onClick={() => setAddingCard(true)}>
             + Add card
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => setPasteOpen(true)}>
+          <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setPasteOpen(true)}>
             + Paste list
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => setFileOpen(true)}>
+          <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setFileOpen(true)}>
             + Import file
           </Button>
           {cards.length > 1 && (
-            <Button variant="secondary" size="sm" onClick={() => setReorgMode(true)}>
+            <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setReorgMode(true)}>
               Reorganize
             </Button>
           )}
@@ -767,7 +966,7 @@ export function CollectionDetailPage() {
 
       {/* Cards grid */}
       {!isLoading && filtered.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-20 sm:pb-0">
           {filtered.map((card) => (
             <CardItem key={card.id} card={card} collectionId={collectionId} onDelete={handleDelete} />
           ))}
@@ -782,6 +981,20 @@ export function CollectionDetailPage() {
       {/* Modals */}
       <PasteCardsModal open={pasteOpen} onClose={() => setPasteOpen(false)} collectionId={collectionId} />
       <FileImportModal open={fileOpen} onClose={() => setFileOpen(false)} collectionId={collectionId} />
+
+      {/* FAB — mobile only */}
+      {!isLoading && !addingCard && (
+        <button
+          onClick={() => {
+            setAddingCard(true);
+            document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className="fixed bottom-6 right-6 z-50 sm:hidden w-14 h-14 rounded-full bg-indigo-600 text-white font-light shadow-lg hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
