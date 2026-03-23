@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { authApi } from '@/api'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/hooks/useToast'

@@ -18,7 +18,7 @@ import { Button } from "@/components/Button";
 import { TagSelect } from "@/components/TagSelect";
 import { useToast } from "@/hooks/useToast";
 import { useCardImage } from "@/hooks/useCardImage";
-import type { Content, Collection, CardEditRequest } from "@/types";
+import type { Content, Collection, CardEditRequest, Category } from "@/types";
 
 interface CollectionContentResponse {
   collection: Collection;

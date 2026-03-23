@@ -1,5 +1,5 @@
 import { useIsDemo } from './useIsDemo'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { categoriesApi } from '@/api'
 import * as real from '@/features/categories/hooks/useCategories'
 import * as demo from '@/demo/useDemoCategories'

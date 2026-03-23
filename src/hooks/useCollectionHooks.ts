@@ -1,6 +1,4 @@
 import { useIsDemo } from './useIsDemo'
-import { useCollectionWithContent as realUseCollectionWithContent } from '@/features/collections/hooks/useCollections'
-import { useCollections as realUseCollections } from '@/features/collections/hooks/useCollections'
 import { useToggleFavorite as realUseToggleFavorite } from '@/features/collections/hooks/useCollections'
 import { useTogglePublic as realUseTogglePublic } from '@/features/collections/hooks/useCollections'
 import { useCreateCollection as realUseCreateCollection } from '@/features/collections/hooks/useCollections'

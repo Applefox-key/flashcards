@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { shuffle, normalizeText, weightedRandom, adjustProb } from '@/utils/gameUtils'
+import { shuffle, normalizeText, weightedRandom } from '@/utils/gameUtils'
 import { useGameProbs } from './useGameProbs'
 import { ResultScreen } from './ResultScreen'
 import type { Content } from '@/types'
