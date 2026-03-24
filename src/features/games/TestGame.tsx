@@ -9,11 +9,12 @@ interface Props {
   onPlayAgain: () => void
   onRetryMistakes?: (wrongIds: Set<number>) => void
   onBack: () => void
+  answerFirst?: boolean
 }
 
 type AnswerState = 'idle' | 'correct' | 'wrong'
 
-export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props) {
+export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false }: Props) {
   const { probs, updateProb, saveProbs } = useGameProbs(cards, 'test0')
 
   const deck = useMemo(() => shuffle(cards), [cards])
@@ -110,12 +111,12 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props)
         />
       </div>
 
-      {/* Question */}
+      {/* Prompt card */}
       <div className="bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">Question</p>
-        <p className="text-lg font-medium text-gray-900">{current.question}</p>
-        {current.imgQ && (
-          <img src={current.imgQ} alt="" className="max-h-28 mx-auto mt-3 object-contain rounded" />
+        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? 'Answer' : 'Question'}</p>
+        <p className="text-lg font-medium text-gray-900">{answerFirst ? current.answer : current.question}</p>
+        {(answerFirst ? current.imgA : current.imgQ) && (
+          <img src={answerFirst ? current.imgA : current.imgQ} alt="" className="max-h-28 mx-auto mt-3 object-contain rounded" />
         )}
       </div>
 
@@ -137,7 +138,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props)
               disabled={answerState !== 'idle'}
               className={`w-full rounded-xl px-4 py-3 text-sm font-medium text-left transition-all duration-200 ${cls}`}
             >
-              {opt.answer}
+              {answerFirst ? opt.question : opt.answer}
             </button>
           )
         })}

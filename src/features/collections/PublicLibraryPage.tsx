@@ -1,21 +1,21 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { pbcollectionsApi } from '@/api'
-import { useCopyCollection } from '@/features/collections/hooks/useCollections'
-import { useCollections } from '@/hooks/useCollectionHooks'
-import { Button } from '@/components/Button'
-import { useToast } from '@/hooks/useToast'
-import type { Collection } from '@/types'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { pbcollectionsApi } from "@/api";
+import { useCopyCollection } from "@/features/collections/hooks/useCollections";
+import { useCollections } from "@/hooks/useCollectionHooks";
+import { Button } from "@/components/Button";
+import { useToast } from "@/hooks/useToast";
+import type { Collection } from "@/types";
 
 function groupByCategory(collections: Collection[]) {
-  const groups = new Map<string, Collection[]>()
+  const groups = new Map<string, Collection[]>();
   for (const col of collections) {
-    const key = col.category?.name ?? 'Uncategorized'
-    if (!groups.has(key)) groups.set(key, [])
-    groups.get(key)!.push(col)
+    const key = col.category?.name ?? "Uncategorized";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(col);
   }
-  return groups
+  return groups;
 }
 
 function RowSkeleton() {
@@ -26,36 +26,34 @@ function RowSkeleton() {
       <div className="h-4 w-12 bg-gray-100 rounded" />
       <div className="h-7 w-14 bg-gray-100 rounded" />
     </div>
-  )
+  );
 }
 
 export function PublicLibraryPage() {
-  const [search, setSearch] = useState('')
-  const [copiedIds, setCopiedIds] = useState<Set<number>>(new Set())
-  const toast = useToast()
-  const copyCollection = useCopyCollection()
-  const { data: myCollections = [] } = useCollections()
-  const myCollectionIds = new Set(myCollections.map((c) => c.id))
+  const [search, setSearch] = useState("");
+  const [copiedIds, setCopiedIds] = useState<Set<number>>(new Set());
+  const toast = useToast();
+  const copyCollection = useCopyCollection();
+  const { data: myCollections = [] } = useCollections();
+  const myCollectionIds = new Set(myCollections.map((c) => c.id));
 
   const { data: collections = [], isLoading } = useQuery({
-    queryKey: ['pbcollections', 'count'],
+    queryKey: ["pbcollections", "count"],
     queryFn: pbcollectionsApi.getAllWithCount,
-  })
+  });
 
-  const filtered = collections.filter((col) =>
-    col.name.toLowerCase().includes(search.toLowerCase())
-  )
-  const groups = groupByCategory(filtered)
+  const filtered = collections.filter((col) => col.name.toLowerCase().includes(search.toLowerCase()));
+  const groups = groupByCategory(filtered);
 
   const handleCopy = (col: Collection) => {
     copyCollection.mutate(col.id, {
       onSuccess: () => {
-        setCopiedIds((prev) => new Set([...prev, col.id]))
-        toast.success(`"${col.name}" added to your library`)
+        setCopiedIds((prev) => new Set([...prev, col.id]));
+        toast.success(`"${col.name}" added to your library`);
       },
-      onError: () => toast.error('Failed to copy collection'),
-    })
-  }
+      onError: () => toast.error("Failed to copy collection"),
+    });
+  };
 
   return (
     <div>
@@ -63,9 +61,7 @@ export function PublicLibraryPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Public Library</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Browse and copy collections shared by other users
-          </p>
+          <p className="text-sm text-gray-500 mt-0.5">Browse and copy collections shared by other users</p>
         </div>
         <Link to="/library">
           <Button variant="secondary" size="sm">
@@ -103,7 +99,7 @@ export function PublicLibraryPage() {
       {/* Empty */}
       {!isLoading && filtered.length === 0 && (
         <p className="text-center text-gray-400 py-16">
-          {search ? `No collections match "${search}"` : 'No public collections yet'}
+          {search ? `No collections match "${search}"` : "No public collections yet"}
         </p>
       )}
 
@@ -119,12 +115,10 @@ export function PublicLibraryPage() {
               {cols.map((col) => (
                 <div
                   key={col.id}
-                  className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3"
-                >
+                  className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3">
                   <Link
                     to={`/library/public/${col.id}`}
-                    className="font-medium text-gray-900 flex-1 hover:text-indigo-600 transition-colors"
-                  >
+                    className="font-medium text-gray-900 flex-1 hover:text-indigo-600 transition-colors">
                     {col.name}
                   </Link>
                   {col.category && (
@@ -132,9 +126,7 @@ export function PublicLibraryPage() {
                       {col.category.name}
                     </span>
                   )}
-                  {col.cardCount !== undefined && (
-                    <span className="text-xs text-gray-400">{col.cardCount} cards</span>
-                  )}
+                  {col.cardCount !== undefined && <span className="text-xs text-gray-400">{col.cardCount} cards</span>}
                   {myCollectionIds.has(col.id) ? (
                     <span className="text-xs text-indigo-400 font-medium px-2">Your collection</span>
                   ) : copiedIds.has(col.id) ? (
@@ -144,8 +136,7 @@ export function PublicLibraryPage() {
                       size="sm"
                       variant="secondary"
                       onClick={() => handleCopy(col)}
-                      loading={copyCollection.isPending}
-                    >
+                      loading={copyCollection.isPending}>
                       Copy
                     </Button>
                   )}
@@ -155,5 +146,5 @@ export function PublicLibraryPage() {
           </div>
         ))}
     </div>
-  )
+  );
 }

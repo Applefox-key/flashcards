@@ -40,8 +40,8 @@ export function formatParts(text: string): string[] {
   const parts =
     spaceCount >= 2
       ? trimmed.split(' ').filter(Boolean)
-      : trimmed.split('').filter((c) => c !== ' ')
-  if (parts.length < 2 || parts.length > 10) return []
+      : trimmed.split('')
+  if (parts.length < 2 || parts.length > 15) return []
   return parts
 }
 

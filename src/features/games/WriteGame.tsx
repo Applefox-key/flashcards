@@ -9,11 +9,12 @@ interface Props {
   onPlayAgain: () => void
   onRetryMistakes?: (wrongIds: Set<number>) => void
   onBack: () => void
+  answerFirst?: boolean
 }
 
 type Phase = 'input' | 'revealed'
 
-export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props) {
+export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false }: Props) {
   const { probs, updateProb, saveProbs } = useGameProbs(cards, 'write0')
 
   const deck = useMemo(() => shuffle(cards), [cards])
@@ -77,7 +78,8 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props
 
   function handleCheck() {
     if (!current || phase !== 'input') return
-    const correct = normalizeText(input) === normalizeText(current.answer)
+    const correctAnswer = answerFirst ? current.question : current.answer
+    const correct = normalizeText(input) === normalizeText(correctAnswer)
     setIsCorrect(correct)
     setPhase('revealed')
     updateProb(current.id, correct)
@@ -91,7 +93,8 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props
 
   function handleHint() {
     if (!current || phase !== 'input') return
-    const next = current.answer.slice(0, hint.length + 1)
+    const correctAnswer = answerFirst ? current.question : current.answer
+    const next = correctAnswer.slice(0, hint.length + 1)
     setHint(next)
     setInput(next)
   }
@@ -142,12 +145,12 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props
         />
       </div>
 
-      {/* Question */}
+      {/* Prompt card */}
       <div className="bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">Question</p>
-        <p className="text-lg font-medium text-gray-900">{current.question}</p>
-        {current.imgQ && (
-          <img src={current.imgQ} alt="" className="max-h-28 mx-auto mt-3 object-contain rounded" />
+        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? 'Answer' : 'Question'}</p>
+        <p className="text-lg font-medium text-gray-900">{answerFirst ? current.answer : current.question}</p>
+        {(answerFirst ? current.imgA : current.imgQ) && (
+          <img src={answerFirst ? current.imgA : current.imgQ} alt="" className="max-h-28 mx-auto mt-3 object-contain rounded" />
         )}
       </div>
 
@@ -196,7 +199,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack }: Props
           {!isCorrect && (
             <div>
               <p className="text-xs text-gray-400 mb-0.5">Correct answer:</p>
-              <p className="text-sm font-medium text-gray-800">{current.answer}</p>
+              <p className="text-sm font-medium text-gray-800">{answerFirst ? current.question : current.answer}</p>
             </div>
           )}
           {current.note && (

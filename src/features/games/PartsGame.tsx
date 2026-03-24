@@ -9,9 +9,10 @@ interface Props {
   onPlayAgain: () => void
   onRetryMistakes?: (wrongIds: Set<number>) => void
   onBack: () => void
+  answerFirst?: boolean
 }
 
-export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBack }: Props) {
+export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false }: Props) {
   const playableCards = useMemo(
     () => allCards.filter((c) => formatParts(c.answer).length > 0),
     [allCards]
@@ -27,12 +28,14 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   const [correctParts, setCorrectParts] = useState<string[]>([])
   const [shuffledParts, setShuffledParts] = useState<string[]>([])
   const [clicked, setClicked] = useState<string[]>([])
+  const [usedIndices, setUsedIndices] = useState<Set<number>>(new Set())
   const [wrongIndex, setWrongIndex] = useState<number | null>(null)
   const [noMistake, setNoMistake] = useState(true)
   const [score, setScore] = useState({ r: 0, w: 0, t: 0 })
   const [wrongCardIds, setWrongCardIds] = useState<Set<number>>(new Set())
   const [done, setDone] = useState(false)
 
+  const answerFirstRef = useRef(answerFirst)
   const remainingRef = useRef<Content[]>([])
   const probsRef = useRef<Record<number, number>>(probs)
 
@@ -54,11 +57,12 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   }, [remaining])
 
   function loadCard(card: Content) {
-    const parts = formatParts(card.answer)
+    const parts = formatParts(answerFirstRef.current ? card.question : card.answer)
     setCurrent(card)
     setCorrectParts(parts)
     setShuffledParts(shuffle(parts))
     setClicked([])
+    setUsedIndices(new Set())
     setWrongIndex(null)
     setNoMistake(true)
   }
@@ -80,7 +84,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     loadCard(next)
   }
 
-  function handlePartClick(part: string) {
+  function handlePartClick(part: string, index: number) {
     if (wrongIndex !== null || !current) return
     const position = clicked.length
     const expected = correctParts[position]
@@ -88,6 +92,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     if (part === expected) {
       const next = [...clicked, part]
       setClicked(next)
+      setUsedIndices((prev) => new Set([...prev, index]))
 
       if (next.length === correctParts.length) {
         // Puzzle complete
@@ -103,10 +108,12 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       }
     } else {
       setClicked((prev) => [...prev, part])
+      setUsedIndices((prev) => new Set([...prev, index]))
       setWrongIndex(clicked.length)
       setNoMistake(false)
       setTimeout(() => {
         setClicked((prev) => prev.slice(0, -1))
+        setUsedIndices((prev) => { const s = new Set(prev); s.delete(index); return s })
         setWrongIndex(null)
       }, 700)
     }
@@ -114,14 +121,22 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
 
   function handleUndo() {
     if (clicked.length === 0 || wrongIndex !== null) return
+    const lastPart = clicked[clicked.length - 1]
+    // Find the last used index for this part value
+    const lastIdx = [...usedIndices].reverse().find((i) => shuffledParts[i] === lastPart)
     setClicked((prev) => prev.slice(0, -1))
+    if (lastIdx !== undefined) {
+      setUsedIndices((prev) => { const s = new Set(prev); s.delete(lastIdx); return s })
+    }
   }
 
   function handleHint() {
     if (wrongIndex !== null || !current) return
     const expected = correctParts[clicked.length]
     if (!expected) return
-    handlePartClick(expected)
+    const idx = shuffledParts.findIndex((p, i) => p === expected && !usedIndices.has(i))
+    if (idx === -1) return
+    handlePartClick(expected, idx)
   }
 
   if (!initialized || !current) {
@@ -173,10 +188,10 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         />
       </div>
 
-      {/* Question */}
+      {/* Prompt */}
       <div className="bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">Question</p>
-        <p className="text-lg font-medium text-gray-900">{current.question}</p>
+        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? 'Answer' : 'Question'}</p>
+        <p className="text-lg font-medium text-gray-900">{answerFirst ? current.answer : current.question}</p>
       </div>
 
       {/* Build area */}
@@ -193,31 +208,28 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
                   : 'bg-indigo-100 text-indigo-700'
               }`}
             >
-              {part}
+              {part === ' ' ? '⎵' : part}
             </span>
           ))
         )}
       </div>
 
       {/* Part buttons */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         {shuffledParts.map((part, i) => {
-          // Determine how many of this part have been used vs available
-          const usedCount = clicked.filter((p) => p === part).length
-          const totalCount = shuffledParts.filter((p) => p === part).length
-          const isUsed = usedCount >= totalCount
+          const isUsed = usedIndices.has(i)
           return (
             <button
               key={`${part}-${i}`}
-              onClick={() => handlePartClick(part)}
+              onClick={() => handlePartClick(part, i)}
               disabled={isUsed || wrongIndex !== null}
-              className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all duration-150 ${
+              className={`px-5 py-3 rounded-xl border-2 text-base font-medium transition-all duration-150 ${
                 isUsed
                   ? 'border-gray-100 text-gray-300 bg-gray-50 cursor-default'
                   : 'border-gray-300 text-gray-700 bg-white hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50'
               }`}
             >
-              {part}
+              {part === ' ' ? '⎵' : part}
             </button>
           )
         })}

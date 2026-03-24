@@ -7,9 +7,10 @@ interface Props {
   cards: Content[]
   onPlayAgain: () => void
   onBack: () => void
+  answerFirst?: boolean
 }
 
-export function TimedGame({ cards: initialCards, onPlayAgain, onBack }: Props) {
+export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirst = false }: Props) {
   const [cards] = useState(() => shuffle(initialCards))
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
@@ -77,13 +78,13 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack }: Props) {
       >
         {!flipped ? (
           <div className="text-center">
-            <p className="text-xs text-gray-400 mb-3 uppercase tracking-wider">Question</p>
-            <p className="text-xl font-medium text-gray-900">{card.question}</p>
+            <p className="text-xs text-gray-400 mb-3 uppercase tracking-wider">{answerFirst ? 'Answer' : 'Question'}</p>
+            <p className="text-xl font-medium text-gray-900">{answerFirst ? card.answer : card.question}</p>
           </div>
         ) : (
           <div className="text-center">
-            <p className="text-xs text-gray-400 mb-3 uppercase tracking-wider">Answer</p>
-            <p className="text-xl font-medium text-gray-900">{card.answer}</p>
+            <p className="text-xs text-gray-400 mb-3 uppercase tracking-wider">{answerFirst ? 'Question' : 'Answer'}</p>
+            <p className="text-xl font-medium text-gray-900">{answerFirst ? card.question : card.answer}</p>
             {card.note && (
               <p className="text-sm text-gray-400 mt-3 italic">{card.note}</p>
             )}

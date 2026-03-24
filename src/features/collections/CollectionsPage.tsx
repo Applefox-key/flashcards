@@ -161,12 +161,9 @@ function CategoryGroup({
           style={{ display: "inline-block" }}>
           ▼
         </span>
-        <Link
-          to={`/categories/${category.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
           {category.name}
-        </Link>
+        </span>
         <span className="text-xs text-gray-400">({collections.length})</span>
       </button>
 

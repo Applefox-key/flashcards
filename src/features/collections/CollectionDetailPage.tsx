@@ -266,6 +266,7 @@ function CardItem({
   const [imgAFile, setImgAFile] = useState<File | null>(null);
   const [clearImgQ, setClearImgQ] = useState(false);
   const [clearImgA, setClearImgA] = useState(false);
+  const [hoverRate, setHoverRate] = useState(0);
 
   function handleSave() {
     const hasImageChange = imgQFile || imgAFile || clearImgQ || clearImgA;
@@ -387,7 +388,6 @@ function CardItem({
     );
   }
 
-  const [hoverRate, setHoverRate] = useState(0);
   const displayRate = hoverRate || card.rate || 0;
 
   function handleRate(star: number) {
@@ -577,10 +577,10 @@ export function CollectionDetailPage() {
       <div className="mb-2">
         {/* Title row */}
         <div className="flex items-center gap-3 mb-2">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-gray-400 hover:text-gray-600 text-lg leading-none shrink-0">
-            ←
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-400 hover:text-gray-600 shrink-0">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
+            </svg>
           </button>
           <h1 className="text-2xl font-bold text-gray-900 min-w-0 truncate flex-1">
             {isLoading ? (
@@ -588,7 +588,38 @@ export function CollectionDetailPage() {
             ) : (
               (collection?.name ?? `Collection #${id}`)
             )}
-          </h1>
+          </h1>{" "}
+          {/* ── DESKTOP actions row (sm and above) ──*/}
+          <div className="hidden sm:flex items-center gap-2 flex-wrap ml-8">
+            <Link to={`/collections/${id}/edit`}>
+              <Button variant="secondary" size="sm">
+                Edit collection
+              </Button>
+            </Link>
+            {!isLoading && cards.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDeleteAllCards}
+                loading={deleteAllCards.isPending}
+                className="text-red-400 hover:text-red-600">
+                Clear cards
+              </Button>
+            )}
+            {!isLoading && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDeleteCollection}
+                loading={deleteCollection.isPending}
+                className="text-red-400 hover:text-red-600">
+                Delete
+              </Button>
+            )}
+            <Link to={`/play/${id}`} className="ml-auto">
+              <Button size="sm">▶ Practice</Button>
+            </Link>
+          </div>
           {/* ··· button — mobile only */}
           <div className="relative sm:hidden" ref={mobileMenuRef}>
             <button
@@ -767,141 +798,108 @@ export function CollectionDetailPage() {
             </Link>
           </div>
         )}
-
-        {/* ── DESKTOP actions row (sm and above) ── */}
-        <div className="hidden sm:flex items-center gap-2 flex-wrap ml-8">
-          <Link to={`/collections/${id}/edit`}>
-            <Button variant="secondary" size="sm">
-              Edit collection
-            </Button>
-          </Link>
-          {!isLoading && cards.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDeleteAllCards}
-              loading={deleteAllCards.isPending}
-              className="text-red-400 hover:text-red-600">
-              Clear cards
-            </Button>
-          )}
-          {!isLoading && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDeleteCollection}
-              loading={deleteCollection.isPending}
-              className="text-red-400 hover:text-red-600">
-              Delete
-            </Button>
-          )}
-          <Link to={`/play/${id}`} className="ml-auto">
-            <Button size="sm">▶ Practice</Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Meta — desktop only (sm and above) */}
-      {!isLoading && (
-        <div className="hidden sm:flex gap-3 ml-8 mb-6 text-sm text-gray-400">
-          <span>
-            {cards.length} {cards.length === 1 ? "card" : "cards"}
-          </span>
-          {collection?.category && (
-            <span className="border-l border-gray-200 pl-3">
-              {typeof collection.category === "object"
-                ? (collection.category as Category).name
-                : (collection.category as unknown as string)}
+        {/* Meta — desktop only (sm and above) */}
+        {!isLoading && (
+          <div className="hidden sm:flex gap-3 ml-8 mb-6 text-sm text-gray-400">
+            <span>
+              {cards.length} {cards.length === 1 ? "card" : "cards"}
             </span>
-          )}
-          <button
-            onClick={() =>
-              toggleFavorite.mutate(
-                { id: collectionId, isFavorite: !collection?.isFavorite },
-                { onError: () => toast.error("Failed to update favorite") },
-              )
-            }
-            disabled={toggleFavorite.isPending}
-            title={collection?.isFavorite ? "Remove from favorites" : "Add to favorites"}
-            className={`border-l border-gray-200 pl-3 transition-colors disabled:opacity-40 ${
-              collection?.isFavorite ? "text-yellow-400 hover:text-yellow-300" : "text-gray-300 hover:text-yellow-400"
-            }`}>
-            ★ {collection?.isFavorite ? "favorite" : "add to favorites"}
-          </button>
-          <button
-            onClick={() =>
-              togglePublic.mutate(
-                { id: collectionId, isPublic: !collection?.isPublic },
-                { onError: () => toast.error("Failed to update visibility") },
-              )
-            }
-            disabled={togglePublic.isPending}
-            title={collection?.isPublic ? "Make private" : "Make public"}
-            className={`border-l border-gray-200 pl-3 transition-colors disabled:opacity-40 ${
-              collection?.isPublic ? "text-green-500 hover:text-red-400" : "text-gray-300 hover:text-green-500"
-            }`}>
-            {collection?.isPublic ? "public" : "private"}
-          </button>
-
-          {/* Tags */}
-          <div className="border-l border-gray-200 pl-3 relative" ref={tagPopoverRef}>
-            <div className="flex items-center gap-2 flex-wrap">
-              {collectionTags.length > 0 ? (
-                collectionTags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">
-                    {tag.name}
-                  </span>
-                ))
-              ) : (
-                <span className="text-gray-300 text-xs">no tags</span>
-              )}
-              <button
-                onClick={() => setEditingTags(true)}
-                className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-                Edit tags
-              </button>
-            </div>
-
-            {editingTags && (
-              <div className="absolute left-0 top-6 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Edit tags</span>
-                  <button
-                    onClick={() => {
-                      setEditingTags(false);
-                      setPendingTagIds(collectionTags.map((t) => t.id));
-                    }}
-                    className="text-gray-400 hover:text-gray-600 text-lg leading-none">
-                    ×
-                  </button>
-                </div>
-                <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
-                <div className="mt-3 flex justify-end">
-                  <button
-                    onClick={() =>
-                      setCollectionTags.mutate(
-                        { collectionId, tagIds: pendingTagIds },
-                        {
-                          onSuccess: () => {
-                            toast.success("Tags updated");
-                            setEditingTags(false);
-                          },
-                          onError: () => toast.error("Failed to update tags"),
-                        },
-                      )
-                    }
-                    disabled={setCollectionTags.isPending}
-                    className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-                    Save
-                  </button>
-                </div>
-              </div>
+            {collection?.category && (
+              <span className="border-l border-gray-200 pl-3">
+                {typeof collection.category === "object"
+                  ? (collection.category as Category).name
+                  : (collection.category as unknown as string)}
+              </span>
             )}
+            <button
+              onClick={() =>
+                toggleFavorite.mutate(
+                  { id: collectionId, isFavorite: !collection?.isFavorite },
+                  { onError: () => toast.error("Failed to update favorite") },
+                )
+              }
+              disabled={toggleFavorite.isPending}
+              title={collection?.isFavorite ? "Remove from favorites" : "Add to favorites"}
+              className={`border-l border-gray-200 pl-3 transition-colors disabled:opacity-40 ${
+                collection?.isFavorite ? "text-yellow-400 hover:text-yellow-300" : "text-gray-300 hover:text-yellow-400"
+              }`}>
+              ★ {collection?.isFavorite ? "favorite" : "add to favorites"}
+            </button>
+            <button
+              onClick={() =>
+                togglePublic.mutate(
+                  { id: collectionId, isPublic: !collection?.isPublic },
+                  { onError: () => toast.error("Failed to update visibility") },
+                )
+              }
+              disabled={togglePublic.isPending}
+              title={collection?.isPublic ? "Make private" : "Make public"}
+              className={`border-l border-gray-200 pl-3 transition-colors disabled:opacity-40 ${
+                collection?.isPublic ? "text-green-500 hover:text-red-400" : "text-gray-300 hover:text-green-500"
+              }`}>
+              {collection?.isPublic ? "public" : "private"}
+            </button>
+
+            {/* Tags */}
+            <div className="border-l border-gray-200 pl-3 relative" ref={tagPopoverRef}>
+              <div className="flex items-center gap-2 flex-wrap">
+                {collectionTags.length > 0 ? (
+                  collectionTags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">
+                      {tag.name}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-300 text-xs">no tags</span>
+                )}
+                <button
+                  onClick={() => setEditingTags(true)}
+                  className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+                  Edit tags
+                </button>
+              </div>
+
+              {editingTags && (
+                <div className="absolute left-0 top-6 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Edit tags</span>
+                    <button
+                      onClick={() => {
+                        setEditingTags(false);
+                        setPendingTagIds(collectionTags.map((t) => t.id));
+                      }}
+                      className="text-gray-400 hover:text-gray-600 text-lg leading-none">
+                      ×
+                    </button>
+                  </div>
+                  <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() =>
+                        setCollectionTags.mutate(
+                          { collectionId, tagIds: pendingTagIds },
+                          {
+                            onSuccess: () => {
+                              toast.success("Tags updated");
+                              setEditingTags(false);
+                            },
+                            onError: () => toast.error("Failed to update tags"),
+                          },
+                        )
+                      }
+                      disabled={setCollectionTags.isPending}
+                      className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Search */}
       {!isLoading && cards.length > 4 && (
