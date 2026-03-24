@@ -18,17 +18,17 @@ const FEATURES = [
   "Filter practice by difficulty (star rating)",
 ];
 
-const STACK = [
-  "React 18",
-  "TypeScript",
-  "Vite",
-  "Tailwind CSS",
-  "TanStack Query",
-  "Zustand",
-  "React Router v6",
-  "Node.js",
-  "SQLite",
-];
+// const STACK = [
+//   "React 18",
+//   "TypeScript",
+//   "Vite",
+//   "Tailwind CSS",
+//   "TanStack Query",
+//   "Zustand",
+//   "React Router v6",
+//   "Node.js",
+//   "SQLite",
+// ];
 
 export function AboutPage() {
   return (
