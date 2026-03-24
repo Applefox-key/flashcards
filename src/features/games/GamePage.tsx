@@ -99,8 +99,8 @@ export function GamePage() {
         </button>
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 uppercase tracking-wide">{gameLabel}</p>
-          <h1 className="text-lg font-bold text-gray-900 truncate">{title}</h1>
-        </div>
+        </div>{" "}
+        <h1 className="text-lg font-bold text-gray-900 truncate">{title}</h1>
         {mistakeIds && (
           <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
             Retrying {mistakeIds.size} mistake{mistakeIds.size !== 1 ? "s" : ""}
@@ -110,7 +110,7 @@ export function GamePage() {
 
       {/* Difficulty filter + Q→A toggle — shown for all game types except flashcard */}
       {type !== "flashcard" && (
-        <div className="mb-5 flex items-center gap-3">
+        <div className="mb-5 flex items-center gap-3 flex-wrap">
           {type !== "pairs" && (
             <button
               onClick={() => {
