@@ -51,6 +51,7 @@ export function useSetCollectionTags() {
     mutationFn: ({ collectionId, tagIds }: { collectionId: number; tagIds: number[] }) =>
       collectionTagsApi.setCollectionTags(collectionId, tagIds),
     onSuccess: (_, { collectionId }) => {
+      void queryClient.invalidateQueries({ queryKey: ['collection-tags', 'collection', collectionId] })
       void queryClient.invalidateQueries({ queryKey: ['collections', collectionId, 'content'] })
       void queryClient.invalidateQueries({ queryKey: ['categories', 'withCollections'] })
       void queryClient.invalidateQueries({ queryKey: ['collections'] })

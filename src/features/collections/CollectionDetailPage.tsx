@@ -484,7 +484,8 @@ export function CollectionDetailPage() {
   const [editingTags, setEditingTags] = useState(false);
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const tagPopoverRef = useRef<HTMLDivElement>(null);
+  const tagPopoverMobileRef = useRef<HTMLDivElement>(null);
+  const tagPopoverDesktopRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const setCollectionTags = useSetCollectionTags();
@@ -501,7 +502,10 @@ export function CollectionDetailPage() {
   useEffect(() => {
     if (!editingTags) return;
     function handleClick(e: MouseEvent) {
-      if (tagPopoverRef.current && !tagPopoverRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const inMobile = tagPopoverMobileRef.current?.contains(target);
+      const inDesktop = tagPopoverDesktopRef.current?.contains(target);
+      if (!inMobile && !inDesktop) {
         setEditingTags(false);
         setPendingTagIds(collectionTags.map((t) => t.id));
       }
@@ -737,7 +741,7 @@ export function CollectionDetailPage() {
             </div>
 
             {/* Line 3: tags + edit button (popover anchor) */}
-            <div className="ml-8 relative" ref={tagPopoverRef}>
+            <div className="ml-8 relative" ref={tagPopoverMobileRef}>
               <div className="flex items-center gap-2 flex-wrap">
                 {collectionTags.map((tag) => (
                   <span
@@ -841,7 +845,7 @@ export function CollectionDetailPage() {
             </button>
 
             {/* Tags */}
-            <div className="border-l border-gray-200 pl-3 relative" ref={tagPopoverRef}>
+            <div className="border-l border-gray-200 pl-3 relative" ref={tagPopoverDesktopRef}>
               <div className="flex items-center gap-2 flex-wrap">
                 {collectionTags.length > 0 ? (
                   collectionTags.map((tag) => (
