@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pbcollectionsApi } from "@/api";
@@ -7,16 +7,6 @@ import { useCollections } from "@/hooks/useCollectionHooks";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
 import type { Collection } from "@/types";
-
-function groupByCategory(collections: Collection[]) {
-  const groups = new Map<string, Collection[]>();
-  for (const col of collections) {
-    const key = col.category?.name ?? "Uncategorized";
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(col);
-  }
-  return groups;
-}
 
 function RowSkeleton() {
   return (
@@ -29,8 +19,97 @@ function RowSkeleton() {
   );
 }
 
+// The public API may return category as a string (name) or object
+function getCategoryName(col: Collection): string | undefined {
+  if (!col.category) return undefined;
+  if (typeof col.category === "object") return (col.category as { name?: string }).name;
+  if (typeof col.category === "string") return col.category || undefined;
+  return undefined;
+}
+
+// Tags may come back as strings or { id, name } objects
+function getTagNames(col: Collection): string[] {
+  return (col.tags ?? [])
+    .map((t): string => {
+      if (typeof t === "string") return t;
+      if (typeof t === "object" && t !== null) return (t as { name?: string }).name ?? "";
+      return "";
+    })
+    .filter(Boolean);
+}
+
+function highlight(text: string | undefined, query: string): React.ReactNode {
+  if (!text) return text ?? "";
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="bg-yellow-100 text-yellow-800 rounded px-0.5">{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
+interface RowProps {
+  col: Collection;
+  search: string;
+  isMine: boolean;
+  isCopied: boolean;
+  onCopy: (col: Collection) => void;
+  copyPending: boolean;
+}
+
+function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: RowProps) {
+  const categoryName = getCategoryName(col);
+  const tagNames = getTagNames(col);
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-start gap-3 hover:border-indigo-200 transition-colors">
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to={`/library/public/${col.id}`}
+            className="font-medium text-gray-900 hover:text-indigo-600 transition-colors">
+            {highlight(col.name, search)}
+          </Link>
+          {categoryName && (
+            <span className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded-full">
+              {highlight(categoryName, search)}
+            </span>
+          )}
+          {tagNames.length > 0 && (
+            <>
+              {tagNames.map((name) => (
+                <span
+                  key={name}
+                  className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">
+                  {highlight(name, search)}
+                </span>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-3 shrink-0 mt-0.5">
+        {col.cardCount !== undefined && <span className="text-xs text-gray-400">{col.cardCount} cards</span>}
+        {isMine ? (
+          <span className="text-xs text-indigo-400 font-medium px-2">Your collection</span>
+        ) : isCopied ? (
+          <span className="text-xs text-green-600 font-medium px-2">✓ Copied</span>
+        ) : (
+          <Button size="sm" variant="secondary" onClick={() => onCopy(col)} loading={copyPending}>
+            Copy
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function PublicLibraryPage() {
   const [search, setSearch] = useState("");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [copiedIds, setCopiedIds] = useState<Set<number>>(new Set());
   const toast = useToast();
   const copyCollection = useCopyCollection();
@@ -42,8 +121,26 @@ export function PublicLibraryPage() {
     queryFn: pbcollectionsApi.getAllWithCount,
   });
 
-  const filtered = collections.filter((col) => col.name.toLowerCase().includes(search.toLowerCase()));
-  const groups = groupByCategory(filtered);
+  // Collect all unique tag name strings across public collections
+  const allTagNames = useMemo<string[]>(() => {
+    const set = new Set<string>();
+    for (const col of collections) {
+      for (const name of getTagNames(col)) set.add(name);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [collections]);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return collections.filter((col) => {
+      if (activeTag !== null && !getTagNames(col).includes(activeTag)) return false;
+      if (!q) return true;
+      if (col.name?.toLowerCase().includes(q)) return true;
+      if (getCategoryName(col)?.toLowerCase().includes(q)) return true;
+      if (getTagNames(col).some((t) => t.toLowerCase().includes(q))) return true;
+      return false;
+    });
+  }, [collections, search, activeTag]);
 
   const handleCopy = (col: Collection) => {
     copyCollection.mutate(col.id, {
@@ -71,27 +168,44 @@ export function PublicLibraryPage() {
       </div>
 
       {/* Search */}
-      <div className="mb-6">
+      <div className="mb-3">
         <input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search public collections..."
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setActiveTag(null);
+          }}
+          placeholder="Search by name, category or tag…"
           className="w-full max-w-sm border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
+      {/* Tag chips */}
+      {allTagNames.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-5">
+          {allTagNames.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => {
+                setActiveTag(activeTag === tag ? null : tag);
+                setSearch("");
+              }}
+              className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                activeTag === tag
+                  ? "bg-violet-100 text-violet-700 border-violet-300"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-violet-300 hover:text-violet-600"
+              }`}>
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Loading */}
       {isLoading && (
-        <div className="flex flex-col gap-8">
-          {[1, 2].map((g) => (
-            <div key={g}>
-              <div className="h-3 w-24 bg-gray-200 rounded animate-pulse mb-3" />
-              <div className="flex flex-col gap-2">
-                {[1, 2, 3].map((i) => (
-                  <RowSkeleton key={i} />
-                ))}
-              </div>
-            </div>
+        <div className="flex flex-col gap-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <RowSkeleton key={i} />
           ))}
         </div>
       )}
@@ -99,52 +213,26 @@ export function PublicLibraryPage() {
       {/* Empty */}
       {!isLoading && filtered.length === 0 && (
         <p className="text-center text-gray-400 py-16">
-          {search ? `No collections match "${search}"` : "No public collections yet"}
+          {search || activeTag !== null ? "No collections match your search" : "No public collections yet"}
         </p>
       )}
 
-      {/* Category groups */}
-      {!isLoading &&
-        Array.from(groups.entries()).map(([categoryName, cols]) => (
-          <div key={categoryName} className="mb-8">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              {categoryName}
-              <span className="ml-2 text-gray-400 font-normal normal-case">({cols.length})</span>
-            </h2>
-            <div className="flex flex-col gap-2">
-              {cols.map((col) => (
-                <div
-                  key={col.id}
-                  className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3">
-                  <Link
-                    to={`/library/public/${col.id}`}
-                    className="font-medium text-gray-900 flex-1 hover:text-indigo-600 transition-colors">
-                    {col.name}
-                  </Link>
-                  {col.category && (
-                    <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
-                      {col.category.name}
-                    </span>
-                  )}
-                  {col.cardCount !== undefined && <span className="text-xs text-gray-400">{col.cardCount} cards</span>}
-                  {myCollectionIds.has(col.id) ? (
-                    <span className="text-xs text-indigo-400 font-medium px-2">Your collection</span>
-                  ) : copiedIds.has(col.id) ? (
-                    <span className="text-xs text-green-600 font-medium px-2">✓ Copied</span>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleCopy(col)}
-                      loading={copyCollection.isPending}>
-                      Copy
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+      {/* Flat list */}
+      {!isLoading && filtered.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {filtered.map((col) => (
+            <CollectionRow
+              key={col.id}
+              col={col}
+              search={search}
+              isMine={myCollectionIds.has(col.id)}
+              isCopied={copiedIds.has(col.id)}
+              onCopy={handleCopy}
+              copyPending={copyCollection.isPending}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
+import { useCollections } from "@/hooks/useCollectionHooks";
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
 import type { Collection, CategoryWithCollections, CollectionTag } from "@/types";
 
@@ -183,8 +184,16 @@ export function CollectionsPage() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [search, setSearch] = useState("");
   const [activeTagId, setActiveTagId] = useState<number | null>(null);
-  const { data: categories = [], isLoading } = useCategoriesWithCollections();
+  const { data: categoriesRaw = [], isLoading } = useCategoriesWithCollections();
+  const { data: allCollections = [] } = useCollections();
   const { data: allTags = [] } = useCollectionTags();
+
+  // Append a virtual "Uncategorized" group for collections not in any category
+  const categorizedIds = new Set(categoriesRaw.flatMap((c) => c.collections.map((col) => col.id)));
+  const uncategorized = allCollections.filter((col) => !categorizedIds.has(col.id));
+  const categories = uncategorized.length > 0
+    ? [...categoriesRaw, { id: 0, name: "Uncategorized", userid: 0, collections: uncategorized }]
+    : categoriesRaw;
 
   const totalCollections = categories.reduce((sum, c) => sum + c.collections.length, 0);
   const allCollapsed = expanded.size === 0;
