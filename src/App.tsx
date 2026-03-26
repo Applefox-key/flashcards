@@ -17,11 +17,15 @@ const queryClient = new QueryClient({
 /** Hydrates the user on page load when a persisted token exists. */
 function AppInit() {
   useEffect(() => {
-    const { token, isDemo, setUser, logout, enterDemo } = useAuthStore.getState()
+    const { token, isDemo, setUser, logout, enterDemo, setInitializing } = useAuthStore.getState()
     if (isDemo) {
       enterDemo()
+      setInitializing(false)
     } else if (token) {
-      authApi.getMe().then(setUser).catch(() => logout())
+      authApi.getMe()
+        .then(setUser)
+        .catch(() => logout())
+        .finally(() => setInitializing(false))
     } else {
       // No token in localStorage — try cookie auth (cross-project SSO)
       authApi.getMe()
@@ -29,9 +33,8 @@ function AppInit() {
           useAuthStore.setState({ isAuthenticated: true })
           setUser(user)
         })
-        .catch(() => {
-          // No valid cookie — stay unauthenticated, show login page
-        })
+        .catch(() => {})
+        .finally(() => setInitializing(false))
     }
   }, [])
 

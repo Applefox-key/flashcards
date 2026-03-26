@@ -8,10 +8,12 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   isDemo: boolean
+  isInitializing: boolean
   login: (token: string, role: string) => void
   logout: () => void
   setUser: (user: User) => void
   enterDemo: () => void
+  setInitializing: (v: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -21,6 +23,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       isDemo: false,
+      isInitializing: true,
 
       login: (token, _role) =>
         set({ token, isAuthenticated: true, isDemo: false }),
@@ -38,6 +41,8 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           isDemo: true,
         }),
+
+      setInitializing: (v) => set({ isInitializing: v }),
     }),
     {
       name: 'fm_token',
