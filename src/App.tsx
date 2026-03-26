@@ -22,6 +22,16 @@ function AppInit() {
       enterDemo()
     } else if (token) {
       authApi.getMe().then(setUser).catch(() => logout())
+    } else {
+      // No token in localStorage — try cookie auth (cross-project SSO)
+      authApi.getMe()
+        .then((user) => {
+          useAuthStore.setState({ isAuthenticated: true })
+          setUser(user)
+        })
+        .catch(() => {
+          // No valid cookie — stay unauthenticated, show login page
+        })
     }
   }, [])
 

@@ -247,6 +247,94 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
 
 // ── Card item ───────────────────────────────────────────────────────
 
+function CardListRow({
+  card,
+  collectionId,
+  index,
+  onDelete,
+}: {
+  card: Content;
+  collectionId: number;
+  index: number;
+  onDelete: (id: number) => void;
+}) {
+  const toast = useToast();
+  const editCard = useEditCard();
+  const [editing, setEditing] = useState(false);
+  const [question, setQuestion] = useState(card.question);
+  const [answer, setAnswer] = useState(card.answer);
+  const [note, setNote] = useState(card.note ?? "");
+
+  function handleSave() {
+    editCard.mutate(
+      {
+        collectionId,
+        data: { id: card.id, question, answer, note: note || undefined },
+      },
+      {
+        onSuccess: () => { toast.success("Card updated"); setEditing(false); },
+        onError: () => toast.error("Failed to update card"),
+      },
+    );
+  }
+
+  if (editing) {
+    return (
+      <div className="bg-white px-4 py-3 flex flex-col gap-2">
+        <div className="flex gap-2">
+          <input
+            className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Question"
+          />
+          <input
+            className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="Answer"
+          />
+        </div>
+        <input
+          className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Note (optional)"
+        />
+        <div className="flex gap-2 justify-end">
+          <Button size="sm" onClick={handleSave} loading={editCard.isPending} disabled={!question.trim() || !answer.trim()}>
+            Save
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => { setEditing(false); setQuestion(card.question); setAnswer(card.answer); setNote(card.note ?? ""); }}>
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="group bg-white px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 transition-colors">
+      <span className="text-xs text-gray-300 font-mono mt-0.5 w-5 shrink-0 text-right">{index}</span>
+      <div className="flex-1 min-w-0 grid grid-cols-2 gap-x-4 gap-y-0.5">
+        <span className="text-sm text-gray-900 truncate">{card.question}</span>
+        <span className="text-sm text-gray-600 truncate">{card.answer}</span>
+        {card.note && (
+          <span className="col-span-2 text-xs text-gray-400 truncate">{card.note}</span>
+        )}
+      </div>
+      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button onClick={() => setEditing(true)} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+          Edit
+        </button>
+        <button onClick={() => onDelete(card.id)} className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CardItem({
   card,
   collectionId,
@@ -477,6 +565,7 @@ export function CollectionDetailPage() {
   const deleteAllCards = useDeleteAllCards();
 
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [addingCard, setAddingCard] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [fileOpen, setFileOpen] = useState(false);
@@ -905,15 +994,33 @@ export function CollectionDetailPage() {
         )}
       </div>
 
-      {/* Search */}
-      {!isLoading && cards.length > 4 && (
-        <input
-          type="search"
-          placeholder="Search cards..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
+      {/* Search + view toggle */}
+      {!isLoading && cards.length > 0 && (
+        <div className="flex items-center gap-2 mb-4">
+          {cards.length > 4 && (
+            <input
+              type="search"
+              placeholder="Search cards..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          )}
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden ml-auto shrink-0">
+            <button
+              onClick={() => setViewMode("grid")}
+              title="Grid view"
+              className={`px-2.5 py-1.5 text-sm transition-colors ${viewMode === "grid" ? "bg-indigo-50 text-indigo-600" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}>
+              ⊞
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              title="List view"
+              className={`px-2.5 py-1.5 text-sm transition-colors border-l border-gray-200 ${viewMode === "list" ? "bg-indigo-50 text-indigo-600" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}>
+              ☰
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Actions bar */}
@@ -966,11 +1073,18 @@ export function CollectionDetailPage() {
         </div>
       )}
 
-      {/* Cards grid */}
-      {!isLoading && filtered.length > 0 && (
+      {/* Cards */}
+      {!isLoading && filtered.length > 0 && viewMode === "grid" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-20 sm:pb-0">
           {filtered.map((card) => (
             <CardItem key={card.id} card={card} collectionId={collectionId} onDelete={handleDelete} />
+          ))}
+        </div>
+      )}
+      {!isLoading && filtered.length > 0 && viewMode === "list" && (
+        <div className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-lg overflow-hidden pb-20 sm:pb-0">
+          {filtered.map((card, idx) => (
+            <CardListRow key={card.id} card={card} collectionId={collectionId} index={idx + 1} onDelete={handleDelete} />
           ))}
         </div>
       )}

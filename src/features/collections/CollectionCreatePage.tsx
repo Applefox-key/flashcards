@@ -2,17 +2,21 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
 import { CategorySelect } from '@/components/CategorySelect'
+import { TagSelect } from '@/components/TagSelect'
 import { useCreateCollection } from '@/features/collections/hooks/useCollections'
+import { useSetCollectionTags } from '@/features/collections/hooks/useCollectionTags'
 import { useToast } from '@/hooks/useToast'
 
 export function CollectionCreatePage() {
   const navigate = useNavigate()
   const toast = useToast()
   const createCollection = useCreateCollection()
+  const setCollectionTags = useSetCollectionTags()
 
   const [name, setName] = useState('')
   const [note, setNote] = useState('')
   const [categoryid, setCategoryid] = useState<number | undefined>()
+  const [tagIds, setTagIds] = useState<number[]>([])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,7 +24,10 @@ export function CollectionCreatePage() {
     createCollection.mutate(
       { name: name.trim(), note: note.trim() || undefined, categoryid },
       {
-        onSuccess: (col) => {
+        onSuccess: async (col) => {
+          if (tagIds.length > 0) {
+            await setCollectionTags.mutateAsync({ collectionId: col.id, tagIds })
+          }
           toast.success('Collection created')
           navigate(`/collections/${col.id}`)
         },
@@ -71,6 +78,11 @@ export function CollectionCreatePage() {
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700">Category</label>
           <CategorySelect value={categoryid} onChange={setCategoryid} />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700">Tags</label>
+          <TagSelect value={tagIds} onChange={setTagIds} />
         </div>
 
         <div className="flex gap-3 pt-2">
