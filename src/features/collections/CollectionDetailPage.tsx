@@ -272,7 +272,10 @@ function CardListRow({
         data: { id: card.id, question, answer, note: note || undefined },
       },
       {
-        onSuccess: () => { toast.success("Card updated"); setEditing(false); },
+        onSuccess: () => {
+          toast.success("Card updated");
+          setEditing(false);
+        },
         onError: () => toast.error("Failed to update card"),
       },
     );
@@ -302,10 +305,22 @@ function CardListRow({
           placeholder="Note (optional)"
         />
         <div className="flex gap-2 justify-end">
-          <Button size="sm" onClick={handleSave} loading={editCard.isPending} disabled={!question.trim() || !answer.trim()}>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            loading={editCard.isPending}
+            disabled={!question.trim() || !answer.trim()}>
             Save
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => { setEditing(false); setQuestion(card.question); setAnswer(card.answer); setNote(card.note ?? ""); }}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setEditing(false);
+              setQuestion(card.question);
+              setAnswer(card.answer);
+              setNote(card.note ?? "");
+            }}>
             Cancel
           </Button>
         </div>
@@ -319,15 +334,17 @@ function CardListRow({
       <div className="flex-1 min-w-0 grid grid-cols-2 gap-x-4 gap-y-0.5">
         <span className="text-sm text-gray-900 truncate">{card.question}</span>
         <span className="text-sm text-gray-600 truncate">{card.answer}</span>
-        {card.note && (
-          <span className="col-span-2 text-xs text-gray-400 truncate">{card.note}</span>
-        )}
+        {card.note && <span className="col-span-2 text-xs text-gray-400 truncate">{card.note}</span>}
       </div>
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={() => setEditing(true)} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+        <button
+          onClick={() => setEditing(true)}
+          className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
           Edit
         </button>
-        <button onClick={() => onDelete(card.id)} className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+        <button
+          onClick={() => onDelete(card.id)}
+          className="text-xs text-gray-400 hover:text-red-500 transition-colors">
           Delete
         </button>
       </div>
@@ -1084,7 +1101,13 @@ export function CollectionDetailPage() {
       {!isLoading && filtered.length > 0 && viewMode === "list" && (
         <div className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-lg overflow-hidden pb-20 sm:pb-0">
           {filtered.map((card, idx) => (
-            <CardListRow key={card.id} card={card} collectionId={collectionId} index={idx + 1} onDelete={handleDelete} />
+            <CardListRow
+              key={card.id}
+              card={card}
+              collectionId={collectionId}
+              index={idx + 1}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}

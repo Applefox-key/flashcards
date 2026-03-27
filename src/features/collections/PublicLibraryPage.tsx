@@ -157,11 +157,11 @@ export function PublicLibraryPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Public Library</h1>
+          <h1 className="test-base sm:text-2xl font-bold text-gray-900">Public Library</h1>
           <p className="text-sm text-gray-500 mt-0.5">Browse and copy collections shared by other users</p>
         </div>
         <Link to="/library">
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary" size="sm" className="whitespace-nowrap">
             ← My Library
           </Button>
         </Link>

@@ -1,142 +1,147 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
-import { shuffle, formatParts, weightedRandom } from '@/utils/gameUtils'
-import { useGameProbs } from './useGameProbs'
-import { ResultScreen } from './ResultScreen'
-import type { Content } from '@/types'
+import { useState, useMemo, useEffect, useRef } from "react";
+import { shuffle, formatParts, weightedRandom } from "@/utils/gameUtils";
+import { useGameProbs } from "./useGameProbs";
+import { ResultScreen } from "./ResultScreen";
+import type { Content } from "@/types";
 
 interface Props {
-  cards: Content[]
-  onPlayAgain: () => void
-  onRetryMistakes?: (wrongIds: Set<number>) => void
-  onBack: () => void
-  answerFirst?: boolean
+  cards: Content[];
+  onPlayAgain: () => void;
+  onRetryMistakes?: (wrongIds: Set<number>) => void;
+  onBack: () => void;
+  answerFirst?: boolean;
 }
 
 export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false }: Props) {
-  const playableCards = useMemo(
-    () => allCards.filter((c) => formatParts(c.answer).length > 0),
-    [allCards]
-  )
+  const playableCards = useMemo(() => allCards.filter((c) => formatParts(c.answer).length > 0), [allCards]);
 
-  const { probs, updateProb, saveProbs } = useGameProbs(playableCards, 'parts0')
+  const { probs, updateProb, saveProbs } = useGameProbs(playableCards, "parts0");
 
-  const deck = useMemo(() => shuffle(playableCards), [playableCards])
-  const [initialized, setInitialized] = useState(false)
-  const [remaining, setRemaining] = useState<Content[]>([])
+  const deck = useMemo(() => shuffle(playableCards), [playableCards]);
+  const [initialized, setInitialized] = useState(false);
+  const [remaining, setRemaining] = useState<Content[]>([]);
 
-  const [current, setCurrent] = useState<Content | null>(null)
-  const [correctParts, setCorrectParts] = useState<string[]>([])
-  const [shuffledParts, setShuffledParts] = useState<string[]>([])
-  const [clicked, setClicked] = useState<string[]>([])
-  const [usedIndices, setUsedIndices] = useState<Set<number>>(new Set())
-  const [wrongIndex, setWrongIndex] = useState<number | null>(null)
-  const [noMistake, setNoMistake] = useState(true)
-  const [score, setScore] = useState({ r: 0, w: 0, t: 0 })
-  const [wrongCardIds, setWrongCardIds] = useState<Set<number>>(new Set())
-  const [done, setDone] = useState(false)
+  const [current, setCurrent] = useState<Content | null>(null);
+  const [correctParts, setCorrectParts] = useState<string[]>([]);
+  const [shuffledParts, setShuffledParts] = useState<string[]>([]);
+  const [clicked, setClicked] = useState<string[]>([]);
+  const [usedIndices, setUsedIndices] = useState<Set<number>>(new Set());
+  const [wrongIndex, setWrongIndex] = useState<number | null>(null);
+  const [noMistake, setNoMistake] = useState(true);
+  const [score, setScore] = useState({ r: 0, w: 0, t: 0 });
+  const [wrongCardIds, setWrongCardIds] = useState<Set<number>>(new Set());
+  const [done, setDone] = useState(false);
 
-  const answerFirstRef = useRef(answerFirst)
-  const remainingRef = useRef<Content[]>([])
-  const probsRef = useRef<Record<number, number>>(probs)
+  const answerFirstRef = useRef(answerFirst);
+  const remainingRef = useRef<Content[]>([]);
+  const probsRef = useRef<Record<number, number>>(probs);
 
   useEffect(() => {
-    if (initialized || Object.keys(probs).length === 0) return
-    setInitialized(true)
-    const sorted = [...deck].sort((a, b) => (probs[b.id] ?? 10) - (probs[a.id] ?? 10))
-    loadCard(sorted[0])
-    setRemaining(sorted.slice(1))
-    remainingRef.current = sorted.slice(1)
-  }, [probs, deck, initialized])
+    if (initialized || Object.keys(probs).length === 0) return;
+    setInitialized(true);
+    const sorted = [...deck].sort((a, b) => (probs[b.id] ?? 10) - (probs[a.id] ?? 10));
+    loadCard(sorted[0]);
+    setRemaining(sorted.slice(1));
+    remainingRef.current = sorted.slice(1);
+  }, [probs, deck, initialized]);
 
   useEffect(() => {
-    probsRef.current = probs
-  }, [probs])
+    probsRef.current = probs;
+  }, [probs]);
 
   useEffect(() => {
-    remainingRef.current = remaining
-  }, [remaining])
+    remainingRef.current = remaining;
+  }, [remaining]);
 
   function loadCard(card: Content) {
-    const parts = formatParts(answerFirstRef.current ? card.question : card.answer)
-    setCurrent(card)
-    setCorrectParts(parts)
-    setShuffledParts(shuffle(parts))
-    setClicked([])
-    setUsedIndices(new Set())
-    setWrongIndex(null)
-    setNoMistake(true)
+    const parts = formatParts(answerFirstRef.current ? card.question : card.answer);
+    setCurrent(card);
+    setCorrectParts(parts);
+    setShuffledParts(shuffle(parts));
+    setClicked([]);
+    setUsedIndices(new Set());
+    setWrongIndex(null);
+    setNoMistake(true);
   }
 
   function pickNext() {
-    const rem = remainingRef.current
-    const currentProbs = probsRef.current
+    const rem = remainingRef.current;
+    const currentProbs = probsRef.current;
     if (rem.length === 0) {
-      setDone(true)
-      saveProbs()
-      return
+      setDone(true);
+      saveProbs();
+      return;
     }
-    const probList = rem.map((c) => currentProbs[c.id] ?? 10)
-    const nextIdx = weightedRandom(probList)
-    const next = rem[nextIdx]
-    const newRem = rem.filter((_, i) => i !== nextIdx)
-    setRemaining(newRem)
-    remainingRef.current = newRem
-    loadCard(next)
+    const probList = rem.map((c) => currentProbs[c.id] ?? 10);
+    const nextIdx = weightedRandom(probList);
+    const next = rem[nextIdx];
+    const newRem = rem.filter((_, i) => i !== nextIdx);
+    setRemaining(newRem);
+    remainingRef.current = newRem;
+    loadCard(next);
   }
 
   function handlePartClick(part: string, index: number) {
-    if (wrongIndex !== null || !current) return
-    const position = clicked.length
-    const expected = correctParts[position]
+    if (wrongIndex !== null || !current) return;
+    const position = clicked.length;
+    const expected = correctParts[position];
 
     if (part === expected) {
-      const next = [...clicked, part]
-      setClicked(next)
-      setUsedIndices((prev) => new Set([...prev, index]))
+      const next = [...clicked, part];
+      setClicked(next);
+      setUsedIndices((prev) => new Set([...prev, index]));
 
       if (next.length === correctParts.length) {
         // Puzzle complete
-        const correct = noMistake
-        updateProb(current.id, correct)
+        const correct = noMistake;
+        updateProb(current.id, correct);
         setScore((s) => ({
           r: s.r + (correct ? 1 : 0),
           w: s.w + (correct ? 0 : 1),
           t: s.t + 1,
-        }))
-        if (!correct) setWrongCardIds((prev) => new Set([...prev, current.id]))
-        setTimeout(pickNext, 600)
+        }));
+        if (!correct) setWrongCardIds((prev) => new Set([...prev, current.id]));
+        setTimeout(pickNext, 600);
       }
     } else {
-      setClicked((prev) => [...prev, part])
-      setUsedIndices((prev) => new Set([...prev, index]))
-      setWrongIndex(clicked.length)
-      setNoMistake(false)
+      setClicked((prev) => [...prev, part]);
+      setUsedIndices((prev) => new Set([...prev, index]));
+      setWrongIndex(clicked.length);
+      setNoMistake(false);
       setTimeout(() => {
-        setClicked((prev) => prev.slice(0, -1))
-        setUsedIndices((prev) => { const s = new Set(prev); s.delete(index); return s })
-        setWrongIndex(null)
-      }, 700)
+        setClicked((prev) => prev.slice(0, -1));
+        setUsedIndices((prev) => {
+          const s = new Set(prev);
+          s.delete(index);
+          return s;
+        });
+        setWrongIndex(null);
+      }, 700);
     }
   }
 
   function handleUndo() {
-    if (clicked.length === 0 || wrongIndex !== null) return
-    const lastPart = clicked[clicked.length - 1]
+    if (clicked.length === 0 || wrongIndex !== null) return;
+    const lastPart = clicked[clicked.length - 1];
     // Find the last used index for this part value
-    const lastIdx = [...usedIndices].reverse().find((i) => shuffledParts[i] === lastPart)
-    setClicked((prev) => prev.slice(0, -1))
+    const lastIdx = [...usedIndices].reverse().find((i) => shuffledParts[i] === lastPart);
+    setClicked((prev) => prev.slice(0, -1));
     if (lastIdx !== undefined) {
-      setUsedIndices((prev) => { const s = new Set(prev); s.delete(lastIdx); return s })
+      setUsedIndices((prev) => {
+        const s = new Set(prev);
+        s.delete(lastIdx);
+        return s;
+      });
     }
   }
 
   function handleHint() {
-    if (wrongIndex !== null || !current) return
-    const expected = correctParts[clicked.length]
-    if (!expected) return
-    const idx = shuffledParts.findIndex((p, i) => p === expected && !usedIndices.has(i))
-    if (idx === -1) return
-    handlePartClick(expected, idx)
+    if (wrongIndex !== null || !current) return;
+    const expected = correctParts[clicked.length];
+    if (!expected) return;
+    const idx = shuffledParts.findIndex((p, i) => p === expected && !usedIndices.has(i));
+    if (idx === -1) return;
+    handlePartClick(expected, idx);
   }
 
   if (!initialized || !current) {
@@ -144,10 +149,12 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       <div className="max-w-lg mx-auto animate-pulse flex flex-col gap-4">
         <div className="h-24 bg-gray-100 rounded-xl" />
         <div className="flex gap-2 flex-wrap">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 w-20 bg-gray-100 rounded-lg" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-10 w-20 bg-gray-100 rounded-lg" />
+          ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (playableCards.length === 0) {
@@ -156,7 +163,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         <p>No cards suitable for the parts game.</p>
         <p className="text-sm mt-2">Answers need 2–10 parts when split.</p>
       </div>
-    )
+    );
   }
 
   if (done) {
@@ -164,22 +171,22 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       <ResultScreen
         score={score}
         onPlayAgain={onPlayAgain}
-        onRetryMistakes={
-          onRetryMistakes && wrongCardIds.size > 0
-            ? () => onRetryMistakes(wrongCardIds)
-            : undefined
-        }
+        onRetryMistakes={onRetryMistakes && wrongCardIds.size > 0 ? () => onRetryMistakes(wrongCardIds) : undefined}
         onBack={onBack}
       />
-    )
+    );
   }
 
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-4">
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-500">
-        <span>{score.t + 1} / {playableCards.length}</span>
-        <span>✓ {score.r} &nbsp; ✗ {score.w}</span>
+        <span>
+          {score.t + 1} / {playableCards.length}
+        </span>
+        <span>
+          ✓ {score.r} &nbsp; ✗ {score.w}
+        </span>
       </div>
       <div className="w-full h-1.5 bg-gray-200 rounded-full">
         <div
@@ -190,7 +197,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
 
       {/* Prompt */}
       <div className="bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? 'Answer' : 'Question'}</p>
+        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
         <p className="text-lg font-medium text-gray-900">{answerFirst ? current.answer : current.question}</p>
       </div>
 
@@ -203,12 +210,9 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
             <span
               key={i}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                wrongIndex === i
-                  ? 'bg-red-100 text-red-700 border-2 border-red-300'
-                  : 'bg-indigo-100 text-indigo-700'
-              }`}
-            >
-              {part === ' ' ? '⎵' : part}
+                wrongIndex === i ? "bg-red-100 text-red-700 border-2 border-red-300" : "bg-indigo-100 text-indigo-700"
+              }`}>
+              {part === " " ? "⎵" : part}
             </span>
           ))
         )}
@@ -217,7 +221,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       {/* Part buttons */}
       <div className="flex flex-wrap gap-3">
         {shuffledParts.map((part, i) => {
-          const isUsed = usedIndices.has(i)
+          const isUsed = usedIndices.has(i);
           return (
             <button
               key={`${part}-${i}`}
@@ -225,13 +229,12 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
               disabled={isUsed || wrongIndex !== null}
               className={`px-5 py-3 rounded-xl border-2 text-base font-medium transition-all duration-150 ${
                 isUsed
-                  ? 'border-gray-100 text-gray-300 bg-gray-50 cursor-default'
-                  : 'border-gray-300 text-gray-700 bg-white hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50'
-              }`}
-            >
-              {part === ' ' ? '⎵' : part}
+                  ? "border-gray-100 text-gray-300 bg-gray-50 cursor-default"
+                  : "border-gray-300 text-gray-700 bg-white hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50"
+              }`}>
+              {part === " " ? "⎵" : part}
             </button>
-          )
+          );
         })}
       </div>
 
@@ -240,22 +243,18 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         <button
           onClick={handleUndo}
           disabled={clicked.length === 0 || wrongIndex !== null}
-          className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 disabled:opacity-30"
-        >
+          className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 disabled:opacity-30">
           ↩ Undo
         </button>
         <button
           onClick={handleHint}
           disabled={wrongIndex !== null}
-          className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 disabled:opacity-30"
-        >
+          className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 disabled:opacity-30">
           💡 Hint
         </button>
       </div>
 
-      {current.note && (
-        <p className="text-xs text-gray-400 italic text-center">{current.note}</p>
-      )}
+      {current.note && <p className="text-xs text-gray-400 italic text-center">{current.note}</p>}
     </div>
-  )
+  );
 }

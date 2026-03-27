@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { useCategories, useCreateCategory, useEditCategory, useDeleteCategory } from '@/hooks/useCategoryHooks'
-import { useCategoriesWithCollections } from '@/hooks/useCategoryHooks'
-import { useToast } from '@/hooks/useToast'
-import { Button } from '@/components/Button'
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useCategories, useCreateCategory, useEditCategory, useDeleteCategory } from "@/hooks/useCategoryHooks";
+import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
+import { useToast } from "@/hooks/useToast";
+import { Button } from "@/components/Button";
 
 // ── Skeleton ─────────────────────────────────────────────────────────
 
@@ -15,91 +15,97 @@ function CategorySkeleton() {
       <div className="h-4 w-10 bg-gray-100 rounded" />
       <div className="h-4 w-12 bg-gray-100 rounded" />
     </div>
-  )
+  );
 }
 
 // ── Main page ─────────────────────────────────────────────────────────
 
 export function CategoriesPage() {
-  const toast = useToast()
-  const { data: categories = [], isLoading } = useCategories()
-  const { data: withCollections = [] } = useCategoriesWithCollections()
-  const createCategory = useCreateCategory()
-  const editCategory = useEditCategory()
-  const deleteCategory = useDeleteCategory()
+  const toast = useToast();
+  const { data: categories = [], isLoading } = useCategories();
+  const { data: withCollections = [] } = useCategoriesWithCollections();
+  const createCategory = useCreateCategory();
+  const editCategory = useEditCategory();
+  const deleteCategory = useDeleteCategory();
 
-  const [addingNew, setAddingNew] = useState(false)
-  const [newName, setNewName] = useState('')
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [editName, setEditName] = useState('')
+  const [addingNew, setAddingNew] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
 
-  const newInputRef = useRef<HTMLInputElement>(null)
-  const editInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (addingNew) newInputRef.current?.focus()
-  }, [addingNew])
+  const newInputRef = useRef<HTMLInputElement>(null);
+  const editInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (editingId !== null) editInputRef.current?.focus()
-  }, [editingId])
+    if (addingNew) newInputRef.current?.focus();
+  }, [addingNew]);
+
+  useEffect(() => {
+    if (editingId !== null) editInputRef.current?.focus();
+  }, [editingId]);
 
   function getCollectionCount(id: number) {
-    return withCollections.find((c) => c.id === id)?.collections.length ?? 0
+    return withCollections.find((c) => c.id === id)?.collections.length ?? 0;
   }
 
   function handleAdd() {
-    const name = newName.trim()
-    if (!name) return
+    const name = newName.trim();
+    if (!name) return;
     createCategory.mutate(name, {
       onSuccess: () => {
-        setNewName('')
-        setAddingNew(false)
+        setNewName("");
+        setAddingNew(false);
       },
-    })
+    });
   }
 
   function handleAddKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter' || (e.key === 'Enter' && e.ctrlKey)) handleAdd()
-    if (e.key === 'Escape') { setAddingNew(false); setNewName('') }
+    if (e.key === "Enter" || (e.key === "Enter" && e.ctrlKey)) handleAdd();
+    if (e.key === "Escape") {
+      setAddingNew(false);
+      setNewName("");
+    }
   }
 
   function startEdit(id: number, name: string) {
-    setEditingId(id)
-    setEditName(name)
+    setEditingId(id);
+    setEditName(name);
   }
 
   function handleSaveEdit() {
-    if (!editingId) return
-    const name = editName.trim()
-    if (!name) return
-    editCategory.mutate({ id: editingId, name }, {
-      onSuccess: () => setEditingId(null),
-    })
+    if (!editingId) return;
+    const name = editName.trim();
+    if (!name) return;
+    editCategory.mutate(
+      { id: editingId, name },
+      {
+        onSuccess: () => setEditingId(null),
+      },
+    );
   }
 
   function handleEditKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') handleSaveEdit()
-    if (e.key === 'Escape') setEditingId(null)
+    if (e.key === "Enter") handleSaveEdit();
+    if (e.key === "Escape") setEditingId(null);
   }
 
   function handleDelete(id: number, name: string) {
-    const count = getCollectionCount(id)
+    const count = getCollectionCount(id);
     const msg =
       count === 0
         ? `Delete category "${name}"?`
-        : `Delete "${name}"?\nIts ${count} collection(s) will become uncategorized.`
-    if (!window.confirm(msg)) return
+        : `Delete "${name}"?\nIts ${count} collection(s) will become uncategorized.`;
+    if (!window.confirm(msg)) return;
     deleteCategory.mutate(id, {
-      onSuccess: () => toast.success('Category deleted'),
-    })
+      onSuccess: () => toast.success("Category deleted"),
+    });
   }
 
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
+        <h1 className="text-base sm:text-2xl font-bold text-gray-900">Categories</h1>
         {!addingNew && (
           <Button size="sm" onClick={() => setAddingNew(true)}>
             + New category
@@ -123,7 +129,10 @@ export function CategoriesPage() {
             Add
           </Button>
           <button
-            onClick={() => { setAddingNew(false); setNewName('') }}
+            onClick={() => {
+              setAddingNew(false);
+              setNewName("");
+            }}
             className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
             Cancel
           </button>
@@ -133,7 +142,9 @@ export function CategoriesPage() {
       {/* Loading */}
       {isLoading && (
         <div className="flex flex-col gap-2">
-          {[1, 2, 3].map((i) => <CategorySkeleton key={i} />)}
+          {[1, 2, 3].map((i) => (
+            <CategorySkeleton key={i} />
+          ))}
         </div>
       )}
 
@@ -149,8 +160,8 @@ export function CategoriesPage() {
       {!isLoading && (
         <div className="flex flex-col gap-2">
           {categories.map((cat) => {
-            const count = getCollectionCount(cat.id)
-            const isEditing = editingId === cat.id
+            const count = getCollectionCount(cat.id);
+            const isEditing = editingId === cat.id;
 
             return (
               <div
@@ -199,10 +210,10 @@ export function CategoriesPage() {
                   </>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }

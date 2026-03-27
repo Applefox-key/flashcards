@@ -1,57 +1,57 @@
-import { useState, useEffect } from 'react'
-import { authApi } from '@/api'
-import { useAuthStore } from '@/store/authStore'
-import { useToast } from '@/hooks/useToast'
-import { Button } from '@/components/Button'
+import { useState, useEffect } from "react";
+import { authApi } from "@/api";
+import { useAuthStore } from "@/store/authStore";
+import { useToast } from "@/hooks/useToast";
+import { Button } from "@/components/Button";
 
 // ── Avatar URL helper ────────────────────────────────────────────────────────
-const API_URL = import.meta.env.VITE_API_URL ?? 'https://api.learnapp.pro'
+const API_URL = import.meta.env.VITE_API_URL ?? "https://api.learnapp.pro";
 
 function getAvatarUrl(img: string | undefined, token: string | null): string {
-  if (!img) return ''
-  if (img.startsWith('http') || img.startsWith('blob') || img.startsWith('data:')) return img
-  return `${API_URL}/img/avatars/?img=${encodeURIComponent(img)}&token=${token ?? ''}`
+  if (!img) return "";
+  if (img.startsWith("http") || img.startsWith("blob") || img.startsWith("data:")) return img;
+  return `${API_URL}/img/avatars/?img=${encodeURIComponent(img)}&token=${token ?? ""}`;
 }
 
 function AvatarPlaceholder({ name }: { name: string }) {
   const initials = name
-    .split(' ')
+    .split(" ")
     .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase() ?? '')
-    .join('')
+    .map((s) => s[0]?.toUpperCase() ?? "")
+    .join("");
   return (
     <div className="w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600 select-none">
-      {initials || '?'}
+      {initials || "?"}
     </div>
-  )
+  );
 }
 
 // ── Avatar picker modal ──────────────────────────────────────────────────────
 interface AvatarPickerProps {
-  currentUrl: string
-  onSelect: (file: File | null, url: string) => void
-  onClose: () => void
+  currentUrl: string;
+  onSelect: (file: File | null, url: string) => void;
+  onClose: () => void;
 }
 
 function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
-  const [preview, setPreview] = useState<string>(currentUrl)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string>(currentUrl);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setSelectedFile(file)
-    setPreview(URL.createObjectURL(file))
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    setPreview(URL.createObjectURL(file));
   }
 
   function handleClear() {
-    setSelectedFile(null)
-    setPreview('')
+    setSelectedFile(null);
+    setPreview("");
   }
 
   function handleSelect() {
-    onSelect(selectedFile, preview)
-    onClose()
+    onSelect(selectedFile, preview);
+    onClose();
   }
 
   return (
@@ -60,7 +60,9 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-semibold text-gray-900">Change avatar</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+            ×
+          </button>
         </div>
 
         {/* Preview */}
@@ -99,77 +101,77 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export function ProfilePage() {
-  const toast = useToast()
-  const { user, token, setUser } = useAuthStore()
+  const toast = useToast();
+  const { user, token, setUser } = useAuthStore();
 
-  const [name, setName] = useState(user?.name ?? '')
-  const [email, setEmail] = useState(user?.email ?? '')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [name, setName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string>('')
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const avatarUrl = avatarPreview || getAvatarUrl(user?.img, token)
+  const avatarUrl = avatarPreview || getAvatarUrl(user?.img, token);
 
   // Sync form when user loads (e.g. on page refresh)
   useEffect(() => {
-    if (!user) return
-    setName(user.name)
-    setEmail(user.email)
-  }, [user])
+    if (!user) return;
+    setName(user.name);
+    setEmail(user.email);
+  }, [user]);
 
   function handleAvatarSelect(file: File | null, url: string) {
-    setAvatarFile(file)
-    setAvatarPreview(url)
+    setAvatarFile(file);
+    setAvatarPreview(url);
   }
 
   async function handleSave(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
     if (password && password !== confirmPassword) {
-      toast.error('Passwords do not match.')
-      return
+      toast.error("Passwords do not match.");
+      return;
     }
     if (password && password.length < 6) {
-      toast.error('Password must be at least 6 characters.')
-      return
+      toast.error("Password must be at least 6 characters.");
+      return;
     }
 
-    setSaving(true)
+    setSaving(true);
     try {
-      const fd = new FormData()
-      if (avatarFile) fd.append('file', avatarFile)
-      fd.append('data[name]', name)
-      fd.append('data[email]', email)
-      fd.append('data[img]', avatarPreview && !avatarFile ? avatarPreview : (user?.img ?? ''))
-      fd.append('data[id]', String(user?.id ?? ''))
-      if (password) fd.append('data[password]', password)
+      const fd = new FormData();
+      if (avatarFile) fd.append("file", avatarFile);
+      fd.append("data[name]", name);
+      fd.append("data[email]", email);
+      fd.append("data[img]", avatarPreview && !avatarFile ? avatarPreview : (user?.img ?? ""));
+      fd.append("data[id]", String(user?.id ?? ""));
+      if (password) fd.append("data[password]", password);
 
-      const updated = await authApi.updateProfile(fd)
-      setUser(updated)
-      setPassword('')
-      setConfirmPassword('')
-      setAvatarFile(null)
+      const updated = await authApi.updateProfile(fd);
+      setUser(updated);
+      setPassword("");
+      setConfirmPassword("");
+      setAvatarFile(null);
       // Keep preview pointing to new URL from server response
-      setAvatarPreview(getAvatarUrl(updated.img, token))
-      toast.success('Profile saved')
+      setAvatarPreview(getAvatarUrl(updated.img, token));
+      toast.success("Profile saved");
     } catch {
-      toast.error('Failed to save profile')
+      toast.error("Failed to save profile");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
-  if (!user) return null
+  if (!user) return null;
 
   return (
     <div className="max-w-lg">
@@ -178,10 +180,7 @@ export function ProfilePage() {
       <form onSubmit={handleSave} className="flex flex-col gap-6">
         {/* Avatar */}
         <div className="flex flex-col items-center gap-3">
-          <div
-            className="relative cursor-pointer group"
-            onClick={() => setPickerOpen(true)}
-          >
+          <div className="relative cursor-pointer group" onClick={() => setPickerOpen(true)}>
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -195,11 +194,7 @@ export function ProfilePage() {
               <span className="text-white text-xs font-medium">Change</span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setPickerOpen(true)}
-            className="text-xs text-indigo-600 hover:underline"
-          >
+          <button type="button" onClick={() => setPickerOpen(true)} className="text-xs text-indigo-600 hover:underline">
             Change photo
           </button>
         </div>
@@ -258,8 +253,8 @@ export function ProfilePage() {
               placeholder="Repeat new password"
               className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                 confirmPassword && password !== confirmPassword
-                  ? 'border-red-300 focus:ring-red-300'
-                  : 'border-gray-300'
+                  ? "border-red-300 focus:ring-red-300"
+                  : "border-gray-300"
               }`}
             />
             {confirmPassword && password !== confirmPassword && (
@@ -274,12 +269,8 @@ export function ProfilePage() {
       </form>
 
       {pickerOpen && (
-        <AvatarPicker
-          currentUrl={avatarUrl}
-          onSelect={handleAvatarSelect}
-          onClose={() => setPickerOpen(false)}
-        />
+        <AvatarPicker currentUrl={avatarUrl} onSelect={handleAvatarSelect} onClose={() => setPickerOpen(false)} />
       )}
     </div>
-  )
+  );
 }

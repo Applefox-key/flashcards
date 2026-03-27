@@ -162,9 +162,7 @@ function CategoryGroup({
           style={{ display: "inline-block" }}>
           ▼
         </span>
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          {category.name}
-        </span>
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{category.name}</span>
         <span className="text-xs text-gray-400">({collections.length})</span>
       </button>
 
@@ -191,9 +189,10 @@ export function CollectionsPage() {
   // Append a virtual "Uncategorized" group for collections not in any category
   const categorizedIds = new Set(categoriesRaw.flatMap((c) => c.collections.map((col) => col.id)));
   const uncategorized = allCollections.filter((col) => !categorizedIds.has(col.id));
-  const categories = uncategorized.length > 0
-    ? [...categoriesRaw, { id: 0, name: "Uncategorized", userid: 0, collections: uncategorized }]
-    : categoriesRaw;
+  const categories =
+    uncategorized.length > 0
+      ? [...categoriesRaw, { id: 0, name: "Uncategorized", userid: 0, collections: uncategorized }]
+      : categoriesRaw;
 
   const totalCollections = categories.reduce((sum, c) => sum + c.collections.length, 0);
   const allCollapsed = expanded.size === 0;
@@ -251,7 +250,7 @@ export function CollectionsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">My Library</h1>
+        <h1 className="test-base sm:text-2xl font-bold text-gray-900">My Library</h1>
         <div className="flex gap-2">
           <Link to="/library/public">
             <Button variant="secondary" size="sm">

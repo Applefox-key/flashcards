@@ -1,20 +1,20 @@
-import { Button } from '@/components/Button'
+import { Button } from "@/components/Button";
 
 export interface GameScore {
-  r: number
-  w: number
-  t: number
+  r: number;
+  w: number;
+  t: number;
 }
 
 interface Props {
-  score: GameScore
-  onPlayAgain: () => void
-  onRetryMistakes?: () => void
-  onBack: () => void
+  score: GameScore;
+  onPlayAgain: () => void;
+  onRetryMistakes?: () => void;
+  onBack: () => void;
 }
 
 export function ResultScreen({ score, onPlayAgain, onRetryMistakes, onBack }: Props) {
-  const pct = score.t > 0 ? Math.round((score.r / score.t) * 100) : 0
+  const pct = score.t > 0 ? Math.round((score.r / score.t) * 100) : 0;
 
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-6 text-center">
@@ -27,28 +27,22 @@ export function ResultScreen({ score, onPlayAgain, onRetryMistakes, onBack }: Pr
 
       {/* Score bar */}
       <div className="w-full max-w-xs h-3 bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-indigo-500 rounded-full transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
       </div>
 
       <div className="flex flex-col gap-2 w-full max-w-xs">
         {onRetryMistakes && score.w > 0 && (
           <Button onClick={onRetryMistakes}>
-            Retry {score.w} mistake{score.w !== 1 ? 's' : ''}
+            Retry {score.w} mistake{score.w !== 1 ? "s" : ""}
           </Button>
         )}
         <Button variant="secondary" onClick={onPlayAgain}>
           Play again
         </Button>
-        <button
-          onClick={onBack}
-          className="text-sm text-gray-500 hover:text-gray-700 transition-colors py-1"
-        >
+        <button onClick={onBack} className="text-sm text-gray-500 hover:text-gray-700 transition-colors py-1">
           ← Back
         </button>
       </div>
     </div>
-  )
+  );
 }

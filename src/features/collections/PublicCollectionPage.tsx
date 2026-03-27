@@ -114,7 +114,7 @@ export function PublicCollectionPage() {
             <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
           </svg>
         </button>
-        <h1 className="text-2xl font-bold text-gray-900 flex-1">
+        <h1 className="test-base sm:text-2xl font-bold text-gray-900 flex-1">
           {isLoading ? (
             <span className="inline-block h-6 w-48 bg-gray-200 rounded animate-pulse" />
           ) : (
