@@ -101,10 +101,10 @@ export function CollectionEditPage() {
   if (isLoading) {
     return (
       <div className="max-w-lg animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-48 mb-6" />
-        <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col gap-5">
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-6" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-5">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 bg-gray-100 rounded" />
+            <div key={i} className="h-10 bg-gray-100 dark:bg-gray-700 rounded" />
           ))}
         </div>
       </div>
@@ -112,49 +112,57 @@ export function CollectionEditPage() {
   }
 
   if (!collection) {
-    return <p className="text-gray-500">Collection not found.</p>;
+    return <p className="text-gray-500 dark:text-gray-400">Collection not found.</p>;
   }
 
   return (
     <div className="max-w-lg">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-700">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
           ← Back
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Collection</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Collection</h1>
       </div>
 
       {/* Edit form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col gap-5">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Title <span className="text-red-500">*</span>
           </label>
           <input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Note</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Note</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Optional description"
-            className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Category</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
           <CategorySelect value={categoryid} onChange={setCategoryid} />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Tags</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
           <TagSelect value={tagIds} onChange={setTagIds} />
         </div>
 
@@ -169,13 +177,13 @@ export function CollectionEditPage() {
       </form>
 
       {/* Danger zone */}
-      <div className="mt-6 bg-white rounded-lg border border-red-200 p-5">
-        <h2 className="text-sm font-semibold text-red-600 mb-4">Danger zone</h2>
+      <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-900/50 p-5">
+        <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-4">Danger zone</h2>
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-800">Delete all cards</p>
-              <p className="text-xs text-gray-500">Removes all cards but keeps the collection</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Delete all cards</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Removes all cards but keeps the collection</p>
             </div>
             <Button
               variant="danger"
@@ -186,10 +194,10 @@ export function CollectionEditPage() {
               Delete cards
             </Button>
           </div>
-          <div className="border-t border-red-100 pt-4 flex items-center justify-between gap-4">
+          <div className="border-t border-red-100 dark:border-red-900/40 pt-4 flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-800">Delete collection</p>
-              <p className="text-xs text-gray-500">Permanently removes the collection and all its cards</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Delete collection</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Permanently removes the collection and all its cards</p>
             </div>
             <Button
               variant="danger"

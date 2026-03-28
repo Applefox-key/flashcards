@@ -113,18 +113,18 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
     <Modal open={open} onClose={handleClose} title="Import from file" size="xl">
       {step === "upload" && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             Supported: <strong>.txt</strong>, <strong>.csv</strong> (tab/semicolon separated), <strong>.xlsx</strong> /{" "}
             <strong>.xls</strong>
           </p>
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-400 transition-colors"
+            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors"
             onClick={() => fileRef.current?.click()}>
-            <p className="text-gray-500 text-sm">Click to select a file</p>
-            <p className="text-xs text-gray-400 mt-1">or drag and drop</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Click to select a file</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">or drag and drop</p>
           </div>
           <input ref={fileRef} type="file" accept=".txt,.csv,.xlsx,.xls" onChange={handleFile} className="hidden" />
-          {loading && <p className="text-sm text-indigo-600 text-center">Reading file…</p>}
+          {loading && <p className="text-sm text-indigo-600 dark:text-indigo-400 text-center">Reading file…</p>}
           <div className="flex justify-end">
             <Button variant="secondary" onClick={handleClose}>
               Cancel
@@ -135,28 +135,28 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
 
       {step === "map" && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             <strong>{fileName}</strong> — {rawRows.length} rows detected. Map columns:
           </p>
 
           {/* Preview of first 3 rows */}
-          <div className="border border-gray-200 rounded overflow-hidden">
+          <div className="border border-gray-200 dark:border-gray-700 rounded overflow-hidden">
             <div className="overflow-x-auto max-h-40">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                   <tr>
                     {headerRow.map((_, i) => (
-                      <th key={i} className="px-3 py-1.5 text-left text-gray-500 font-medium">
+                      <th key={i} className="px-3 py-1.5 text-left text-gray-500 dark:text-gray-400 font-medium">
                         Col {i + 1}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {rawRows.slice(0, 4).map((row, ri) => (
-                    <tr key={ri}>
+                    <tr key={ri} className="bg-white dark:bg-gray-800">
                       {row.map((cell, ci) => (
-                        <td key={ci} className="px-3 py-1 text-gray-700 truncate max-w-[12rem]">
+                        <td key={ci} className="px-3 py-1 text-gray-700 dark:text-gray-300 truncate max-w-[12rem]">
                           {cell}
                         </td>
                       ))}
@@ -171,7 +171,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
           <div className="grid grid-cols-3 gap-3">
             {(["question", "answer", "note"] as const).map((field) => (
               <div key={field}>
-                <label className="block text-xs font-medium text-gray-600 mb-1 capitalize">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 capitalize">
                   {field} column{field === "note" ? " (optional)" : ""}
                 </label>
                 <select
@@ -182,7 +182,9 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
                       [field]: e.target.value === "" ? null : Number(e.target.value),
                     }))
                   }
-                  className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400">
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm
+                             bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                             focus:outline-none focus:ring-1 focus:ring-indigo-400">
                   {field === "note" && <option value="">— none —</option>}
                   {headerRow.map((_, i) => (
                     <option key={i} value={i}>
@@ -195,7 +197,9 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
           </div>
 
           <div className="flex justify-between">
-            <button onClick={() => setStep("upload")} className="text-sm text-gray-500 hover:text-gray-700">
+            <button
+              onClick={() => setStep("upload")}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
               ← Choose different file
             </button>
             <div className="flex gap-2">
@@ -212,12 +216,12 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
 
       {step === "preview" && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-600">Review and edit cards before saving:</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Review and edit cards before saving:</p>
           <CardPreviewTable cards={cards} onChange={setCards} />
           <div className="flex justify-between items-center">
             <button
               onClick={() => setStep(rawRows.length > 0 ? "map" : "upload")}
-              className="text-sm text-gray-500 hover:text-gray-700">
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
               ← Back
             </button>
             <div className="flex gap-2">

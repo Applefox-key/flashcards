@@ -17,22 +17,22 @@ function PlaylistCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col gap-3">
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <button
           onClick={onEdit}
-          className="font-semibold text-gray-900 hover:text-indigo-600 transition-colors text-left">
+          className="font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left">
           {playlist.name}
         </button>
         <div className="flex gap-1 flex-shrink-0">
           <button
             onClick={onEdit}
-            className="text-xs text-gray-500 hover:text-indigo-600 px-2 py-1 rounded hover:bg-gray-100">
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             Edit
           </button>
           <button
             onClick={onDelete}
-            className="text-xs text-gray-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50">
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
             Delete
           </button>
         </div>
@@ -40,14 +40,14 @@ function PlaylistCard({
 
       {/* Collection names */}
       {playlist.collections.length === 0 ? (
-        <p className="text-sm text-gray-400">No collections — click Edit to add some</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No collections — click Edit to add some</p>
       ) : (
         <div className="flex flex-col gap-1">
-          <span className="text-xs text-gray-400 mb-0.5">
+          <span className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
             {playlist.collections.length} {playlist.collections.length === 1 ? "collection" : "collections"}
           </span>
           {playlist.collections.map((col) => (
-            <div key={col.id} className="flex items-center gap-2 text-sm text-gray-600">
+            <div key={col.id} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-300 flex-shrink-0" />
               <span className="flex-1">{col.name}</span>
             </div>
@@ -57,7 +57,7 @@ function PlaylistCard({
 
       {/* Play button */}
       {playlist.collections.length > 0 && (
-        <div className="pt-1 border-t border-gray-100">
+        <div className="pt-1 border-t border-gray-100 dark:border-gray-700">
           <Link to={`/play/${playlist.id}?src=pl`}>
             <Button size="sm" variant="secondary">
               ▶ Practice
@@ -71,11 +71,11 @@ function PlaylistCard({
 
 function PlaylistSkeleton() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 animate-pulse">
-      <div className="h-5 bg-gray-200 rounded w-40 mb-3" />
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 animate-pulse">
+      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-40 mb-3" />
       <div className="flex flex-col gap-2">
         {[1, 2].map((i) => (
-          <div key={i} className="h-4 bg-gray-100 rounded w-full" />
+          <div key={i} className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-full" />
         ))}
       </div>
     </div>
@@ -114,7 +114,7 @@ export function PlaylistsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-base sm:text-2xl font-bold text-gray-900">Playlists</h1>
+        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Playlists</h1>
         <Button size="sm" onClick={openCreate}>
           + New set
         </Button>
@@ -126,7 +126,9 @@ export function PlaylistsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search playlists..."
-            className="w-full max-w-sm border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full max-w-sm border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
       )}
@@ -140,7 +142,7 @@ export function PlaylistsPage() {
       )}
 
       {!isLoading && playlists.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-lg mb-2">No playlists yet</p>
           <Button size="sm" onClick={openCreate}>
             Create your first playlist
@@ -149,7 +151,7 @@ export function PlaylistsPage() {
       )}
 
       {!isLoading && playlists.length > 0 && visible.length === 0 && (
-        <p className="text-gray-400 py-8 text-center">No playlists match "{search}"</p>
+        <p className="text-gray-400 dark:text-gray-500 py-8 text-center">No playlists match "{search}"</p>
       )}
 
       {!isLoading && visible.length > 0 && (

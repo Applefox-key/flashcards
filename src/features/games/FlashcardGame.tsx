@@ -159,8 +159,10 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
   const showNote = flipped !== answerFirst;
 
   const btnBase = "text-xs border rounded px-2 py-0.5 transition-colors";
-  const btnActive = "bg-indigo-50 border-indigo-300 text-indigo-600";
-  const btnInactive = "border-gray-200 text-gray-500 hover:border-gray-300";
+  const btnActive =
+    "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400";
+  const btnInactive =
+    "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500";
 
   const isNavigating = !visible;
 
@@ -203,19 +205,19 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
             }}>
             {/* Front face */}
             <div
-              className="absolute inset-0 rounded-2xl border border-gray-200 bg-white shadow-sm flex flex-col p-8"
+              className="absolute inset-0 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex flex-col p-8 "
               style={{ backfaceVisibility: "hidden", overflowY: "auto" }}>
               <div className="m-auto flex flex-col items-center gap-3 w-full">
                 <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
-                <p className="text-2xl font-semibold text-gray-900 text-center">{frontText}</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">{frontText}</p>
                 <CardImg filename={frontImg} collectionId={collectionId} dark={false} />
-                <span className="text-xs text-gray-300 mt-2">Click to flip</span>
+                <span className="text-xs text-gray-300 dark:text-gray-600 mt-2">Click to flip</span>
               </div>
             </div>
 
             {/* Back face */}
             <div
-              className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-600 shadow-sm flex flex-col p-8"
+              className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-600 shadow-sm flex flex-col p-8 dark:bg-indigo-900/20"
               style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", overflowY: "auto" }}>
               <div className="m-auto flex flex-col items-center gap-3 w-full">
                 <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>
@@ -241,7 +243,9 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
               handleRate(card.id, star);
             }}
             className={`text-2xl transition-colors ${
-              (ratingMap[card.id] ?? 0) >= star ? "text-yellow-400" : "text-gray-200 hover:text-yellow-300"
+              (ratingMap[card.id] ?? 0) >= star
+                ? "text-yellow-400"
+                : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
             }`}>
             ★
           </button>
@@ -253,7 +257,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
         <button
           onClick={goPrev}
           disabled={index === 0 || isNavigating}
-          className="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
           ← Prev
         </button>
 
@@ -261,7 +265,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
           <span className="text-sm text-gray-400 shrink-0">
             {index + 1} / {cards.length}
           </span>
-          <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+          <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
             <div
               className="bg-indigo-500 rounded-full h-full transition-all duration-300"
               style={{ width: `${((index + 1) / cards.length) * 100}%` }}
@@ -272,7 +276,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
         <button
           onClick={goNext}
           disabled={index === cards.length - 1 || isNavigating}
-          className="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
           Next →
         </button>
       </div>

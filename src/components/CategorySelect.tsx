@@ -44,7 +44,9 @@ export function CategorySelect({ value, onChange }: Props) {
             if (e.key === "Escape") setAddingNew(false);
           }}
           placeholder="Category name"
-          className="border border-gray-300 rounded px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm flex-1
+                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <Button
           type="button"
@@ -75,7 +77,9 @@ export function CategorySelect({ value, onChange }: Props) {
       <select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-        className="border border-gray-300 rounded px-3 py-2 text-sm flex-1 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm flex-1
+                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500">
         <option value="">No category</option>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
@@ -86,7 +90,8 @@ export function CategorySelect({ value, onChange }: Props) {
       <button
         type="button"
         onClick={() => setAddingNew(true)}
-        className="text-sm text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 whitespace-nowrap">
+        className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300
+                   px-2 py-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/20 whitespace-nowrap">
         + New
       </button>
     </div>

@@ -147,10 +147,10 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   if (!initialized || !current) {
     return (
       <div className="max-w-lg mx-auto animate-pulse flex flex-col gap-4">
-        <div className="h-24 bg-gray-100 rounded-xl" />
+        <div className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl" />
         <div className="flex gap-2 flex-wrap">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-10 w-20 bg-gray-100 rounded-lg" />
+            <div key={i} className="h-10 w-20 bg-gray-100 dark:bg-gray-800 rounded-lg" />
           ))}
         </div>
       </div>
@@ -180,7 +180,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-4">
       {/* Progress */}
-      <div className="flex items-center justify-between text-sm text-gray-500">
+      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>
           {score.t + 1} / {playableCards.length}
         </span>
@@ -188,7 +188,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
           ✓ {score.r} &nbsp; ✗ {score.w}
         </span>
       </div>
-      <div className="w-full h-1.5 bg-gray-200 rounded-full">
+      <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
         <div
           className="h-full bg-indigo-500 rounded-full transition-all"
           style={{ width: `${(score.t / playableCards.length) * 100}%` }}
@@ -196,21 +196,21 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       </div>
 
       {/* Prompt */}
-      <div className="bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
+      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
-        <p className="text-lg font-medium text-gray-900">{answerFirst ? current.answer : current.question}</p>
+        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
       </div>
 
       {/* Build area */}
-      <div className="min-h-[52px] bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 flex items-center flex-wrap gap-2">
+      <div className="min-h-[52px] bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center flex-wrap gap-2">
         {clicked.length === 0 ? (
-          <span className="text-sm text-gray-300">Click parts in the correct order…</span>
+          <span className="text-sm text-gray-300 dark:text-gray-600">Click parts in the correct order…</span>
         ) : (
           clicked.map((part, i) => (
             <span
               key={i}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                wrongIndex === i ? "bg-red-100 text-red-700 border-2 border-red-300" : "bg-indigo-100 text-indigo-700"
+                wrongIndex === i ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-300 dark:border-red-700" : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
               }`}>
               {part === " " ? "⎵" : part}
             </span>
@@ -229,8 +229,8 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
               disabled={isUsed || wrongIndex !== null}
               className={`px-5 py-3 rounded-xl border-2 text-base font-medium transition-all duration-150 ${
                 isUsed
-                  ? "border-gray-100 text-gray-300 bg-gray-50 cursor-default"
-                  : "border-gray-300 text-gray-700 bg-white hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50"
+                  ? "border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600 bg-gray-50 dark:bg-gray-800/50 cursor-default"
+                  : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
               }`}>
               {part === " " ? "⎵" : part}
             </button>
@@ -243,13 +243,13 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         <button
           onClick={handleUndo}
           disabled={clicked.length === 0 || wrongIndex !== null}
-          className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 disabled:opacity-30">
+          className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
           ↩ Undo
         </button>
         <button
           onClick={handleHint}
           disabled={wrongIndex !== null}
-          className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 disabled:opacity-30">
+          className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
           💡 Hint
         </button>
       </div>

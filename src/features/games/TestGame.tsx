@@ -76,9 +76,9 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
   if (!initialized || !current) {
     return (
       <div className="flex flex-col gap-4 max-w-lg mx-auto animate-pulse">
-        <div className="h-24 bg-gray-100 rounded-xl" />
+        <div className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl" />
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-12 bg-gray-100 rounded-lg" />
+          <div key={i} className="h-12 bg-gray-100 dark:bg-gray-800 rounded-lg" />
         ))}
       </div>
     );
@@ -98,7 +98,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-4">
       {/* Progress */}
-      <div className="flex items-center justify-between text-sm text-gray-500">
+      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>
           {score.t + 1} / {cards.length}
         </span>
@@ -106,7 +106,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
           ✓ {score.r} &nbsp; ✗ {score.w}
         </span>
       </div>
-      <div className="w-full h-1.5 bg-gray-200 rounded-full">
+      <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
         <div
           className="h-full bg-indigo-500 rounded-full transition-all"
           style={{ width: `${(score.t / cards.length) * 100}%` }}
@@ -114,9 +114,9 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
       </div>
 
       {/* Prompt card */}
-      <div className="bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
+      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
-        <p className="text-lg font-medium text-gray-900">{answerFirst ? current.answer : current.question}</p>
+        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
         {(answerFirst ? current.imgA : current.imgQ) && (
           <img
             src={answerFirst ? current.imgA : current.imgQ}
@@ -131,11 +131,11 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
         {options.map((opt) => {
           const isChosen = chosen === opt.id;
           const isCorrect = opt.id === current.id;
-          let cls = "bg-white border-2 border-gray-200 text-gray-800 hover:border-indigo-300 hover:bg-indigo-50";
+          let cls = "bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20";
           if (answerState !== "idle") {
-            if (isCorrect) cls = "bg-green-50 border-green-400 text-green-800";
-            else if (isChosen) cls = "bg-red-50 border-red-400 text-red-800";
-            else cls = "bg-white border-gray-100 text-gray-400 opacity-60";
+            if (isCorrect) cls = "bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-600 text-green-800 dark:text-green-400";
+            else if (isChosen) cls = "bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600 text-red-800 dark:text-red-400";
+            else cls = "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 opacity-60";
           }
           return (
             <button
@@ -150,7 +150,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
       </div>
 
       {answerState !== "idle" && current.note && (
-        <p className="text-sm text-gray-500 text-center italic">{current.note}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">{current.note}</p>
       )}
     </div>
   );

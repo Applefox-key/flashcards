@@ -39,15 +39,19 @@ export function CollectionCreatePage() {
   return (
     <div className="max-w-lg">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-700">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
           ← Back
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">New Collection</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">New Collection</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col gap-5">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Title <span className="text-red-500">*</span>
           </label>
           <input
@@ -55,27 +59,31 @@ export function CollectionCreatePage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. English verbs"
-            className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Note</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Note</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Optional description"
-            className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Category</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
           <CategorySelect value={categoryid} onChange={setCategoryid} />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">Tags</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
           <TagSelect value={tagIds} onChange={setTagIds} />
         </div>
 

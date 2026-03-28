@@ -61,9 +61,9 @@ export function GamePage() {
   if (isLoading) {
     return (
       <div className="max-w-lg mx-auto animate-pulse flex flex-col gap-4 pt-4">
-        <div className="h-6 bg-gray-200 rounded w-48" />
-        <div className="h-32 bg-gray-100 rounded-xl" />
-        <div className="h-12 bg-gray-100 rounded-xl" />
+        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-48" />
+        <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+        <div className="h-12 bg-gray-100 dark:bg-gray-800 rounded-xl" />
       </div>
     );
   }
@@ -92,7 +92,7 @@ export function GamePage() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 text-lg leading-none">
+        <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
           </svg>
@@ -100,9 +100,9 @@ export function GamePage() {
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 uppercase tracking-wide">{gameLabel}</p>
         </div>{" "}
-        <h1 className="text-lg font-bold text-gray-900 truncate">{title}</h1>
+        <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate">{title}</h1>
         {mistakeIds && (
-          <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+          <span className="text-xs bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full">
             Retrying {mistakeIds.size} mistake{mistakeIds.size !== 1 ? "s" : ""}
           </span>
         )}
@@ -117,7 +117,7 @@ export function GamePage() {
                 setAnswerFirst((a) => !a);
                 setGameKey((k) => k + 1);
               }}
-              className={`text-xs border rounded px-2 py-0.5 transition-colors ${answerFirst ? "bg-indigo-50 border-indigo-300 text-indigo-600" : "border-gray-200 text-gray-500 hover:border-gray-300"}`}>
+              className={`text-xs border rounded px-2 py-0.5 transition-colors ${answerFirst ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400" : "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500"}`}>
               {answerFirst ? "A → Q" : "Q → A"}
             </button>
           )}

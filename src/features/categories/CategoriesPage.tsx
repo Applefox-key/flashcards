@@ -9,11 +9,11 @@ import { Button } from "@/components/Button";
 
 function CategorySkeleton() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3 animate-pulse">
-      <div className="h-4 bg-gray-200 rounded flex-1 max-w-xs" />
-      <div className="h-4 w-20 bg-gray-100 rounded-full" />
-      <div className="h-4 w-10 bg-gray-100 rounded" />
-      <div className="h-4 w-12 bg-gray-100 rounded" />
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center gap-3 animate-pulse">
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded flex-1 max-w-xs" />
+      <div className="h-4 w-20 bg-gray-100 dark:bg-gray-700 rounded-full" />
+      <div className="h-4 w-10 bg-gray-100 dark:bg-gray-700 rounded" />
+      <div className="h-4 w-12 bg-gray-100 dark:bg-gray-700 rounded" />
     </div>
   );
 }
@@ -105,7 +105,7 @@ export function CategoriesPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-base sm:text-2xl font-bold text-gray-900">Categories</h1>
+        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
         {!addingNew && (
           <Button size="sm" onClick={() => setAddingNew(true)}>
             + New category
@@ -115,7 +115,7 @@ export function CategoriesPage() {
 
       {/* Inline add form */}
       {addingNew && (
-        <div className="bg-white rounded-lg border border-indigo-300 px-4 py-3 flex items-center gap-3 mb-3 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-indigo-300 dark:border-indigo-600 px-4 py-3 flex items-center gap-3 mb-3 shadow-sm">
           <input
             ref={newInputRef}
             type="text"
@@ -123,7 +123,7 @@ export function CategoriesPage() {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={handleAddKeyDown}
             placeholder="Category name"
-            className="flex-1 text-sm outline-none text-gray-900 placeholder-gray-400"
+            className="flex-1 text-sm outline-none bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
           <Button size="sm" onClick={handleAdd} disabled={createCategory.isPending || !newName.trim()}>
             Add
@@ -150,7 +150,7 @@ export function CategoriesPage() {
 
       {/* Empty state */}
       {!isLoading && categories.length === 0 && !addingNew && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-lg mb-2">No categories yet.</p>
           <p className="text-sm">Create your first one.</p>
         </div>
@@ -166,7 +166,7 @@ export function CategoriesPage() {
             return (
               <div
                 key={cat.id}
-                className="group flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors">
+                className="group flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-600 transition-colors">
                 {isEditing ? (
                   <>
                     <input
@@ -175,12 +175,12 @@ export function CategoriesPage() {
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       onKeyDown={handleEditKeyDown}
-                      className="flex-1 text-sm outline-none border-b border-indigo-400 text-gray-900 bg-transparent pb-0.5"
+                      className="flex-1 text-sm outline-none border-b border-indigo-400 text-gray-900 dark:text-gray-100 bg-transparent pb-0.5"
                     />
                     <button
                       onClick={handleSaveEdit}
                       disabled={editCategory.isPending || !editName.trim()}
-                      className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors disabled:opacity-50">
+                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors disabled:opacity-50">
                       Save
                     </button>
                     <button
@@ -193,13 +193,13 @@ export function CategoriesPage() {
                   <>
                     <Link
                       to={`/categories/${cat.id}`}
-                      className="flex-1 font-medium text-gray-900 hover:text-indigo-600 transition-colors">
+                      className="flex-1 font-medium text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                       {cat.name}
                     </Link>
-                    <span className="text-xs text-gray-400">{count} collections</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">{count} collections</span>
                     <button
                       onClick={() => startEdit(cat.id, cat.name)}
-                      className="text-xs text-gray-400 hover:text-indigo-600 transition-colors opacity-0 group-hover:opacity-100">
+                      className="text-xs text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors opacity-0 group-hover:opacity-100">
                       Edit
                     </button>
                     <button

@@ -31,7 +31,7 @@ function CardImg({ filename, collectionId, alt }: { filename: string | undefined
   const src = useCardImage(filename, collectionId);
   const hasFile = !!filename && filename !== "null" && filename !== "";
   if (!hasFile) return null;
-  if (!src) return <div className="w-full bg-gray-100 rounded animate-pulse mt-2" style={{ height: "6rem" }} />;
+  if (!src) return <div className="w-full bg-gray-100 dark:bg-gray-700 rounded animate-pulse mt-2" style={{ height: "6rem" }} />;
   return <img src={src} alt={alt} className="mt-2 max-h-40 object-contain rounded border border-gray-100" />;
 }
 
@@ -111,7 +111,7 @@ function ImageUploadField({
       ) : (
         <div
           onClick={() => inputRef.current?.click()}
-          className="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 transition-colors text-xs text-gray-400">
+          className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
           Click to add image
         </div>
       )}
@@ -178,11 +178,11 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
   const isPending = addCard.isPending || addCardWithImage.isPending;
 
   return (
-    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex flex-col gap-3 mb-4">
-      <p className="text-xs font-medium text-indigo-600 uppercase tracking-wide">New card</p>
+    <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-4 flex flex-col gap-3 mb-4">
+      <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">New card</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Question</label>
+          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Question</label>
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -192,7 +192,7 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
             placeholder="Enter question..."
             rows={2}
             autoFocus
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
             label="Question image"
@@ -203,7 +203,7 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 block mb-1">Answer</label>
+          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Answer</label>
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
@@ -212,7 +212,7 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
             }}
             placeholder="Enter answer..."
             rows={2}
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
             label="Answer image"
@@ -224,12 +224,12 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         </div>
       </div>
       <div>
-        <label className="text-xs text-gray-500 block mb-1">Note (optional)</label>
+        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Note (optional)</label>
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Optional note..."
-          className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+          className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
       </div>
       <div className="flex gap-2 justify-end items-center">
@@ -283,23 +283,23 @@ function CardListRow({
 
   if (editing) {
     return (
-      <div className="bg-white px-4 py-3 flex flex-col gap-2">
+      <div className="bg-white dark:bg-gray-800 px-4 py-3 flex flex-col gap-2">
         <div className="flex gap-2">
           <input
-            className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Question"
           />
           <input
-            className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="Answer"
           />
         </div>
         <input
-          className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Note (optional)"
@@ -329,11 +329,11 @@ function CardListRow({
   }
 
   return (
-    <div className="group bg-white px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 transition-colors">
-      <span className="text-xs text-gray-300 font-mono mt-0.5 w-5 shrink-0 text-right">{index}</span>
+    <div className="group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+      <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">{index}</span>
       <div className="flex-1 min-w-0 grid grid-cols-2 gap-x-4 gap-y-0.5">
-        <span className="text-sm text-gray-900 truncate">{card.question}</span>
-        <span className="text-sm text-gray-600 truncate">{card.answer}</span>
+        <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{card.question}</span>
+        <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
         {card.note && <span className="col-span-2 text-xs text-gray-400 truncate">{card.note}</span>}
       </div>
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -428,14 +428,14 @@ function CardItem({
 
   if (editing) {
     return (
-      <div className="bg-white border border-indigo-300 rounded-lg p-4 flex flex-col gap-3">
+      <div className="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-700 rounded-lg p-4 flex flex-col gap-3">
         <div>
           <label className="text-xs text-gray-400 block mb-1">Question</label>
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             rows={2}
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
             label="Question image"
@@ -455,7 +455,7 @@ function CardItem({
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             rows={2}
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
             label="Answer image"
@@ -474,7 +474,7 @@ function CardItem({
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
         </div>
         <div className="flex gap-2 justify-end">
@@ -507,16 +507,16 @@ function CardItem({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 transition-colors group">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
       <div>
         <p className="text-xs text-gray-400 mb-1">Question</p>
-        <p className="font-medium text-gray-900">{card.question}</p>
+        <p className="font-medium text-gray-900 dark:text-gray-100">{card.question}</p>
         <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
       </div>
-      <div className="border-t border-gray-100" />
+      <div className="border-t border-gray-100 dark:border-gray-700" />
       <div>
         <p className="text-xs text-gray-400 mb-1">Answer</p>
-        <p className="text-gray-800">{card.answer}</p>
+        <p className="text-gray-800 dark:text-gray-200">{card.answer}</p>
         <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
         {card.note && <p className="text-xs text-gray-400 mt-1 italic">{card.note}</p>}
       </div>
@@ -529,7 +529,7 @@ function CardItem({
               onMouseEnter={() => setHoverRate(star)}
               disabled={editCard.isPending}
               className={`text-base leading-none transition-colors disabled:opacity-40 ${
-                star <= displayRate ? "text-yellow-400" : "text-gray-200 hover:text-yellow-300"
+                star <= displayRate ? "text-yellow-400" : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
               }`}>
               ★
             </button>
@@ -556,12 +556,12 @@ function CardItem({
 
 function CardSkeleton() {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse">
-      <div className="h-3 w-16 bg-gray-200 rounded mb-2" />
-      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
-      <div className="border-t border-gray-100 mb-3" />
-      <div className="h-3 w-16 bg-gray-100 rounded mb-2" />
-      <div className="h-4 bg-gray-100 rounded w-1/2" />
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 animate-pulse">
+      <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4" />
+      <div className="border-t border-gray-100 dark:border-gray-700 mb-3" />
+      <div className="h-3 w-16 bg-gray-100 dark:bg-gray-700 rounded mb-2" />
+      <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-1/2" />
     </div>
   );
 }
@@ -687,14 +687,14 @@ export function CollectionDetailPage() {
       <div className="mb-2">
         {/* Title row */}
         <div className="flex items-center gap-3 mb-2">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-400 hover:text-gray-600 shrink-0">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
               <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
             </svg>
           </button>
-          <h1 className="text-2xl font-bold text-gray-900 min-w-0 truncate flex-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 min-w-0 truncate flex-1">
             {isLoading ? (
-              <span className="inline-block h-6 w-48 bg-gray-200 rounded animate-pulse" />
+              <span className="inline-block h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             ) : (
               (collection?.name ?? `Collection #${id}`)
             )}
@@ -734,17 +734,17 @@ export function CollectionDetailPage() {
           <div className="relative sm:hidden" ref={mobileMenuRef}>
             <button
               onClick={() => setMobileMenuOpen((v) => !v)}
-              className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-base leading-none">
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-base leading-none">
               •••
             </button>
             {mobileMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[220px] py-1">
+              <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[220px] py-1">
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     navigate(`/collections/${id}/edit`);
                   }}
-                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <span className="text-xs text-gray-400">✏</span> Edit collection
                 </button>
                 {cards.length > 1 && (
@@ -753,7 +753,7 @@ export function CollectionDetailPage() {
                       setMobileMenuOpen(false);
                       setReorgMode(true);
                     }}
-                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <span className="text-xs text-gray-400">⇅</span> Reorganize
                   </button>
                 )}
@@ -762,7 +762,7 @@ export function CollectionDetailPage() {
                     setMobileMenuOpen(false);
                     setPasteOpen(true);
                   }}
-                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <span className="text-xs text-gray-400">⎘</span> Paste list
                 </button>
                 <button
@@ -770,10 +770,10 @@ export function CollectionDetailPage() {
                     setMobileMenuOpen(false);
                     setFileOpen(true);
                   }}
-                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <span className="text-xs text-gray-400">↑</span> Import file
                 </button>
-                <div className="border-t border-gray-100 my-1" />
+                <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
                 {cards.length > 0 && (
                   <button
                     onClick={() => {
@@ -814,8 +814,8 @@ export function CollectionDetailPage() {
                 disabled={togglePublic.isPending}
                 className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
                   collection?.isPublic
-                    ? "bg-green-50 text-green-700 border-green-200"
-                    : "bg-gray-50 text-gray-400 border-gray-200"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"
+                    : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
                 }`}>
                 {collection?.isPublic ? "public" : "private"}
               </button>
@@ -829,15 +829,15 @@ export function CollectionDetailPage() {
                 disabled={toggleFavorite.isPending}
                 className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
                   collection?.isFavorite
-                    ? "bg-amber-50 text-amber-700 border-amber-200"
-                    : "bg-gray-50 text-gray-400 border-gray-200"
+                    ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                    : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
                 }`}>
                 {collection?.isFavorite ? "★ favorite" : "★"}
               </button>
-              <span className="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
+              <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
                 {cards.length} {cards.length === 1 ? "card" : "cards"}
               </span>
-              <span className="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
+              <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
                 {collection?.category
                   ? typeof collection.category === "object"
                     ? (collection.category as Category).name
@@ -852,11 +852,11 @@ export function CollectionDetailPage() {
                 {collectionTags.map((tag) => (
                   <span
                     key={tag.id}
-                    className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">
+                    className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
                     {tag.name}
                   </span>
                 ))}
-                {collectionTags.length === 0 && <span className="text-xs text-gray-300">no tags</span>}
+                {collectionTags.length === 0 && <span className="text-xs text-gray-300 dark:text-gray-600">no tags</span>}
                 <button
                   onClick={() => setEditingTags(true)}
                   className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
@@ -864,9 +864,9 @@ export function CollectionDetailPage() {
                 </button>
               </div>
               {editingTags && (
-                <div className="absolute left-0 top-6 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
+                <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Edit tags</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Edit tags</span>
                     <button
                       onClick={() => {
                         setEditingTags(false);
@@ -915,7 +915,7 @@ export function CollectionDetailPage() {
               {cards.length} {cards.length === 1 ? "card" : "cards"}
             </span>
             {collection?.category && (
-              <span className="border-l border-gray-200 pl-3">
+              <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
                 {typeof collection.category === "object"
                   ? (collection.category as Category).name
                   : (collection.category as unknown as string)}
@@ -930,8 +930,8 @@ export function CollectionDetailPage() {
               }
               disabled={toggleFavorite.isPending}
               title={collection?.isFavorite ? "Remove from favorites" : "Add to favorites"}
-              className={`border-l border-gray-200 pl-3 transition-colors disabled:opacity-40 ${
-                collection?.isFavorite ? "text-yellow-400 hover:text-yellow-300" : "text-gray-300 hover:text-yellow-400"
+              className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
+                collection?.isFavorite ? "text-yellow-400 hover:text-yellow-300" : "text-gray-300 dark:text-gray-600 hover:text-yellow-400"
               }`}>
               ★ {collection?.isFavorite ? "favorite" : "add to favorites"}
             </button>
@@ -944,25 +944,25 @@ export function CollectionDetailPage() {
               }
               disabled={togglePublic.isPending}
               title={collection?.isPublic ? "Make private" : "Make public"}
-              className={`border-l border-gray-200 pl-3 transition-colors disabled:opacity-40 ${
-                collection?.isPublic ? "text-green-500 hover:text-red-400" : "text-gray-300 hover:text-green-500"
+              className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
+                collection?.isPublic ? "text-green-500 hover:text-red-400" : "text-gray-300 dark:text-gray-600 hover:text-green-500"
               }`}>
               {collection?.isPublic ? "public" : "private"}
             </button>
 
             {/* Tags */}
-            <div className="border-l border-gray-200 pl-3 relative" ref={tagPopoverDesktopRef}>
+            <div className="border-l border-gray-200 dark:border-gray-700 pl-3 relative" ref={tagPopoverDesktopRef}>
               <div className="flex items-center gap-2 flex-wrap">
                 {collectionTags.length > 0 ? (
                   collectionTags.map((tag) => (
                     <span
                       key={tag.id}
-                      className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">
+                      className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
                       {tag.name}
                     </span>
                   ))
                 ) : (
-                  <span className="text-gray-300 text-xs">no tags</span>
+                  <span className="text-gray-300 dark:text-gray-600 text-xs">no tags</span>
                 )}
                 <button
                   onClick={() => setEditingTags(true)}
@@ -972,9 +972,9 @@ export function CollectionDetailPage() {
               </div>
 
               {editingTags && (
-                <div className="absolute left-0 top-6 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
+                <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Edit tags</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Edit tags</span>
                     <button
                       onClick={() => {
                         setEditingTags(false);
@@ -1020,20 +1020,20 @@ export function CollectionDetailPage() {
               placeholder="Search cards..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           )}
-          <div className="flex rounded-lg border border-gray-200 overflow-hidden ml-auto shrink-0">
+          <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden ml-auto shrink-0">
             <button
               onClick={() => setViewMode("grid")}
               title="Grid view"
-              className={`px-2.5 py-1.5 text-sm transition-colors ${viewMode === "grid" ? "bg-indigo-50 text-indigo-600" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}>
+              className={`px-2.5 py-1.5 text-sm transition-colors ${viewMode === "grid" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`}>
               ⊞
             </button>
             <button
               onClick={() => setViewMode("list")}
               title="List view"
-              className={`px-2.5 py-1.5 text-sm transition-colors border-l border-gray-200 ${viewMode === "list" ? "bg-indigo-50 text-indigo-600" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}>
+              className={`px-2.5 py-1.5 text-sm transition-colors border-l border-gray-200 dark:border-gray-700 ${viewMode === "list" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`}>
               ☰
             </button>
           </div>
@@ -1099,7 +1099,7 @@ export function CollectionDetailPage() {
         </div>
       )}
       {!isLoading && filtered.length > 0 && viewMode === "list" && (
-        <div className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-lg overflow-hidden pb-20 sm:pb-0">
+        <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-20 sm:pb-0">
           {filtered.map((card, idx) => (
             <CardListRow
               key={card.id}

@@ -53,12 +53,12 @@ const ACTIVITIES = [
 ];
 
 const COLOR_MAP: Record<string, { bg: string; border: string; icon: string; text: string }> = {
-  indigo: { bg: "bg-indigo-50", border: "border-indigo-200", icon: "text-indigo-500", text: "text-indigo-700" },
-  green: { bg: "bg-green-50", border: "border-green-200", icon: "text-green-500", text: "text-green-700" },
-  blue: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-500", text: "text-blue-700" },
-  purple: { bg: "bg-purple-50", border: "border-purple-200", icon: "text-purple-500", text: "text-purple-700" },
-  amber: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-500", text: "text-amber-700" },
-  coral: { bg: "bg-orange-50", border: "border-orange-200", icon: "text-orange-500", text: "text-orange-700" },
+  indigo: { bg: "bg-indigo-50 dark:bg-indigo-900/20", border: "border-indigo-200 dark:border-indigo-700", icon: "text-indigo-500 dark:text-indigo-400", text: "text-indigo-700 dark:text-indigo-400" },
+  green:  { bg: "bg-green-50 dark:bg-green-900/20",   border: "border-green-200 dark:border-green-700",   icon: "text-green-500 dark:text-green-400",   text: "text-green-700 dark:text-green-400"   },
+  blue:   { bg: "bg-blue-50 dark:bg-blue-900/20",     border: "border-blue-200 dark:border-blue-700",     icon: "text-blue-500 dark:text-blue-400",     text: "text-blue-700 dark:text-blue-400"     },
+  purple: { bg: "bg-purple-50 dark:bg-purple-900/20", border: "border-purple-200 dark:border-purple-700", icon: "text-purple-500 dark:text-purple-400", text: "text-purple-700 dark:text-purple-400" },
+  amber:  { bg: "bg-amber-50 dark:bg-amber-900/20",   border: "border-amber-200 dark:border-amber-700",   icon: "text-amber-500 dark:text-amber-400",   text: "text-amber-700 dark:text-amber-400"   },
+  coral:  { bg: "bg-orange-50 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-700", icon: "text-orange-500 dark:text-orange-400", text: "text-orange-700 dark:text-orange-400" },
 };
 
 export function GameHubPage() {
@@ -77,7 +77,7 @@ export function GameHubPage() {
     return (
       <div className="text-center py-16 text-red-500">
         <p>Failed to load.</p>
-        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-700 mt-2 underline">
+        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mt-2 underline">
           Go back
         </button>
       </div>
@@ -99,26 +99,26 @@ export function GameHubPage() {
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-1">
-        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">
+        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
           </svg>
         </button>
         {isLoading ? (
-          <div className="h-7 w-48 bg-gray-200 rounded animate-pulse" />
+          <div className="h-7 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
         ) : (
-          <h1 className="text-2xl font-bold text-gray-900">{title || `Set #${id}`}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title || `Set #${id}`}</h1>
         )}
         {!isLoading && <span className="text-xs text-gray-400 ml-1">{cards.length} cards</span>}
       </div>
 
-      <p className="text-sm text-gray-500 ml-8 mb-6">Choose an activity</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 ml-8 mb-6">Choose an activity</p>
 
       {/* Activity grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {isLoading
           ? Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 animate-pulse h-24" />
+              <div key={i} className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 animate-pulse h-24" />
             ))
           : ACTIVITIES.map((activity) => {
               const enough = cards.length >= activity.minCards;
@@ -130,17 +130,17 @@ export function GameHubPage() {
                   className={`rounded-xl border-2 p-4 transition-shadow ${
                     enough
                       ? `${c.bg} ${c.border} cursor-pointer hover:shadow-sm`
-                      : "border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+                      : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 opacity-50 cursor-not-allowed"
                   }`}>
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">{activity.icon}</span>
                     <div className="flex flex-col gap-1 flex-1">
-                      <span className={`font-semibold text-sm ${enough ? c.text : "text-gray-600"}`}>
+                      <span className={`font-semibold text-sm ${enough ? c.text : "text-gray-600 dark:text-gray-400"}`}>
                         {activity.label}
                       </span>
-                      <span className="text-xs text-gray-500 leading-relaxed">{activity.description}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{activity.description}</span>
                       {!enough && (
-                        <span className="text-xs text-gray-400 mt-1">Needs at least {activity.minCards} cards</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">Needs at least {activity.minCards} cards</span>
                       )}
                     </div>
                   </div>

@@ -13,10 +13,10 @@ import type { Collection } from "@/types";
 
 function TagSkeleton() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3 animate-pulse">
-      <div className="h-4 bg-gray-200 rounded flex-1 max-w-xs" />
-      <div className="h-4 w-10 bg-gray-100 rounded" />
-      <div className="h-4 w-12 bg-gray-100 rounded" />
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center gap-3 animate-pulse">
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded flex-1 max-w-xs" />
+      <div className="h-4 w-10 bg-gray-100 dark:bg-gray-700 rounded" />
+      <div className="h-4 w-12 bg-gray-100 dark:bg-gray-700 rounded" />
     </div>
   );
 }
@@ -76,9 +76,9 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
   const hasCollections = allCollections.length > 0;
 
   return (
-    <div className="bg-white border border-violet-200 rounded-lg p-3 mt-1 mb-2">
+    <div className="bg-white dark:bg-gray-800 border border-violet-200 dark:border-violet-800 rounded-lg p-3 mt-1 mb-2">
       {!hasCollections ? (
-        <p className="text-sm text-gray-400 py-2">No collections found.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 py-2">No collections found.</p>
       ) : (
         <div className="flex flex-col gap-3">
           {categoriesData.map((cat) => {
@@ -86,7 +86,7 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
             if (cols.length === 0) return null;
             return (
               <div key={cat.id}>
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{cat.name}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{cat.name}</p>
                 <div className="flex flex-col gap-1">
                   {cols.map((col) => (
                     <label key={col.id} className="flex items-center gap-2 cursor-pointer">
@@ -96,7 +96,7 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
                         onChange={() => toggle(col.id)}
                         className="accent-violet-500"
                       />
-                      <span className="text-sm text-gray-800">{col.name}</span>
+                      <span className="text-sm text-gray-800 dark:text-gray-200">{col.name}</span>
                     </label>
                   ))}
                 </div>
@@ -105,7 +105,7 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
           })}
         </div>
       )}
-      <div className="flex items-center justify-end gap-3 mt-3 pt-2 border-t border-gray-100">
+      <div className="flex items-center justify-end gap-3 mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
         <button onClick={onClose} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
           Cancel
         </button>
@@ -179,7 +179,7 @@ export function CollectionTagsPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-base sm:text-2xl font-bold text-gray-900">Tags</h1>
+        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Tags</h1>
         {!addingNew && (
           <Button size="sm" onClick={() => setAddingNew(true)}>
             + New tag
@@ -189,7 +189,7 @@ export function CollectionTagsPage() {
 
       {/* Inline add form */}
       {addingNew && (
-        <div className="bg-white rounded-lg border border-violet-300 px-4 py-3 flex items-center gap-3 mb-3 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-violet-300 dark:border-violet-700 px-4 py-3 flex items-center gap-3 mb-3 shadow-sm">
           <input
             ref={newInputRef}
             type="text"
@@ -203,7 +203,7 @@ export function CollectionTagsPage() {
               }
             }}
             placeholder="Tag name"
-            className="flex-1 text-sm outline-none text-gray-900 placeholder-gray-400"
+            className="flex-1 text-sm outline-none bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
           <Button size="sm" onClick={handleAdd} disabled={createTag.isPending || !newName.trim()}>
             Add
@@ -230,7 +230,7 @@ export function CollectionTagsPage() {
 
       {/* Empty state */}
       {!isLoading && tags.length === 0 && !addingNew && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-lg mb-1">No tags yet.</p>
           <p className="text-sm">Create tags to organise your collections.</p>
         </div>
@@ -245,8 +245,10 @@ export function CollectionTagsPage() {
             return (
               <div key={tag.id}>
                 <div
-                  className={`group flex items-center gap-3 px-4 py-3 bg-white rounded-lg border transition-colors ${
-                    isAssigning ? "border-violet-300" : "border-gray-200 hover:border-violet-200"
+                  className={`group flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border transition-colors ${
+                    isAssigning
+                      ? "border-violet-300 dark:border-violet-600"
+                      : "border-gray-200 dark:border-gray-700 hover:border-violet-200 dark:hover:border-violet-700"
                   }`}>
                   {isEditing ? (
                     <>
@@ -259,12 +261,12 @@ export function CollectionTagsPage() {
                           if (e.key === "Enter") handleSaveEdit();
                           if (e.key === "Escape") setEditingId(null);
                         }}
-                        className="flex-1 text-sm outline-none border-b border-violet-400 text-gray-900 bg-transparent pb-0.5"
+                        className="flex-1 text-sm outline-none border-b border-violet-400 text-gray-900 dark:text-gray-100 bg-transparent pb-0.5"
                       />
                       <button
                         onClick={handleSaveEdit}
                         disabled={editTag.isPending || !editName.trim()}
-                        className="text-xs text-violet-600 hover:text-violet-800 font-medium transition-colors disabled:opacity-50">
+                        className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 font-medium transition-colors disabled:opacity-50">
                         Save
                       </button>
                       <button
@@ -275,7 +277,7 @@ export function CollectionTagsPage() {
                     </>
                   ) : (
                     <>
-                      <span className="flex-1 text-sm font-medium text-gray-900 flex items-center gap-2">
+                      <span className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <span className="inline-block w-2 h-2 rounded-full bg-violet-400" />
                         {tag.name}
                       </span>

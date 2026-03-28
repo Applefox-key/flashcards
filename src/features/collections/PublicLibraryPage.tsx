@@ -10,11 +10,11 @@ import type { Collection } from "@/types";
 
 function RowSkeleton() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3 animate-pulse">
-      <div className="h-4 bg-gray-200 rounded flex-1 max-w-xs" />
-      <div className="h-4 w-16 bg-gray-100 rounded-full" />
-      <div className="h-4 w-12 bg-gray-100 rounded" />
-      <div className="h-7 w-14 bg-gray-100 rounded" />
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center gap-3 animate-pulse">
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded flex-1 max-w-xs" />
+      <div className="h-4 w-16 bg-gray-100 dark:bg-gray-700 rounded-full" />
+      <div className="h-4 w-12 bg-gray-100 dark:bg-gray-700 rounded" />
+      <div className="h-7 w-14 bg-gray-100 dark:bg-gray-700 rounded" />
     </div>
   );
 }
@@ -46,7 +46,7 @@ function highlight(text: string | undefined, query: string): React.ReactNode {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-yellow-100 text-yellow-800 rounded px-0.5">{text.slice(idx, idx + query.length)}</mark>
+      <mark className="bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-300 rounded px-0.5">{text.slice(idx, idx + query.length)}</mark>
       {text.slice(idx + query.length)}
     </>
   );
@@ -65,16 +65,16 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
   const categoryName = getCategoryName(col);
   const tagNames = getTagNames(col);
   return (
-    <div className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-start gap-3 hover:border-indigo-200 transition-colors">
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-start gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to={`/library/public/${col.id}`}
-            className="font-medium text-gray-900 hover:text-indigo-600 transition-colors">
+            className="font-medium text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             {highlight(col.name, search)}
           </Link>
           {categoryName && (
-            <span className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded-full">
+            <span className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700 px-1.5 py-0.5 rounded-full">
               {highlight(categoryName, search)}
             </span>
           )}
@@ -83,7 +83,7 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
               {tagNames.map((name) => (
                 <span
                   key={name}
-                  className="text-xs bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">
+                  className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
                   {highlight(name, search)}
                 </span>
               ))}
@@ -92,11 +92,11 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0 mt-0.5">
-        {col.cardCount !== undefined && <span className="text-xs text-gray-400">{col.cardCount} cards</span>}
+        {col.cardCount !== undefined && <span className="text-xs text-gray-400 dark:text-gray-500">{col.cardCount} cards</span>}
         {isMine ? (
-          <span className="text-xs text-indigo-400 font-medium px-2">Your collection</span>
+          <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium px-2">Your collection</span>
         ) : isCopied ? (
-          <span className="text-xs text-green-600 font-medium px-2">✓ Copied</span>
+          <span className="text-xs text-green-600 dark:text-green-400 font-medium px-2">✓ Copied</span>
         ) : (
           <Button size="sm" variant="secondary" onClick={() => onCopy(col)} loading={copyPending}>
             Copy
@@ -157,8 +157,10 @@ export function PublicLibraryPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="test-base sm:text-2xl font-bold text-gray-900">Public Library</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Browse and copy collections shared by other users</p>
+          <h1 className="test-base sm:text-2xl font-bold text-gray-900 dark:text-white">Public Library</h1>
+          <p className="text-sm text-gray-500 mt-0.5 dark:text-white">
+            Browse and copy collections shared by other users
+          </p>
         </div>
         <Link to="/library">
           <Button variant="secondary" size="sm" className="whitespace-nowrap">
@@ -176,7 +178,7 @@ export function PublicLibraryPage() {
             setActiveTag(null);
           }}
           placeholder="Search by name, category or tag…"
-          className="w-full max-w-sm border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full max-w-sm border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
         />
       </div>
 
@@ -193,7 +195,8 @@ export function PublicLibraryPage() {
               className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                 activeTag === tag
                   ? "bg-violet-100 text-violet-700 border-violet-300"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-violet-300 hover:text-violet-600"
+                  : // : "bg-white text-gray-500 border-gray-200 hover:border-violet-300 hover:text-violet-600 dark:text-gray-400 dark:hover:bg-violet-900/20 dark:hover:border-violet-600"
+                    "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
               }`}>
               {tag}
             </button>

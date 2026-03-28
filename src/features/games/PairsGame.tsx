@@ -131,10 +131,10 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   function getCellClass(cell: PairCell): string {
     const isSelected = selected === cell.cellId;
     const isWrong = wrongPair?.includes(cell.cellId);
-    if (cell.matched) return "bg-green-50 border-green-200 text-green-500 opacity-40 cursor-default";
-    if (isWrong) return "bg-red-50 border-red-400 text-red-600 animate-pulse";
-    if (isSelected) return "bg-indigo-50 border-indigo-400 text-indigo-700 scale-105";
-    return "bg-white border-gray-200 text-gray-800 hover:border-indigo-300 hover:bg-indigo-50";
+    if (cell.matched) return "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-500 dark:text-green-600 opacity-40 cursor-default";
+    if (isWrong) return "bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600 text-red-600 dark:text-red-400 animate-pulse";
+    if (isSelected) return "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-400 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 scale-105";
+    return "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20";
   }
 
   if (done) {
@@ -151,7 +151,7 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-4">
       {/* Score */}
-      <div className="flex items-center justify-between text-sm text-gray-500">
+      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>
           Batch {batchIndex + 1} / {totalBatches}
         </span>

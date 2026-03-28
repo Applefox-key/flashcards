@@ -40,12 +40,12 @@ export function TagSelect({ value, onChange }: Props) {
       {/* Selected tags */}
       <div className="flex flex-wrap gap-1.5 min-h-[1.75rem]">
         {selectedTags.length === 0 && (
-          <span className="text-xs text-gray-400 py-0.5">No tags selected</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 py-0.5">No tags selected</span>
         )}
         {selectedTags.map((tag) => (
           <span
             key={tag.id}
-            className="inline-flex items-center gap-1 text-xs bg-violet-100 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-full">
+            className="inline-flex items-center gap-1 text-xs bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700 px-2 py-0.5 rounded-full">
             {tag.name}
             <button
               type="button"
@@ -64,7 +64,7 @@ export function TagSelect({ value, onChange }: Props) {
             key={tag.id}
             type="button"
             onClick={() => toggle(tag.id)}
-            className="text-xs border border-gray-200 text-gray-500 px-2 py-0.5 rounded-full hover:border-violet-300 hover:text-violet-600 transition-colors">
+            className="text-xs border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
             + {tag.name}
           </button>
         ))}
@@ -80,13 +80,15 @@ export function TagSelect({ value, onChange }: Props) {
                 if (e.key === 'Escape') { setCreatingNew(false); setNewName('') }
               }}
               placeholder="Tag name"
-              className="border border-gray-300 rounded px-2 py-0.5 text-xs w-24 focus:outline-none focus:ring-1 focus:ring-violet-400"
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-0.5 text-xs w-24
+                         bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                         focus:outline-none focus:ring-1 focus:ring-violet-400"
             />
             <button
               type="button"
               onClick={handleCreate}
               disabled={!newName.trim() || createTag.isPending}
-              className="text-xs text-violet-600 hover:text-violet-800 disabled:opacity-40 transition-colors">
+              className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 disabled:opacity-40 transition-colors">
               Add
             </button>
             <button
@@ -100,7 +102,7 @@ export function TagSelect({ value, onChange }: Props) {
           <button
             type="button"
             onClick={() => setCreatingNew(true)}
-            className="text-xs border border-dashed border-gray-300 text-gray-400 px-2 py-0.5 rounded-full hover:border-violet-300 hover:text-violet-500 transition-colors">
+            className="text-xs border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 px-2 py-0.5 rounded-full hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-500 dark:hover:text-violet-400 transition-colors">
             + New tag
           </button>
         )}

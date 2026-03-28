@@ -123,9 +123,9 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
 
     if (isFilled) {
       return (
-        <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm">
+        <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
           <span className="text-xs text-gray-400 w-5 shrink-0">{i + 1}</span>
-          <span className="flex-1 text-gray-800">{resolveCollectionName(id)}</span>
+          <span className="flex-1 text-gray-800 dark:text-gray-200">{resolveCollectionName(id)}</span>
           <button
             onClick={() => removeSlot(i)}
             className="text-gray-300 hover:text-red-500 transition-colors text-lg leading-none w-6 text-center">
@@ -141,11 +141,11 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
         onClick={() => setActiveSlot(i)}
         className={
           isActive
-            ? "flex items-center gap-3 px-3 py-2 rounded-lg border border-indigo-400 bg-indigo-50 text-sm cursor-pointer"
-            : "flex items-center gap-3 px-3 py-2 rounded-lg border border-dashed border-gray-200 text-sm cursor-pointer hover:border-indigo-300 hover:bg-gray-50"
+            ? "flex items-center gap-3 px-3 py-2 rounded-lg border border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 text-sm cursor-pointer"
+            : "flex items-center gap-3 px-3 py-2 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 text-sm cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
         }>
         <span className="text-xs text-gray-400 w-5 shrink-0">{i + 1}</span>
-        <span className="text-sm text-gray-400 italic">add collection</span>
+        <span className="text-sm text-gray-400 dark:text-gray-500 italic">add collection</span>
       </div>
     );
   });
@@ -153,10 +153,10 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
   const pickerContent = (listClassName: string) => (
     <>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-500 font-medium">Slot {activeSlot !== null ? activeSlot + 1 : ""}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Slot {activeSlot !== null ? activeSlot + 1 : ""}</span>
         <button
           onClick={closePicker}
-          className="text-gray-400 hover:text-gray-600 text-lg leading-none w-6 text-center">
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none w-6 text-center">
           ×
         </button>
       </div>
@@ -165,18 +165,20 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search..."
-        className="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs
+                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
       <div className={listClassName}>
         {pickerCollections.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-4">{search ? "No matches" : "No collections available"}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">{search ? "No matches" : "No collections available"}</p>
         ) : (
           pickerCollections.map((col) => (
             <div
               key={col.id}
               onClick={() => pickCollection(col.id)}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-indigo-100 cursor-pointer text-sm rounded">
-              <span className="flex-1 text-gray-800">{col.name}</span>
+              className="flex items-center gap-2 px-3 py-2 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 cursor-pointer text-sm rounded">
+              <span className="flex-1 text-gray-800 dark:text-gray-200">{col.name}</span>
               {col.category && <span className="text-xs text-indigo-400 shrink-0">{col.category.name}</span>}
             </div>
           ))
@@ -194,7 +196,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
       <div className="flex flex-col gap-4">
         {/* Name */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -205,19 +207,21 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
               if (e.key === "Enter") handleSave();
             }}
             placeholder="e.g. Morning review"
-            className="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         {/* Collections */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">Collections</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Collections</label>
             <span
               className={
                 filledCount === 10
-                  ? "text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium"
-                  : "text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium"
+                  ? "text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium"
+                  : "text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium"
               }>
               {filledCount} / 10
             </span>
@@ -233,7 +237,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
 
               {/* Right column: picker panel — desktop only */}
               {activeSlot !== null && (
-                <div className="hidden sm:block border border-indigo-200 rounded-lg p-3 bg-indigo-50 sticky top-0">
+                <div className="hidden sm:block border border-indigo-200 dark:border-indigo-700 rounded-lg p-3 bg-indigo-50 dark:bg-indigo-900/20 sticky top-0">
                   {pickerContent("max-h-64 overflow-y-auto mt-2")}
                 </div>
               )}
@@ -241,13 +245,13 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
 
             {/* Mobile overlay: picker panel — small screens only */}
             {activeSlot !== null && (
-              <div className="sm:hidden absolute inset-0 z-10 bg-white rounded-lg border border-indigo-200 p-3 flex flex-col">
+              <div className="sm:hidden absolute inset-0 z-10 bg-white dark:bg-gray-800 rounded-lg border border-indigo-200 dark:border-indigo-700 p-3 flex flex-col">
                 {pickerContent("flex-1 overflow-y-auto mt-2")}
               </div>
             )}
           </div>
 
-          <p className="text-xs text-gray-400 mt-2">Sets can contain up to 10 collections.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Sets can contain up to 10 collections.</p>
         </div>
 
         <div className="flex gap-3 pt-1">

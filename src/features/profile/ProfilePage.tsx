@@ -20,7 +20,7 @@ function AvatarPlaceholder({ name }: { name: string }) {
     .map((s) => s[0]?.toUpperCase() ?? "")
     .join("");
   return (
-    <div className="w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600 select-none">
+    <div className="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-2xl font-bold text-indigo-600 dark:text-indigo-400 select-none">
       {initials || "?"}
     </div>
   );
@@ -57,10 +57,10 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
+      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900">Change avatar</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Change avatar</h3>
+          <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">
             ×
           </button>
         </div>
@@ -71,10 +71,10 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
             <img
               src={preview}
               alt="preview"
-              className="w-24 h-24 rounded-full object-cover border-2 border-indigo-200"
+              className="w-24 h-24 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-700"
             />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+            <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
               No image
             </div>
           )}
@@ -87,7 +87,7 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
             type="file"
             accept="image/*"
             onChange={handleFile}
-            className="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border file:border-gray-300 file:text-sm file:bg-white file:text-gray-700 hover:file:bg-gray-50 cursor-pointer"
+            className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border file:border-gray-300 dark:file:border-gray-600 file:text-sm file:bg-white dark:file:bg-gray-700 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-50 dark:hover:file:bg-gray-600 cursor-pointer"
           />
         </label>
 
@@ -173,9 +173,12 @@ export function ProfilePage() {
 
   if (!user) return null;
 
+  const inputClass =
+    "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400";
+
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Profile</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Profile</h1>
 
       <form onSubmit={handleSave} className="flex flex-col gap-6">
         {/* Avatar */}
@@ -185,7 +188,7 @@ export function ProfilePage() {
               <img
                 src={avatarUrl}
                 alt="avatar"
-                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 group-hover:border-indigo-400 transition-colors"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 group-hover:border-indigo-400 transition-colors"
               />
             ) : (
               <AvatarPlaceholder name={name || user.name} />
@@ -194,67 +197,67 @@ export function ProfilePage() {
               <span className="text-white text-xs font-medium">Change</span>
             </div>
           </div>
-          <button type="button" onClick={() => setPickerOpen(true)} className="text-xs text-indigo-600 hover:underline">
+          <button type="button" onClick={() => setPickerOpen(true)} className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
             Change photo
           </button>
         </div>
 
         {/* Profile fields */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
-          <h2 className="text-sm font-semibold text-gray-700">Account info</h2>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-4">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Account info</h2>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Name</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Your name"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Email</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Email</label>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               type="email"
               placeholder="you@example.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className={inputClass}
             />
           </div>
         </div>
 
         {/* Change password */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
-          <h2 className="text-sm font-semibold text-gray-700">Change password</h2>
-          <p className="text-xs text-gray-400 -mt-2">Leave blank to keep your current password.</p>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-4">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Change password</h2>
+          <p className="text-xs text-gray-400 dark:text-gray-500 -mt-2">Leave blank to keep your current password.</p>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1">New password</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">New password</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="New password (min 6 chars)"
               minLength={password ? 6 : undefined}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Confirm new password</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Confirm new password</label>
             <input
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               type="password"
               placeholder="Repeat new password"
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+              className={`w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                 confirmPassword && password !== confirmPassword
-                  ? "border-red-300 focus:ring-red-300"
-                  : "border-gray-300"
+                  ? "border-red-300 dark:border-red-700 focus:ring-red-300"
+                  : "border-gray-300 dark:border-gray-600"
               }`}
             />
             {confirmPassword && password !== confirmPassword && (

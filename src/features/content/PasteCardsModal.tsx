@@ -94,35 +94,35 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
       {!parsed ? (
         <div className="flex flex-col gap-4">
           {/* Mode tabs */}
-          <div className="flex gap-1 border-b border-gray-200">
+          <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
             {(Object.keys(MODE_LABELS) as Mode[]).map((m) => (
               <button
                 key={m}
                 onClick={() => setMode(m)}
                 className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
                   mode === m
-                    ? "border-indigo-500 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                    : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 }`}>
                 {MODE_LABELS[m]}
               </button>
             ))}
           </div>
 
-          <p className="text-xs text-gray-500">{MODE_HINTS[mode]}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{MODE_HINTS[mode]}</p>
 
           {/* Delimiter config */}
           {mode === "delimited" && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Separator:</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Separator:</span>
               {[";", "\t", ","].map((s) => (
                 <button
                   key={s}
                   onClick={() => setSep(s)}
                   className={`px-2 py-0.5 rounded text-sm border ${
                     sep === s
-                      ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                      ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-400"
+                      : "border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500"
                   }`}>
                   {s === "\t" ? "Tab" : s}
                 </button>
@@ -132,7 +132,9 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
                 onChange={(e) => e.target.value && setSep(e.target.value)}
                 placeholder="custom"
                 maxLength={3}
-                className="w-16 border border-gray-300 rounded px-2 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                className="w-16 border border-gray-300 dark:border-gray-600 rounded px-2 py-0.5 text-sm
+                           bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                           focus:outline-none focus:ring-1 focus:ring-indigo-400"
               />
             </div>
           )}
@@ -143,7 +145,9 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
             onChange={(e) => setText(e.target.value)}
             placeholder={mode === "two-lists" ? "Questions (one per line)..." : "Paste your content here..."}
             rows={mode === "two-lists" ? 6 : 10}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-mono resize-none
+                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                       focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
 
           {mode === "two-lists" && (
@@ -152,7 +156,9 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
               onChange={(e) => setText2(e.target.value)}
               placeholder="Answers (one per line)..."
               rows={6}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-mono resize-none
+                         bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                         focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           )}
 
@@ -169,7 +175,9 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
         <div className="flex flex-col gap-4">
           <CardPreviewTable cards={cards} onChange={setCards} />
           <div className="flex justify-between items-center">
-            <button onClick={handleBack} className="text-sm text-gray-500 hover:text-gray-700">
+            <button
+              onClick={handleBack}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
               ← Back to edit
             </button>
             <div className="flex gap-2">

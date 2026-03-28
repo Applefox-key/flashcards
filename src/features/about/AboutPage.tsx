@@ -35,7 +35,7 @@ export function AboutPage() {
     <div className="max-w-2xl mx-auto flex flex-col gap-6 sm:gap-10 py-2 sm:py-4">
       {/* Back link */}
       <div>
-        <a href="/library" className="text-sm text-indigo-600 hover:underline">
+        <a href="/library" className="text-lg font-bold sm:text-sm text-indigo-600 hover:underline">
           ← Back to app
         </a>
       </div>
@@ -43,13 +43,15 @@ export function AboutPage() {
       {/* Hero */}
       <div className="flex flex-col items-center text-center gap-3">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-indigo-600">FlashMinds</h1>
-        <p className="text-base sm:text-lg text-gray-600">A flashcard learning app to help you memorize anything</p>
+        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
+          A flashcard learning app to help you memorize anything
+        </p>
       </div>
 
       {/* What is this */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">What is FlashMinds?</h2>
-        <p className="text-sm text-gray-600 leading-relaxed">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">What is FlashMinds?</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
           FlashMinds is a personal flashcard learning tool. Create collections of cards on any topic, organize them into
           categories, group collections into sets (playlists), and practice with different activities designed to
           strengthen memory.
@@ -58,13 +60,15 @@ export function AboutPage() {
 
       {/* Activities */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Activities</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Activities</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {ACTIVITIES.map((a) => (
-            <div key={a.name} className="bg-white border border-gray-200 rounded-xl p-4">
+            <div
+              key={a.name}
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
               <div className="text-2xl mb-2">{a.icon}</div>
-              <div className="text-sm font-semibold text-gray-800">{a.name}</div>
-              <div className="text-xs text-gray-500 mt-1">{a.description}</div>
+              <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">{a.name}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{a.description}</div>
             </div>
           ))}
         </div>
@@ -72,12 +76,12 @@ export function AboutPage() {
 
       {/* Features */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Features</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Features</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {FEATURES.map((f) => (
             <div key={f} className="flex gap-2">
               <span className="text-indigo-500 shrink-0">✓</span>
-              <span className="text-sm text-gray-700">{f}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{f}</span>
             </div>
           ))}
         </div>

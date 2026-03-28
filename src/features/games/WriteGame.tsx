@@ -110,8 +110,8 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
   if (!initialized || !current) {
     return (
       <div className="max-w-lg mx-auto animate-pulse flex flex-col gap-4">
-        <div className="h-24 bg-gray-100 rounded-xl" />
-        <div className="h-20 bg-gray-100 rounded-xl" />
+        <div className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+        <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl" />
       </div>
     );
   }
@@ -130,7 +130,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-4">
       {/* Progress */}
-      <div className="flex items-center justify-between text-sm text-gray-500">
+      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>
           {score.t + 1} / {cards.length}
         </span>
@@ -138,7 +138,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
           ✓ {score.r} &nbsp; ✗ {score.w}
         </span>
       </div>
-      <div className="w-full h-1.5 bg-gray-200 rounded-full">
+      <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
         <div
           className="h-full bg-indigo-500 rounded-full transition-all"
           style={{ width: `${(score.t / cards.length) * 100}%` }}
@@ -146,9 +146,9 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
       </div>
 
       {/* Prompt card */}
-      <div className="bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
+      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
-        <p className="text-lg font-medium text-gray-900">{answerFirst ? current.answer : current.question}</p>
+        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
         {(answerFirst ? current.imgA : current.imgQ) && (
           <img
             src={answerFirst ? current.imgA : current.imgQ}
@@ -168,12 +168,12 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
             onKeyDown={handleKeyDown}
             placeholder="Type your answer…"
             rows={3}
-            className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-indigo-400"
+            className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
           <div className="flex gap-2">
             <button
               onClick={handleHint}
-              className="text-sm px-3 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50">
+              className="text-sm px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
               💡 Hint
             </button>
             <button
@@ -189,26 +189,26 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
       {/* Revealed phase */}
       {phase === "revealed" && (
         <div
-          className={`border-2 rounded-xl p-5 flex flex-col gap-2 ${isCorrect ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}`}>
-          <p className={`font-semibold text-sm ${isCorrect ? "text-green-700" : "text-red-700"}`}>
+          className={`border-2 rounded-xl p-5 flex flex-col gap-2 ${isCorrect ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700" : "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"}`}>
+          <p className={`font-semibold text-sm ${isCorrect ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
             {isCorrect ? "✓ Correct!" : "✗ Wrong"}
           </p>
           <div>
             <p className="text-xs text-gray-400 mb-0.5">Your answer:</p>
-            <p className={`text-sm ${isCorrect ? "text-green-800" : "text-red-700 line-through"}`}>
+            <p className={`text-sm ${isCorrect ? "text-green-800 dark:text-green-300" : "text-red-700 dark:text-red-400 line-through"}`}>
               {input || "(empty)"}
             </p>
           </div>
           {!isCorrect && (
             <div>
               <p className="text-xs text-gray-400 mb-0.5">Correct answer:</p>
-              <p className="text-sm font-medium text-gray-800">{answerFirst ? current.question : current.answer}</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{answerFirst ? current.question : current.answer}</p>
             </div>
           )}
-          {current.note && <p className="text-xs text-gray-500 italic mt-1">{current.note}</p>}
+          {current.note && <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">{current.note}</p>}
           <button
             onClick={pickNext}
-            className="mt-2 bg-white border border-gray-300 rounded-lg py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            className="mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
             Next ↵
           </button>
         </div>

@@ -63,37 +63,41 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col">
+    <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-gray-50">
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-sm font-medium">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <button
+          onClick={onClose}
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm font-medium">
           ← Back
         </button>
-        <h2 className="text-base font-semibold text-gray-900">Move cards to another collection</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Move cards to another collection</h2>
       </div>
 
       <div className="flex flex-1 min-h-0">
         {/* Left: card selector */}
-        <div className="flex flex-col w-1/2 border-r border-gray-200 min-h-0">
-          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-gray-50">
-            <span className="text-sm font-medium text-gray-700">
+        <div className="flex flex-col w-1/2 border-r border-gray-200 dark:border-gray-700 min-h-0">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Select cards ({selected.size} / {cards.length})
             </span>
             <div className="flex gap-2">
-              <button onClick={selectAll} className="text-xs text-indigo-600 hover:underline">
+              <button onClick={selectAll} className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
                 All
               </button>
-              <button onClick={clearAll} className="text-xs text-gray-500 hover:underline">
+              <button onClick={clearAll} className="text-xs text-gray-500 dark:text-gray-400 hover:underline">
                 None
               </button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
             {cards.map((card) => (
               <label
                 key={card.id}
-                className={`flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-                  selected.has(card.id) ? "bg-indigo-50" : ""
+                className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors ${
+                  selected.has(card.id)
+                    ? "bg-indigo-50 dark:bg-indigo-900/20"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-800/60"
                 }`}>
                 <input
                   type="checkbox"
@@ -102,8 +106,8 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
                   className="mt-0.5 shrink-0 accent-indigo-600"
                 />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{card.question}</p>
-                  <p className="text-xs text-gray-500 truncate">{card.answer}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{card.question}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{card.answer}</p>
                 </div>
               </label>
             ))}
@@ -112,28 +116,32 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
 
         {/* Right: collection selector */}
         <div className="flex flex-col w-1/2 min-h-0">
-          <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
-            <span className="text-sm font-medium text-gray-700">Move to collection</span>
+          <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Move to collection</span>
           </div>
-          <div className="px-4 py-2 border-b border-gray-100">
+          <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-900">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search collections..."
-              className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-1.5 text-sm
+                         bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                         focus:outline-none focus:ring-1 focus:ring-indigo-400"
             />
           </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
             {filteredCollections.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">
+              <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-8">
                 {search ? "No collections match your search." : "No other collections."}
               </p>
             ) : (
               filteredCollections.map((col) => (
                 <label
                   key={col.id}
-                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    targetId === col.id ? "bg-indigo-50" : ""
+                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
+                    targetId === col.id
+                      ? "bg-indigo-50 dark:bg-indigo-900/20"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-800/60"
                   }`}>
                   <input
                     type="radio"
@@ -143,11 +151,13 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
                     className="accent-indigo-600 shrink-0"
                   />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{col.name}</p>
-                    {col.category && <p className="text-xs text-gray-400 truncate">{col.category.name}</p>}
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{col.name}</p>
+                    {col.category && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{col.category.name}</p>
+                    )}
                   </div>
                   {col.cardCount !== undefined && (
-                    <span className="ml-auto text-xs text-gray-400 shrink-0">{col.cardCount} cards</span>
+                    <span className="ml-auto text-xs text-gray-400 dark:text-gray-500 shrink-0">{col.cardCount} cards</span>
                   )}
                 </label>
               ))
@@ -157,8 +167,8 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
-        <p className="text-sm text-gray-500">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {selected.size > 0 && targetId
             ? `Move ${selected.size} card${selected.size !== 1 ? "s" : ""} to "${
                 otherCollections.find((c) => c.id === targetId)?.name ?? "..."
