@@ -257,7 +257,27 @@ export function Layout() {
             </div>
             <NavLink to="/profile" className="flex items-center hover:opacity-80 transition-opacity">
               {user && <NavAvatar name={user.name} img={user.img} token={token} />}
-            </NavLink>
+            </NavLink>{" "}
+            <button
+              onClick={handleLogout}
+              className=" ml-4 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              title="Logout">
+              <svg
+                className="sm:hidden"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span className="hidden sm:inline text-sm">Logout</span>
+            </button>
           </div>
         </div>
 
@@ -328,7 +348,6 @@ export function Layout() {
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
-            <span className="hidden sm:inline text-sm">Logout</span>
           </button>
         </nav>
       </header>

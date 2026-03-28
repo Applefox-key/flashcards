@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { ProtectedRoute } from './ProtectedRoute'
 import { ErrorPage } from '@/components/ErrorPage'
+import { RootRedirect } from './RootRedirect'
 
 import { AuthPage } from '@/features/auth/AuthPage'
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
     path: '/',
     errorElement: <ErrorPage />,
     children: [
+      { index: true, element: <RootRedirect /> },
       { path: 'login', element: <AuthPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'reset/:token', element: <ResetPasswordPage /> },
@@ -36,7 +38,7 @@ export const router = createBrowserRouter([
           {
             element: <Layout />,
             children: [
-              { index: true, element: <Navigate to="/library" replace /> },
+              { path: 'home', element: <Navigate to="/library" replace /> },
               { path: 'library', element: <CollectionsPage /> },
               { path: 'library/public', element: <PublicLibraryPage /> },
               { path: 'library/public/:id', element: <PublicCollectionPage /> },
