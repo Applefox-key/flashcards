@@ -1,5 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { DarkModeToggle } from '@/components/DarkModeToggle'
+import { useNavigate } from 'react-router-dom'
+import { PublicNavbar } from '@/components/PublicNavbar'
 import { useAuthStore } from '@/store/authStore'
 
 const ACTIVITIES = [
@@ -32,40 +32,17 @@ export function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-2xl mx-auto px-4 flex flex-col gap-6 sm:gap-10 py-6 sm:py-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <PublicNavbar />
 
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
-          {isAuthenticated ? (
-            <Link to="/library" className="text-lg font-bold sm:text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-              ← Back to app
-            </Link>
-          ) : (
-            <span />
-          )}
-          <DarkModeToggle />
-        </div>
+      <div className="max-w-2xl mx-auto w-full px-4 flex flex-col gap-6 sm:gap-10 py-8 sm:py-12">
 
         {/* Hero */}
-        <div className="flex flex-col items-center text-center gap-4">
+        <div className="flex flex-col items-center text-center gap-3">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-indigo-600">FlashMinds</h1>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
             A flashcard learning app to help you memorize anything
           </p>
-          <div className="flex gap-3 mt-2">
-            <Link
-              to="/login"
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
-              Log in
-            </Link>
-            <Link
-              to="/login"
-              state={{ tab: "register" }}
-              className="px-5 py-2 border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm font-medium rounded-lg transition-colors">
-              Sign up
-            </Link>
-          </div>
         </div>
 
         {/* What is this */}
@@ -116,15 +93,10 @@ export function AboutPage() {
           </div>
         </div>
 
-        {/* Bottom CTA */}
-        <div className="flex flex-col items-center gap-3 pt-2 pb-4">
-          <Link
-            to="/login"
-            className="px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
-            Get started
-          </Link>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Made with ♥ as a personal learning project</p>
-        </div>
+        {/* Footer */}
+        <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-4">
+          Made with ♥ as a personal learning project
+        </p>
 
       </div>
     </div>

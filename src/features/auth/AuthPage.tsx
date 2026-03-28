@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { authApi } from "@/api";
 import { useLogin, useRegister } from "./hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
+import { PublicNavbar } from "@/components/PublicNavbar";
 
 type AuthTab = "login" | "register" | "forgot";
 
@@ -115,13 +116,10 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <PublicNavbar />
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md w-full max-w-sm p-8">
-        <div className="mb-4">
-          <Link to="/about" className="text-xs text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-            ← About FlashMinds
-          </Link>
-        </div>
         <h1 className="text-2xl font-bold text-center text-indigo-600 mb-2">FlashMinds</h1>
         <div className="text-center mb-6">
           <button
@@ -189,6 +187,7 @@ export function AuthPage() {
 
         {/* Forgot password form */}
         {tab === "forgot" && <ForgotForm onBack={() => setTab("login")} />}
+      </div>
       </div>
     </div>
   );
