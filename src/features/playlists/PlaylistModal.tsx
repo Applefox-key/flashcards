@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { collectionsApi } from "@/api";
 import { Modal } from "@/components/Modal";
@@ -8,6 +8,8 @@ import { useCreatePlaylist, useEditPlaylist } from "@/hooks/usePlaylistHooks";
 import { useCollections } from "@/hooks/useCollectionHooks";
 import { useIsDemo } from "@/hooks/useIsDemo";
 import type { Playlist } from "@/types";
+
+const MAX_SLOTS = 10;
 
 interface Props {
   open: boolean;
@@ -20,6 +22,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
   const [name, setName] = useState("");
   const [selectedIds, setSelectedIds] = useState<(number | undefined)[]>([]);
   const [search, setSearch] = useState("");
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -32,6 +35,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
     setSelectedIds(editPlaylist?.collections.map((c) => c.id) ?? []);
     setActiveSlot(null);
     setSearch("");
+    setTagFilter(null);
   }, [editPlaylist, open]);
 
   // Autofocus search input when picker opens
@@ -96,13 +100,23 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
       next[activeSlot] = id;
       return next;
     });
-    setActiveSlot(null);
     setSearch("");
+    setTagFilter(null);
+    // Close picker only if all slots will be filled after this pick
+    const newFilledCount = selectedIds.filter((sid, i) => i === activeSlot ? true : sid != null).length;
+    if (newFilledCount >= MAX_SLOTS) {
+      setActiveSlot(null);
+    } else {
+      // Move to next empty slot, or keep current slot open if no next
+      const nextEmpty = selectedIds.findIndex((sid, i) => i > activeSlot && sid == null);
+      setActiveSlot(nextEmpty !== -1 ? nextEmpty : activeSlot);
+    }
   }
 
   function closePicker() {
     setActiveSlot(null);
     setSearch("");
+    setTagFilter(null);
   }
 
   function resolveCollectionName(id: number): string {
@@ -110,13 +124,23 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
     return col?.name ?? `Collection #${id}`;
   }
 
-  // Collections available in the picker (not already selected, sorted by name, filtered by search)
+  // All unique tag names across available collections
+  const allTagNames = useMemo<string[]>(() => {
+    const set = new Set<string>();
+    for (const col of allCollections) {
+      for (const tag of col.tags ?? []) set.add(tag.name);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allCollections]);
+
+  // Collections available in the picker (not already selected, filtered by search + tag)
   const pickerCollections = allCollections
     .filter((c) => !selectedIds.includes(c.id))
+    .filter((c) => !tagFilter || (c.tags ?? []).some((t) => t.name === tagFilter))
     .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const slotRows = Array.from({ length: 10 }, (_, i) => {
+  const slotRows = Array.from({ length: MAX_SLOTS }, (_, i) => {
     const id = selectedIds[i];
     const isFilled = id != null;
     const isActive = activeSlot === i;
@@ -164,14 +188,31 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
         ref={searchRef}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search..."
+        placeholder="Search by name..."
         className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                    focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
+      {/* Tag filter chips */}
+      {allTagNames.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+          {allTagNames.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
+              className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                tagFilter === tag
+                  ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-600"
+                  : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400"
+              }`}>
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
       <div className={listClassName}>
         {pickerCollections.length === 0 ? (
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">{search ? "No matches" : "No collections available"}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">{search || tagFilter ? "No matches" : "No collections available"}</p>
         ) : (
           pickerCollections.map((col) => (
             <div
@@ -219,11 +260,11 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Collections</label>
             <span
               className={
-                filledCount === 10
+                filledCount === MAX_SLOTS
                   ? "text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium"
                   : "text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium"
               }>
-              {filledCount} / 10
+              {filledCount} / {MAX_SLOTS}
             </span>
           </div>
 
@@ -251,7 +292,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
             )}
           </div>
 
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Sets can contain up to 10 collections.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Sets can contain up to {MAX_SLOTS} collections.</p>
         </div>
 
         <div className="flex gap-3 pt-1">

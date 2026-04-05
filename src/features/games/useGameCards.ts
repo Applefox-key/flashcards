@@ -37,6 +37,12 @@ export function useGameCards() {
     enabled: !isDemo && isPlaylist && !!numId,
   })
 
+  const plMetaQuery = useQuery({
+    queryKey: ['playlists', numId],
+    queryFn: () => playlistsApi.getById(numId),
+    enabled: !isDemo && isPlaylist && !!numId,
+  })
+
   if (isDemo) {
     if (isPlaylist) {
       const cards = demoPlaylist
@@ -53,7 +59,12 @@ export function useGameCards() {
   }
 
   if (isPlaylist) {
-    return { cards: plQuery.data ?? [], title: '', isLoading: plQuery.isLoading, isError: plQuery.isError }
+    return {
+      cards: plQuery.data ?? [],
+      title: plMetaQuery.data?.name ?? '',
+      isLoading: plQuery.isLoading || plMetaQuery.isLoading,
+      isError: plQuery.isError,
+    }
   }
 
   const raw = colQuery.data as unknown as CollectionContentResponse[] | undefined
