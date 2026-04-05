@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { pbcollectionsApi } from "@/api";
 import { useCopyCollection } from "@/features/collections/hooks/useCollections";
 import { useCollections } from "@/hooks/useCollectionHooks";
+import { useLibraryUiStore } from "@/store/libraryUiStore";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
 import type { Collection } from "@/types";
@@ -108,8 +109,9 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
 }
 
 export function PublicLibraryPage() {
-  const [search, setSearch] = useState("");
-  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const { publicLibrary, setPublicLibrary } = useLibraryUiStore();
+  const search = publicLibrary.search;
+  const activeTag = publicLibrary.activeTag;
   const [copiedIds, setCopiedIds] = useState<Set<number>>(new Set());
   const toast = useToast();
   const copyCollection = useCopyCollection();
@@ -174,8 +176,7 @@ export function PublicLibraryPage() {
         <input
           value={search}
           onChange={(e) => {
-            setSearch(e.target.value);
-            setActiveTag(null);
+            setPublicLibrary({ search: e.target.value, activeTag: null });
           }}
           placeholder="Search by name, category or tag…"
           className="w-full max-w-sm border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
@@ -189,8 +190,7 @@ export function PublicLibraryPage() {
             <button
               key={tag}
               onClick={() => {
-                setActiveTag(activeTag === tag ? null : tag);
-                setSearch("");
+                setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "" });
               }}
               className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                 activeTag === tag

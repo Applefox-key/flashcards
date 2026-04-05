@@ -39,6 +39,7 @@ export interface Content {
   answer: string
   note?: string
   collectionid: number
+  collectionname?: string
   imgQ?: string
   imgA?: string
   rate?: number

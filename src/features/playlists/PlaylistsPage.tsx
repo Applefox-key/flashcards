@@ -57,10 +57,15 @@ function PlaylistCard({
 
       {/* Play button */}
       {playlist.collections.length > 0 && (
-        <div className="pt-1 border-t border-gray-100 dark:border-gray-700">
+        <div className="pt-1 border-t border-gray-100 dark:border-gray-700 flex gap-2">
           <Link to={`/play/${playlist.id}?src=pl`}>
             <Button size="sm" variant="secondary">
               ▶ Practice
+            </Button>
+          </Link>
+          <Link to={`/playlists/${playlist.id}/cards`}>
+            <Button size="sm" variant="secondary">
+              View cards
             </Button>
           </Link>
         </div>

@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useCollections } from "@/hooks/useCollectionHooks";
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
+import { useLibraryUiStore } from "@/store/libraryUiStore";
 import type { Collection, CategoryWithCollections, CollectionTag } from "@/types";
 
 function CollectionSkeleton() {
@@ -185,10 +185,18 @@ function CategoryGroup({
 }
 
 export function CollectionsPage() {
-  const [activeFilter, setActiveFilter] = useState<FilterTag>("All");
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
-  const [search, setSearch] = useState("");
-  const [activeTagId, setActiveTagId] = useState<number | null>(null);
+  const { myLibrary, setMyLibrary } = useLibraryUiStore();
+  const activeFilter = myLibrary.activeFilter;
+  const search = myLibrary.search;
+  const activeTagId = myLibrary.activeTagId;
+  const expanded = new Set(myLibrary.expanded);
+
+  function setActiveFilter(v: FilterTag) { setMyLibrary({ activeFilter: v }); }
+  function setSearch(v: string) { setMyLibrary({ search: v }); }
+  function setActiveTagId(v: number | null) { setMyLibrary({ activeTagId: v }); }
+  function setExpanded(fn: (prev: Set<number>) => Set<number>) {
+    setMyLibrary({ expanded: Array.from(fn(expanded)) });
+  }
   const { data: categoriesRaw = [], isLoading } = useCategoriesWithCollections();
   const { data: allCollections = [] } = useCollections();
   const { data: allTags = [] } = useCollectionTags();
@@ -240,9 +248,9 @@ export function CollectionsPage() {
 
   function toggleAll() {
     if (allCollapsed) {
-      setExpanded(new Set(categories.map((c) => c.id)));
+      setExpanded(() => new Set(categories.map((c) => c.id)));
     } else {
-      setExpanded(new Set());
+      setExpanded(() => new Set());
     }
   }
 
