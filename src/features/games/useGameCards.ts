@@ -59,9 +59,11 @@ export function useGameCards() {
   }
 
   if (isPlaylist) {
+    const plMeta = plMetaQuery.data as unknown as { name: string }[] | { name: string } | undefined
+    const plName = Array.isArray(plMeta) ? plMeta[0]?.name : plMeta?.name
     return {
       cards: plQuery.data ?? [],
-      title: plMetaQuery.data?.name ?? '',
+      title: plName ?? '',
       isLoading: plQuery.isLoading || plMetaQuery.isLoading,
       isError: plQuery.isError,
     }
