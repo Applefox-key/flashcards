@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { categoriesApi } from "@/api";
 import { Button } from "./Button";
+import { useToast } from "@/hooks/useToast";
 
 interface Props {
   value?: number;
@@ -12,6 +13,7 @@ export function CategorySelect({ value, onChange }: Props) {
   const [addingNew, setAddingNew] = useState(false);
   const [newName, setNewName] = useState("");
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -20,13 +22,15 @@ export function CategorySelect({ value, onChange }: Props) {
 
   const createMutation = useMutation({
     mutationFn: (name: string) => categoriesApi.create(name),
-    onSuccess: (cat) => {
-      void queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: async (result, name) => {
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
       void queryClient.invalidateQueries({ queryKey: ["categories", "withCollections"] });
-      onChange(cat.id);
+      onChange(result.id);
       setAddingNew(false);
       setNewName("");
+      toast.success(`Category "${name}" added`);
     },
+    onError: () => toast.error("Failed to create category"),
   });
 
   if (addingNew) {

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { shuffle, buildTestOptions, weightedRandom, adjustProb } from "@/utils/gameUtils";
+import { shuffle, buildTestOptions, weightedRandom, adjustProb, normalizeText } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
 import type { Content } from "@/types";
@@ -58,7 +58,8 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
   function handleAnswer(opt: Content) {
     if (answerState !== "idle" || !current) return;
     setChosen(opt.id);
-    const correct = opt.id === current.id;
+    const correctText = normalizeText(answerFirst ? current.question : current.answer);
+    const correct = normalizeText(answerFirst ? opt.question : opt.answer) === correctText;
     setAnswerState(correct ? "correct" : "wrong");
     updateProb(current.id, correct);
     const nextProbs = { ...probs, [current.id]: adjustProb(probs[current.id] ?? 10, correct) };
@@ -130,7 +131,8 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
       <div className="flex flex-col gap-2">
         {options.map((opt) => {
           const isChosen = chosen === opt.id;
-          const isCorrect = opt.id === current.id;
+          const correctText = normalizeText(answerFirst ? current.question : current.answer);
+          const isCorrect = normalizeText(answerFirst ? opt.question : opt.answer) === correctText;
           let cls = "bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20";
           if (answerState !== "idle") {
             if (isCorrect) cls = "bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-600 text-green-800 dark:text-green-400";

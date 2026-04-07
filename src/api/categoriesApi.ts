@@ -27,9 +27,9 @@ export const categoriesApi = {
     return res.data.data as Collection[]
   },
 
-  create: async (name: string): Promise<Category> => {
+  create: async (name: string): Promise<{ id: number }> => {
     const res = await apiClient.post('/categories/user', { name })
-    return res.data.data as Category
+    return res.data as { id: number }
   },
 
   edit: async (id: number, name: string): Promise<Category> => {

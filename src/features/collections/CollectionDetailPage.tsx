@@ -677,6 +677,18 @@ export function CollectionDetailPage() {
     );
   }
 
+  function handleExport() {
+    const name = collection?.name ?? `collection_${collectionId}`;
+    const rows = cards.map((c) => [c.question, c.answer, c.note ?? ""].join(";"));
+    const blob = new Blob([rows.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (reorgMode) {
     return <Reorganizer cards={cards} collectionId={collectionId} onClose={() => setReorgMode(false)} />;
   }
@@ -773,6 +785,16 @@ export function CollectionDetailPage() {
                   className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <span className="text-xs text-gray-400">↑</span> Import file
                 </button>
+                {cards.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleExport();
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <span className="text-xs text-gray-400">↓</span> Export cards
+                  </button>
+                )}
                 <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
                 {cards.length > 0 && (
                   <button
@@ -1055,6 +1077,11 @@ export function CollectionDetailPage() {
           {cards.length > 1 && (
             <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setReorgMode(true)}>
               Reorganize
+            </Button>
+          )}
+          {cards.length > 0 && (
+            <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={handleExport}>
+              ↓ Export
             </Button>
           )}
         </div>

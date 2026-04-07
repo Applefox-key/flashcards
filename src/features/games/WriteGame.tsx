@@ -34,6 +34,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
   const probsRef = useRef<Record<number, number>>(probs);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (initialized || Object.keys(probs).length === 0) return;
@@ -54,6 +55,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
 
   useEffect(() => {
     if (phase === "input") inputRef.current?.focus();
+    else nextRef.current?.focus();
   }, [current, phase]);
 
   function pickNext() {
@@ -207,6 +209,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
           )}
           {current.note && <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">{current.note}</p>}
           <button
+            ref={nextRef}
             onClick={pickNext}
             className="mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
             Next ↵

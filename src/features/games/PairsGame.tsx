@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { shuffle } from "@/utils/gameUtils";
+import { shuffle, normalizeText } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
 import type { Content } from "@/types";
 
@@ -82,9 +82,16 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allMatched]);
 
-  function markMatched(cardId: number) {
-    setQuestions((prev) => prev.map((c) => (c.cardId === cardId ? { ...c, matched: true } : c)));
-    setAnswers((prev) => prev.map((c) => (c.cardId === cardId ? { ...c, matched: true } : c)));
+  function markMatchedCells(cellId1: string, cellId2: string) {
+    setQuestions((prev) => prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, matched: true } : c)));
+    setAnswers((prev) => prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, matched: true } : c)));
+  }
+
+  function isTextMatch(qCell: PairCell, aCell: PairCell): boolean {
+    // Find the card for the question cell to get its expected answer text
+    const card = deck.find((c) => c.id === qCell.cardId);
+    if (!card) return false;
+    return normalizeText(card.answer) === normalizeText(aCell.text);
   }
 
   function handleClick(cell: PairCell) {
@@ -106,20 +113,22 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     const firstIsQuestion = firstCell.cellId.startsWith("q-");
     const secondIsQuestion = cell.cellId.startsWith("q-");
     if (firstIsQuestion === secondIsQuestion) {
-      // Same side — just switch selection to the new cell
       setSelected(cell.cellId);
       return;
     }
 
-    if (firstCell.cardId === cell.cardId) {
+    const qCell = firstIsQuestion ? firstCell : cell;
+    const aCell = firstIsQuestion ? cell : firstCell;
+
+    if (isTextMatch(qCell, aCell)) {
       // Match!
-      markMatched(cell.cardId);
+      markMatchedCells(qCell.cellId, aCell.cellId);
       setScore((s) => ({ r: s.r + 1, w: s.w, t: s.t + 1 }));
       setSelected(null);
     } else {
       // Wrong
       setWrongPair([selected, cell.cellId]);
-      setWrongCardIds((prev) => new Set([...prev, firstCell.cardId, cell.cardId]));
+      setWrongCardIds((prev) => new Set([...prev, qCell.cardId]));
       setScore((s) => ({ r: s.r, w: s.w + 1, t: s.t + 1 }));
       setTimeout(() => {
         setWrongPair(null);

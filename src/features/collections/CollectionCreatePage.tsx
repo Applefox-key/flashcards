@@ -18,22 +18,21 @@ export function CollectionCreatePage() {
   const [categoryid, setCategoryid] = useState<number | undefined>();
   const [tagIds, setTagIds] = useState<number[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    createCollection.mutate(
-      { name: name.trim(), note: note.trim() || undefined, categoryid },
-      {
-        onSuccess: async (col) => {
-          if (tagIds.length > 0) {
-            await setCollectionTags.mutateAsync({ collectionId: col.id, tagIds });
-          }
-          toast.success("Collection created");
-          navigate(`/collections/${col.id}`);
-        },
-        onError: () => toast.error("Failed to create collection"),
-      },
-    );
+    try {
+      const col = await createCollection.mutateAsync(
+        { name: name.trim(), note: note.trim() || undefined, categoryid },
+      );
+      if (tagIds.length > 0) {
+        await setCollectionTags.mutateAsync({ collectionId: col.id, tagIds });
+      }
+      toast.success("Collection created");
+      navigate(`/collections/${col.id}`);
+    } catch {
+      toast.error("Failed to create collection");
+    }
   };
 
   return (

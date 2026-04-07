@@ -32,9 +32,9 @@ export const collectionsApi = {
     return res.data.data as Collection[]
   },
 
-  create: async (data: CollectionCreateRequest): Promise<Collection> => {
+  create: async (data: CollectionCreateRequest): Promise<{ id: number }> => {
     const res = await apiClient.post('/collections', data)
-    return res.data.data as Collection
+    return res.data.id as { id: number }
   },
 
   createWithCards: async (data: CollectionCreateWithCardsRequest): Promise<Collection> => {

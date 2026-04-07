@@ -95,22 +95,15 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
 
   function pickCollection(id: number) {
     if (activeSlot === null) return;
-    setSelectedIds((prev) => {
-      const next = [...prev];
-      next[activeSlot] = id;
-      return next;
-    });
-    setSearch("");
-    setTagFilter(null);
-    // Close picker only if all slots will be filled after this pick
-    const newFilledCount = selectedIds.filter((sid, i) => i === activeSlot ? true : sid != null).length;
-    if (newFilledCount >= MAX_SLOTS) {
-      setActiveSlot(null);
-    } else {
-      // Move to next empty slot, or keep current slot open if no next
-      const nextEmpty = selectedIds.findIndex((sid, i) => i > activeSlot && sid == null);
-      setActiveSlot(nextEmpty !== -1 ? nextEmpty : activeSlot);
+    const next = [...selectedIds];
+    next[activeSlot] = id;
+    setSelectedIds(next);
+    // Find next empty slot after current (filters stay untouched)
+    let nextEmpty = -1;
+    for (let i = activeSlot + 1; i < MAX_SLOTS; i++) {
+      if (next[i] == null) { nextEmpty = i; break; }
     }
+    setActiveSlot(nextEmpty !== -1 ? nextEmpty : null);
   }
 
   function closePicker() {
