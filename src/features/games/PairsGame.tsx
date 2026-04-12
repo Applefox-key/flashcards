@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { shuffle, normalizeText } from "@/utils/gameUtils";
+import { shuffle } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
 import type { Content } from "@/types";
 
@@ -88,10 +88,9 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   }
 
   function isTextMatch(qCell: PairCell, aCell: PairCell): boolean {
-    // Find the card for the question cell to get its expected answer text
     const card = deck.find((c) => c.id === qCell.cardId);
     if (!card) return false;
-    return normalizeText(card.answer) === normalizeText(aCell.text);
+    return card.answer.trim() === aCell.text.trim();
   }
 
   function handleClick(cell: PairCell) {

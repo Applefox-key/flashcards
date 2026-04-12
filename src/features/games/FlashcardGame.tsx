@@ -156,7 +156,6 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
   const backText = answerFirst ? card.question : card.answer;
   const frontImg = answerFirst ? card.imgA : card.imgQ;
   const backImg = answerFirst ? card.imgQ : card.imgA;
-  const showNote = flipped !== answerFirst;
 
   const btnBase = "text-xs border rounded px-2 py-0.5 transition-colors";
   const btnActive =
@@ -223,7 +222,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
                 <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>
                 <p className="text-2xl font-semibold text-white text-center">{backText}</p>
                 <CardImg filename={backImg} collectionId={collectionId} dark={true} />
-                {showNote && card.note && (
+                {card.note && (
                   <p className="text-sm text-indigo-200 mt-1 italic text-center">{card.note}</p>
                 )}
                 <span className="text-xs text-indigo-300 mt-2">Click to flip back</span>
