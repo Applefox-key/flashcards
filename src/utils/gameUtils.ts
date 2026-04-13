@@ -29,20 +29,18 @@ export function weightedRandom(probs: number[]): number {
 }
 
 /**
- * Split an answer into clickable parts for the Parts game.
- * - 2+ spaces: split by word
- * - 0–1 space: split by character (excluding space)
- * Returns [] if parts count is outside [2, 10].
+ * Split text into clickable parts for the Parts game.
+ * - Cards with more than 15 words are excluded (return []).
+ * - More than 2 words → split by word.
+ * - 1–2 words → split by character, preserving spaces as separate parts.
+ * Returns [] if the result has fewer than 2 parts.
  */
 export function formatParts(text: string): string[] {
   const trimmed = text.trim().toLowerCase().replace(/\s+/g, ' ')
-  const spaceCount = (trimmed.match(/ /g) ?? []).length
-  const parts =
-    spaceCount >= 2
-      ? trimmed.split(' ').filter(Boolean)
-      : trimmed.split('')
-  if (parts.length < 2 || parts.length > 15) return []
-  return parts
+  const words = trimmed.split(' ').filter(Boolean)
+  if (words.length === 0 || words.length > 15) return []
+  const parts = words.length > 2 ? words : trimmed.split('')
+  return parts.length >= 2 ? parts : []
 }
 
 /** Build 4 multiple-choice options: 1 correct + up to 3 random wrong, shuffled */

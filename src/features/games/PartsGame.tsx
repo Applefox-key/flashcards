@@ -13,12 +13,15 @@ interface Props {
 }
 
 export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false }: Props) {
-  const playableCards = useMemo(() => allCards.filter((c) => formatParts(c.answer).length > 0), [allCards]);
+  const playableCards = useMemo(
+    () => allCards.filter((c) => formatParts(answerFirst ? c.question : c.answer).length > 0),
+    [allCards, answerFirst],
+  );
 
   const { probs, updateProb, saveProbs } = useGameProbs(playableCards, "parts0");
 
   const deck = useMemo(() => shuffle(playableCards), [playableCards]);
-  const [initialized, setInitialized] = useState(false);
+  const initializedRef = useRef(false);
   const [remaining, setRemaining] = useState<Content[]>([]);
 
   const [current, setCurrent] = useState<Content | null>(null);
@@ -37,13 +40,30 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   const probsRef = useRef<Record<number, number>>(probs);
 
   useEffect(() => {
-    if (initialized || Object.keys(probs).length === 0) return;
-    setInitialized(true);
+    answerFirstRef.current = answerFirst;
+  }, [answerFirst]);
+
+  function loadCard(card: Content) {
+    const text = answerFirstRef.current ? card.question : card.answer;
+    const parts = formatParts(text);
+    setCurrent(card);
+    setCorrectParts(parts);
+    setShuffledParts(shuffle([...parts]));
+    setClicked([]);
+    setUsedIndices(new Set());
+    setWrongIndex(null);
+    setNoMistake(true);
+  }
+
+  useEffect(() => {
+    if (initializedRef.current || Object.keys(probs).length === 0) return;
+    initializedRef.current = true;
     const sorted = [...deck].sort((a, b) => (probs[b.id] ?? 10) - (probs[a.id] ?? 10));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCard(sorted[0]);
     setRemaining(sorted.slice(1));
     remainingRef.current = sorted.slice(1);
-  }, [probs, deck, initialized]);
+  }, [probs, deck]);
 
   useEffect(() => {
     probsRef.current = probs;
@@ -52,17 +72,6 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   useEffect(() => {
     remainingRef.current = remaining;
   }, [remaining]);
-
-  function loadCard(card: Content) {
-    const parts = formatParts(answerFirstRef.current ? card.question : card.answer);
-    setCurrent(card);
-    setCorrectParts(parts);
-    setShuffledParts(shuffle(parts));
-    setClicked([]);
-    setUsedIndices(new Set());
-    setWrongIndex(null);
-    setNoMistake(true);
-  }
 
   function pickNext() {
     const rem = remainingRef.current;
@@ -144,7 +153,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     handlePartClick(expected, idx);
   }
 
-  if (!initialized || !current) {
+  if (!current) {
     return (
       <div className="max-w-lg mx-auto animate-pulse flex flex-col gap-4">
         <div className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl" />
@@ -198,7 +207,9 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       {/* Prompt */}
       <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
-        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
+        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          {answerFirst ? current.answer : current.question}
+        </p>
       </div>
 
       {/* Build area */}
@@ -210,7 +221,9 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
             <span
               key={i}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                wrongIndex === i ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-300 dark:border-red-700" : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                wrongIndex === i
+                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-300 dark:border-red-700"
+                  : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
               }`}>
               {part === " " ? "⎵" : part}
             </span>
