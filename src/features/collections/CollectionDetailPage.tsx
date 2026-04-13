@@ -14,6 +14,7 @@ import { collectionTagsApi } from "@/api";
 import { PasteCardsModal } from "@/features/content/PasteCardsModal";
 import { FileImportModal } from "@/features/content/FileImportModal";
 import { Reorganizer } from "@/features/content/Reorganizer";
+import { VoiceInputButton } from "@/components/VoiceInputButton";
 import { Button } from "@/components/Button";
 import { TagSelect } from "@/components/TagSelect";
 import { useToast } from "@/hooks/useToast";
@@ -182,7 +183,10 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
       <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">New card</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Question</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-500 dark:text-gray-400">Question</label>
+            <VoiceInputButton onResult={setQuestion} />
+          </div>
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -203,7 +207,10 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Answer</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-500 dark:text-gray-400">Answer</label>
+            <VoiceInputButton onResult={setAnswer} />
+          </div>
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
@@ -430,7 +437,10 @@ function CardItem({
     return (
       <div className="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-700 rounded-lg p-4 flex flex-col gap-3">
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Question</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-400">Question</label>
+            <VoiceInputButton onResult={setQuestion} />
+          </div>
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -450,7 +460,10 @@ function CardItem({
           />
         </div>
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Answer</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-400">Answer</label>
+            <VoiceInputButton onResult={setAnswer} />
+          </div>
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}

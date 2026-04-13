@@ -3,6 +3,7 @@ import { contentApi } from "@/api";
 import { useCardImage } from "@/hooks/useCardImage";
 import { shuffle } from "@/utils/gameUtils";
 import { DifficultyFilter } from "./DifficultyFilter";
+import { SpeakButton } from "@/components/SpeakButton";
 import { useIsDemo } from "@/hooks/useIsDemo";
 import { useDemoStore } from "@/demo/demoStore";
 import type { Content } from "@/types";
@@ -204,28 +205,44 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
             }}>
             {/* Front face */}
             <div
-              className="absolute inset-0 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex flex-col p-8 "
-              style={{ backfaceVisibility: "hidden", overflowY: "auto" }}>
-              <div className="m-auto flex flex-col items-center gap-3 w-full">
+              className="absolute inset-0 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex flex-col"
+              style={{ backfaceVisibility: "hidden" }}>
+              {/* Header */}
+              <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
                 <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
+                <SpeakButton text={frontText} />
+              </div>
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-3 px-6 py-2">
                 <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">{frontText}</p>
                 <CardImg filename={frontImg} collectionId={collectionId} dark={false} />
-                <span className="text-xs text-gray-300 dark:text-gray-600 mt-2">Click to flip</span>
+              </div>
+              {/* Footer */}
+              <div className="shrink-0 px-6 pt-1 pb-4 text-center">
+                <span className="text-xs text-gray-300 dark:text-gray-600">Click to flip</span>
               </div>
             </div>
 
             {/* Back face */}
             <div
-              className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-600 shadow-sm flex flex-col p-8 dark:bg-indigo-900/20"
-              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", overflowY: "auto" }}>
-              <div className="m-auto flex flex-col items-center gap-3 w-full">
+              className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-600 dark:bg-indigo-900/20 shadow-sm flex flex-col"
+              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+              {/* Header */}
+              <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
                 <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>
+                <SpeakButton text={backText} />
+              </div>
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-3 px-6 py-2">
                 <p className="text-2xl font-semibold text-white text-center">{backText}</p>
                 <CardImg filename={backImg} collectionId={collectionId} dark={true} />
                 {card.note && (
-                  <p className="text-sm text-indigo-200 mt-1 italic text-center">{card.note}</p>
+                  <p className="text-sm text-indigo-200 italic text-center">{card.note}</p>
                 )}
-                <span className="text-xs text-indigo-300 mt-2">Click to flip back</span>
+              </div>
+              {/* Footer */}
+              <div className="shrink-0 px-6 pt-1 pb-4 text-center">
+                <span className="text-xs text-indigo-300">Click to flip back</span>
               </div>
             </div>
           </div>

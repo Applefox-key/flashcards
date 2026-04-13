@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { authApi } from "@/api";
 import { useAuthStore } from "@/store/authStore";
 import { useToast } from "@/hooks/useToast";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { ALL_SPEECH_LANGS, type LangCode } from "@/lib/userSettings";
 import { Button } from "@/components/Button";
 
 // ── Avatar URL helper ────────────────────────────────────────────────────────
@@ -109,6 +111,7 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
 export function ProfilePage() {
   const toast = useToast();
   const { user, token, setUser } = useAuthStore();
+  const { speechLangs, saveSpeechLangs } = useUserSettings();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -119,6 +122,12 @@ export function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const [selectedLangs, setSelectedLangs] = useState<LangCode[]>(speechLangs);
+  const [savingLangs, setSavingLangs] = useState(false);
+
+  // Sync when settings load from store
+  useEffect(() => { setSelectedLangs(speechLangs); }, [JSON.stringify(speechLangs)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const avatarUrl = avatarPreview || getAvatarUrl(user?.img, token);
 
@@ -169,6 +178,28 @@ export function ProfilePage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleSaveLangs() {
+    if (selectedLangs.length === 0) {
+      toast.error("Select at least one language");
+      return;
+    }
+    setSavingLangs(true);
+    try {
+      await saveSpeechLangs(selectedLangs);
+      toast.success("Languages saved");
+    } catch {
+      toast.error("Failed to save languages");
+    } finally {
+      setSavingLangs(false);
+    }
+  }
+
+  function toggleLang(code: LangCode) {
+    setSelectedLangs((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+    );
   }
 
   if (!user) return null;
@@ -270,6 +301,45 @@ export function ProfilePage() {
           Save changes
         </Button>
       </form>
+
+      {/* Speech languages */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-4 mt-6">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Speech languages</h2>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+            Selected languages will appear in the read-aloud and voice input buttons.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {ALL_SPEECH_LANGS.map(({ code, label, name: langName }) => {
+            const active = selectedLangs.includes(code);
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => toggleLang(code)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm transition-colors ${
+                  active
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300"
+                    : "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500"
+                }`}
+              >
+                <span className="font-semibold text-xs">{label}</span>
+                <span className="text-xs opacity-70">{langName}</span>
+                {active && <span className="text-indigo-400 dark:text-indigo-300 text-xs leading-none">✓</span>}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-3">
+          <Button size="sm" onClick={handleSaveLangs} loading={savingLangs} disabled={selectedLangs.length === 0}>
+            Save languages
+          </Button>
+          {selectedLangs.length === 0 && (
+            <p className="text-xs text-red-400">Select at least one language</p>
+          )}
+        </div>
+      </div>
 
       {pickerOpen && (
         <AvatarPicker currentUrl={avatarUrl} onSelect={handleAvatarSelect} onClose={() => setPickerOpen(false)} />

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { shuffle, normalizeText, weightedRandom } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
+import { VoiceInputButton } from "@/components/VoiceInputButton";
 import type { Content } from "@/types";
 
 interface Props {
@@ -178,6 +179,10 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
               className="text-sm px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
               💡 Hint
             </button>
+            <VoiceInputButton
+              onResult={setInput}
+              className="border border-gray-200 dark:border-gray-600 rounded-lg px-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+            />
             <button
               onClick={handleCheck}
               disabled={!input.trim()}
