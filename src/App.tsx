@@ -17,7 +17,20 @@ const queryClient = new QueryClient({
 /** Hydrates the user on page load when a persisted token exists. */
 function AppInit() {
   useEffect(() => {
-    const { token, isDemo, setUser, logout, enterDemo, setInitializing } = useAuthStore.getState()
+    const { token, isDemo, setUser, login, logout, enterDemo, setInitializing } = useAuthStore.getState()
+
+    const params = new URLSearchParams(window.location.search)
+    const urlToken = params.get('token')
+    if (urlToken) {
+      window.history.replaceState({}, '', window.location.pathname)
+      login(urlToken, '')
+      authApi.getMe()
+        .then(setUser)
+        .catch(() => logout())
+        .finally(() => setInitializing(false))
+      return
+    }
+
     if (isDemo) {
       enterDemo()
       setInitializing(false)
