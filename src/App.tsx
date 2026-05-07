@@ -25,7 +25,13 @@ function AppInit() {
       window.history.replaceState({}, '', window.location.pathname)
       login(urlToken, '')
       authApi.getMe()
-        .then(setUser)
+        .then((user) => {
+          if (!user?.id || !user?.email) {
+            logout()
+          } else {
+            setUser(user)
+          }
+        })
         .catch(() => logout())
         .finally(() => setInitializing(false))
       return
