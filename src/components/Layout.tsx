@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
 import { Toaster } from "./Toast";
 import { useIsDemo } from "@/hooks/useIsDemo";
+import { getAvatarUrl } from "@/utils";
 import { DarkModeToggle } from "./DarkModeToggle";
 
 const APPS = [
@@ -34,9 +35,7 @@ const APPS = [
   },
 ] as const;
 
-const API_URL = import.meta.env.VITE_API_URL ?? "https://api.learnapp.pro";
-
-function NavAvatar({ name, img, token }: { name: string; img?: string; token: string | null }) {
+function NavAvatar({ name, img, userId }: { name: string; img?: string; userId?: number }) {
   const initials =
     name
       .split(" ")
@@ -44,14 +43,10 @@ function NavAvatar({ name, img, token }: { name: string; img?: string; token: st
       .map((s) => s[0]?.toUpperCase() ?? "")
       .join("") || "?";
 
-  const avatarUrl = img
-    ? img.startsWith("http") || img.startsWith("blob") || img.startsWith("data:")
-      ? img
-      : `${API_URL}/img/avatars/?img=${encodeURIComponent(img)}&token=${token ?? ""}`
-    : "";
+  const avatarUrl = getAvatarUrl(img, userId);
 
   return avatarUrl ? (
-    <img src={avatarUrl} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+    <img key={avatarUrl} src={avatarUrl} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
   ) : (
     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-300 select-none">
       {initials}
@@ -60,7 +55,7 @@ function NavAvatar({ name, img, token }: { name: string; img?: string; token: st
 }
 
 export function Layout() {
-  const { user, token, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar } = useUiStore();
   const navigate = useNavigate();
   const isDemo = useIsDemo();
@@ -256,7 +251,7 @@ export function Layout() {
               )}
             </div>
             <NavLink to="/profile" className="flex items-center hover:opacity-80 transition-opacity">
-              {user && <NavAvatar name={user.name} img={user.img} token={token} />}
+              {user && <NavAvatar name={user.name} img={user.img} userId={user.id} />}
             </NavLink>{" "}
             <button
               onClick={handleLogout}

@@ -31,9 +31,11 @@ export const authApi = {
    * PATCH /users — update profile (name, email, optional password, optional avatar).
    * Send as FormData: file (optional), data[name], data[email], data[password], data[img], data[id]
    */
-  updateProfile: async (formData: FormData): Promise<User> => {
-    const res = await apiClient.patch('/users', formData)
-    return res.data.data as User
+  updateProfile: async (formData: FormData): Promise<User | null> => {
+    const res = await apiClient.patch('/users', formData, {
+      validateStatus: (s) => (s >= 200 && s < 300) || s === 304,
+    })
+    return (res.data?.data as User) ?? null
   },
 
   /** POST /resetpassword — send reset link to email */

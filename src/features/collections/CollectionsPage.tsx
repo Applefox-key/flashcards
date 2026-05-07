@@ -138,7 +138,7 @@ function SearchFilterBar({
           className="ml-auto sm:ml-4 px-3 py-1 text-xs rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400
                      hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1"
           title={allCollapsed ? "Expand all categories" : "Collapse all categories"}>
-          <span>{allCollapsed ? "▶▶" : "▼▼"}</span>
+          <span>{allCollapsed ? "▷▷" : "▽▽"}</span>
           <span className="hidden sm:inline">{allCollapsed ? "Expand all" : "Collapse all"}</span>
         </button>
       </div>
@@ -191,9 +191,15 @@ export function CollectionsPage() {
   const activeTagId = myLibrary.activeTagId;
   const expanded = new Set(myLibrary.expanded);
 
-  function setActiveFilter(v: FilterTag) { setMyLibrary({ activeFilter: v }); }
-  function setSearch(v: string) { setMyLibrary({ search: v }); }
-  function setActiveTagId(v: number | null) { setMyLibrary({ activeTagId: v }); }
+  function setActiveFilter(v: FilterTag) {
+    setMyLibrary({ activeFilter: v });
+  }
+  function setSearch(v: string) {
+    setMyLibrary({ search: v });
+  }
+  function setActiveTagId(v: number | null) {
+    setMyLibrary({ activeTagId: v });
+  }
   function setExpanded(fn: (prev: Set<number>) => Set<number>) {
     setMyLibrary({ expanded: Array.from(fn(expanded)) });
   }
@@ -264,6 +270,8 @@ export function CollectionsPage() {
 
   return (
     <div>
+      {/* <div className="rounded-3xl border border-slate-200/80 bg-white/85 p-6 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-slate-700/80 dark:bg-slate-900/75"> */}
+
       <div className="flex items-center justify-between mb-4">
         <h1 className="test-base sm:text-2xl font-bold text-gray-900 dark:text-white">My Library</h1>
         <div className="flex gap-2">
@@ -277,7 +285,6 @@ export function CollectionsPage() {
           </Link>
         </div>
       </div>
-
       <SearchFilterBar
         search={search}
         onSearch={setSearch}
@@ -286,9 +293,8 @@ export function CollectionsPage() {
         allCollapsed={allCollapsed}
         onToggleAll={toggleAll}
       />
-
       {allTags.length > 0 && (
-        <div className="flex gap-2 flex-wrap items-center mb-4">
+        <div className="flex gap-2 flex-wrap items-center mb-4 border-b border-slate-200/80 dark:border-slate-700/80 px-3 py-2 space-y-1 border-t border-slate-200/80 dark:border-slate-700/80 ">
           <span className="text-xs text-gray-500 dark:text-gray-400">Tags:</span>
           {allTags.map((tag) => (
             <button
@@ -315,7 +321,6 @@ export function CollectionsPage() {
           </Link>
         </div>
       )}
-
       {hasNoResults && (
         <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-lg mb-2">No collections match "{search}"</p>
@@ -326,7 +331,6 @@ export function CollectionsPage() {
           </button>
         </div>
       )}
-
       {!isLoading &&
         visibleCategories.map(({ category, collections }) => (
           <CategoryGroup

@@ -3,17 +3,9 @@ import { authApi } from "@/api";
 import { useAuthStore } from "@/store/authStore";
 import { useToast } from "@/hooks/useToast";
 import { useUserSettings } from "@/hooks/useUserSettings";
-import { ALL_SPEECH_LANGS, type LangCode } from "@/lib/userSettings";
+import { ALL_SPEECH_LANGS, serializeSettings, type LangCode } from "@/lib/userSettings";
 import { Button } from "@/components/Button";
-
-// ── Avatar URL helper ────────────────────────────────────────────────────────
-const API_URL = import.meta.env.VITE_API_URL ?? "https://api.learnapp.pro";
-
-function getAvatarUrl(img: string | undefined, token: string | null): string {
-  if (!img) return "";
-  if (img.startsWith("http") || img.startsWith("blob") || img.startsWith("data:")) return img;
-  return `${API_URL}/img/avatars/?img=${encodeURIComponent(img)}&token=${token ?? ""}`;
-}
+import { getAvatarUrl } from "@/utils";
 
 function AvatarPlaceholder({ name }: { name: string }) {
   const initials = name
@@ -112,8 +104,8 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
 
 export function ProfilePage() {
   const toast = useToast();
-  const { user, token, setUser } = useAuthStore();
-  const { speechLangs, saveSpeechLangs } = useUserSettings();
+  const { user, setUser } = useAuthStore();
+  const { settings, speechLangs } = useUserSettings();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -132,7 +124,7 @@ export function ProfilePage() {
     setSelectedLangs(speechLangs);
   }, [JSON.stringify(speechLangs)]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const avatarUrl = avatarPreview || getAvatarUrl(user?.img, token);
+  const avatarUrl = avatarPreview || getAvatarUrl(user?.img, user?.id);
 
   // Sync form when user loads (e.g. on page refresh)
   useEffect(() => {
@@ -172,13 +164,15 @@ export function ProfilePage() {
       fd.append("data[img]", avatarPreview && !avatarFile ? avatarPreview : (user?.img ?? ""));
       fd.append("data[id]", String(user?.id ?? ""));
       if (password) fd.append("data[password]", password);
+      fd.append("data[settings]", serializeSettings({ ...settings, speechLangs: selectedLangs }));
 
-      const [updated] = await Promise.all([authApi.updateProfile(fd), saveSpeechLangs(selectedLangs)]);
+      let updated = await authApi.updateProfile(fd);
+      if (!updated?.id) updated = await authApi.getMe();
       setUser(updated);
       setPassword("");
       setConfirmPassword("");
       setAvatarFile(null);
-      setAvatarPreview(getAvatarUrl(updated.img, token));
+      setAvatarPreview(getAvatarUrl(updated.img, updated.id));
       toast.success("Profile saved");
     } catch {
       toast.error("Failed to save profile");
@@ -195,6 +189,8 @@ export function ProfilePage() {
 
   const inputClass =
     "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400";
+  console.log(user);
+  console.log(avatarFile);
 
   return (
     <div className="max-w-lg m-auto">
