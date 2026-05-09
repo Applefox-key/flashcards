@@ -347,7 +347,18 @@ export function Layout() {
                 to="/library"
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
                 My Library
+              </NavLink>{" "}
+              <NavLink
+                to="/library/public"
+                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                Public Library
+              </NavLink>{" "}
+              <NavLink
+                to="/playlists"
+                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                Playlists
               </NavLink>
+              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
               <NavLink
                 to="/categories"
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
@@ -358,25 +369,11 @@ export function Layout() {
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-400 py-1">
                 Tags
               </NavLink>
-              <NavLink
-                to="/library/public"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                Public Library
-              </NavLink>
-              <NavLink
-                to="/playlists"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                Playlists
-              </NavLink>
+              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
               <NavLink
                 to="/profile"
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
                 Profile
-              </NavLink>
-              <NavLink
-                to="/about"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                About
               </NavLink>
               {user?.role === "admin" && (
                 <NavLink
@@ -389,8 +386,13 @@ export function Layout() {
                 onClick={handleLogout}
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 py-1 text-left transition-colors">
                 Logout
-              </button>
-
+              </button>{" "}
+              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
+              <NavLink
+                to="/about"
+                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                About
+              </NavLink>
               {/* Other tools — mobile only */}
               <div className="border-t border-gray-100 dark:border-gray-700 mt-3 pt-3">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Other tools</p>

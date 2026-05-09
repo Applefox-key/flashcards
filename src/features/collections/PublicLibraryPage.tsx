@@ -45,7 +45,9 @@ function highlight(text: string | undefined, query: string): React.ReactNode {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-300 rounded px-0.5">{text.slice(idx, idx + query.length)}</mark>
+      <mark className="bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-300 rounded px-0.5">
+        {text.slice(idx, idx + query.length)}
+      </mark>
       {text.slice(idx + query.length)}
     </>
   );
@@ -64,12 +66,13 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
   const categoryName = getCategoryName(col);
   const tagNames = getTagNames(col);
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-start gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors">
+    // <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-start gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors">
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2.5 flex items-center gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/20 transition-all">
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to={`/library/public/${col.id}`}
-            className="font-medium text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            className="text-gray-600 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             {highlight(col.name, search)}
           </Link>
           {categoryName && (
@@ -91,7 +94,9 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0 mt-0.5">
-        {col.cardCount !== undefined && <span className="text-xs text-gray-400 dark:text-gray-500">{col.cardCount} cards</span>}
+        {col.cardCount !== undefined && (
+          <span className="text-xs text-gray-400 dark:text-gray-500">{col.cardCount} cards</span>
+        )}
         {isMine ? (
           <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium px-2">Your collection</span>
         ) : isCopied ? (
@@ -106,13 +111,7 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
   );
 }
 
-function LibraryTabsBar({
-  search,
-  onSearch,
-}: {
-  search: string;
-  onSearch: (v: string) => void;
-}) {
+function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: string) => void }) {
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-4">
       {/* Tabs */}
@@ -189,10 +188,7 @@ export function PublicLibraryPage() {
 
   return (
     <div>
-      <LibraryTabsBar
-        search={search}
-        onSearch={(v) => setPublicLibrary({ search: v, activeTag: null })}
-      />
+      <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null })} />
 
       {allTagNames.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-5">

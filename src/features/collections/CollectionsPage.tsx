@@ -139,9 +139,9 @@ function LibraryTabsBar({
   onChange: (tag: FilterTag) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-4">
-      {/* Tabs */}
-      <div className="flex shrink-0">
+    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-1">
+      {/* Tabs — full width on mobile so the + button sits flush right */}
+      <div className="flex items-center w-full sm:w-auto shrink-0">
         <span className="px-5 py-2.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 -mb-px cursor-default select-none">
           My Library
         </span>
@@ -150,16 +150,20 @@ function LibraryTabsBar({
           className="px-5 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent transition-colors">
           Public Library
         </Link>
+        {/* Mobile only: compact + button (no "New" text) */}
+        <Link to="/collections/new" className="ml-auto pb-1 sm:hidden shrink-0">
+          <Button size="sm">+</Button>
+        </Link>
       </div>
 
-      {/* Search + filters + new collection button */}
-      <div className="flex items-center gap-2 flex-wrap ml-auto pb-2">
+      {/* Search + filters + desktop button */}
+      <div className="flex items-center gap-2 flex-wrap pb-2 sm:ml-auto">
         <input
           type="search"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search..."
-          className="w-40 sm:w-52 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
+          className="w-24 sm:w-52 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
@@ -175,7 +179,8 @@ function LibraryTabsBar({
             {tag}
           </button>
         ))}
-        <Link to="/collections/new" className="shrink-0">
+        {/* Desktop only: full button */}
+        <Link to="/collections/new" className="shrink-0 hidden sm:block">
           <Button size="sm">+ New Collection</Button>
         </Link>
       </div>
@@ -271,7 +276,7 @@ export function CollectionsPage() {
       <LibraryTabsBar search={search} onSearch={setSearch} active={activeFilter} onChange={setActiveFilter} />
 
       {allTags.length > 0 && (
-        <div className="flex gap-2 flex-wrap items-center mb-4 border-b border-slate-200/80 dark:border-slate-700/80 px-3 space-y-1 border-slate-200/80 dark:border-slate-700/80">
+        <div className="flex gap-2 flex-wrap items-center mb-4 border-b border-slate-200/80 dark:border-slate-700/80 px-3 py-1 space-y-1 border-slate-200/80 dark:border-slate-700/80">
           <span className="text-xs text-gray-500 dark:text-gray-400">Tags:</span>
           {allTags.map((tag) => (
             <button
@@ -312,7 +317,7 @@ export function CollectionsPage() {
 
       {!isLoading && visibleCategories.length > 0 && (
         <div>
-          <div className="flex justify-end mb-1">
+          <div className="flex justify-end py-1.5 mb-1 sticky top-[-24px] z-10 bg-gray-50 dark:bg-gray-900 -mx-4 sm:-mx-6 px-4 sm:px-6">
             <button
               onClick={toggleAll}
               className="px-3 py-1 text-xs rounded-full border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400
