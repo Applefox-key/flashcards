@@ -20,7 +20,6 @@ function RowSkeleton() {
   );
 }
 
-// The public API may return category as a string (name) or object
 function getCategoryName(col: Collection): string | undefined {
   if (!col.category) return undefined;
   if (typeof col.category === "object") return (col.category as { name?: string }).name;
@@ -28,7 +27,6 @@ function getCategoryName(col: Collection): string | undefined {
   return undefined;
 }
 
-// Tags may come back as strings or { id, name } objects
 function getTagNames(col: Collection): string[] {
   return (col.tags ?? [])
     .map((t): string => {
@@ -108,6 +106,42 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
   );
 }
 
+function LibraryTabsBar({
+  search,
+  onSearch,
+}: {
+  search: string;
+  onSearch: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-4">
+      {/* Tabs */}
+      <div className="flex shrink-0">
+        <Link
+          to="/library"
+          className="px-5 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent transition-colors">
+          My Library
+        </Link>
+        <span className="px-5 py-2.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 -mb-px cursor-default select-none">
+          Public Library
+        </span>
+      </div>
+
+      {/* Search */}
+      <div className="ml-auto pb-2">
+        <input
+          value={search}
+          onChange={(e) => onSearch(e.target.value)}
+          placeholder="Search by name, category or tag…"
+          className="w-40 sm:w-64 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
+                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                     focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+      </div>
+    </div>
+  );
+}
+
 export function PublicLibraryPage() {
   const { publicLibrary, setPublicLibrary } = useLibraryUiStore();
   const search = publicLibrary.search;
@@ -123,7 +157,6 @@ export function PublicLibraryPage() {
     queryFn: pbcollectionsApi.getAllWithCount,
   });
 
-  // Collect all unique tag name strings across public collections
   const allTagNames = useMemo<string[]>(() => {
     const set = new Set<string>();
     for (const col of collections) {
@@ -156,34 +189,11 @@ export function PublicLibraryPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="test-base sm:text-2xl font-bold text-gray-900 dark:text-white">Public Library</h1>
-          <p className="text-sm text-gray-500 mt-0.5 dark:text-white">
-            Browse and copy collections shared by other users
-          </p>
-        </div>
-        <Link to="/library">
-          <Button variant="secondary" size="sm" className="whitespace-nowrap">
-            ← My Library
-          </Button>
-        </Link>
-      </div>
+      <LibraryTabsBar
+        search={search}
+        onSearch={(v) => setPublicLibrary({ search: v, activeTag: null })}
+      />
 
-      {/* Search */}
-      <div className="mb-3">
-        <input
-          value={search}
-          onChange={(e) => {
-            setPublicLibrary({ search: e.target.value, activeTag: null });
-          }}
-          placeholder="Search by name, category or tag…"
-          className="w-full max-w-sm border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
-        />
-      </div>
-
-      {/* Tag chips */}
       {allTagNames.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-5">
           {allTagNames.map((tag) => (
@@ -195,8 +205,7 @@ export function PublicLibraryPage() {
               className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                 activeTag === tag
                   ? "bg-violet-100 text-violet-700 border-violet-300"
-                  : // : "bg-white text-gray-500 border-gray-200 hover:border-violet-300 hover:text-violet-600 dark:text-gray-400 dark:hover:bg-violet-900/20 dark:hover:border-violet-600"
-                    "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
+                  : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
               }`}>
               {tag}
             </button>
@@ -204,7 +213,6 @@ export function PublicLibraryPage() {
         </div>
       )}
 
-      {/* Loading */}
       {isLoading && (
         <div className="flex flex-col gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -213,14 +221,12 @@ export function PublicLibraryPage() {
         </div>
       )}
 
-      {/* Empty */}
       {!isLoading && filtered.length === 0 && (
         <p className="text-center text-gray-400 py-16">
           {search || activeTag !== null ? "No collections match your search" : "No public collections yet"}
         </p>
       )}
 
-      {/* Flat list */}
       {!isLoading && filtered.length > 0 && (
         <div className="flex flex-col gap-2">
           {filtered.map((col) => (
