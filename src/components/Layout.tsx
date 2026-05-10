@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
 import { Toaster } from "./Toast";
@@ -58,7 +58,19 @@ export function Layout() {
   const { user, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar } = useUiStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const isDemo = useIsDemo();
+
+  const activeSection =
+    location.pathname === "/library" || location.pathname.startsWith("/library/") || location.pathname.startsWith("/collections/")
+      ? "library"
+      : location.pathname === "/playlists" || location.pathname.startsWith("/playlists/")
+        ? "playlists"
+        : location.pathname === "/categories" || location.pathname.startsWith("/categories/")
+          ? "categories"
+          : location.pathname === "/tags"
+            ? "tags"
+            : null;
   const [appsOpen, setAppsOpen] = useState(false);
 
   useEffect(() => {
@@ -120,40 +132,35 @@ export function Layout() {
           <nav className="ml-4 hidden sm:flex gap-2">
             <NavLink
               to="/library"
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded text-sm font-medium ${isActive ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
-              }>
+              className={`px-3 py-1.5 rounded text-sm font-medium ${activeSection === "library" ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
               Library
             </NavLink>
             <NavLink
               to="/playlists"
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded text-sm font-medium ${isActive ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
-              }>
+              className={`px-3 py-1.5 rounded text-sm font-medium ${activeSection === "playlists" ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
               Playlists
             </NavLink>
             <NavLink
               to="/categories"
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded text-sm font-medium ${isActive ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
-              }>
+              className={`px-3 py-1.5 rounded text-sm font-medium ${activeSection === "categories" ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
               Categories
             </NavLink>
             <NavLink
               to="/tags"
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded text-sm font-medium ${isActive ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
-              }>
+              className={`px-3 py-1.5 rounded text-sm font-medium ${activeSection === "tags" ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
               Tags
             </NavLink>
           </nav>
 
           <NavLink
             to="/about"
-            className="hidden sm:inline flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+            // className="hidden sm:inline flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+            className={({ isActive }) =>
+              `hidden sm:inline px-3 py-1.5 rounded text-sm font-medium ${isActive ? "hidden sm:inline bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
+            }
             title="About">
             {" "}
-            <svg
+            {/* <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
@@ -165,8 +172,8 @@ export function Layout() {
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="16" x2="12" y2="12" />
               <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            {/* <span className="text-xs">About</span> */}
+            </svg> */}
+            <span className="text-xs">About</span>
           </NavLink>
 
           <div className="ml-auto flex items-center justify-end gap-3">
@@ -266,30 +273,22 @@ export function Layout() {
         <nav className="sm:hidden flex px-2">
           <NavLink
             to="/library"
-            className={({ isActive }) =>
-              `flex-1 text-center py-2 text-xs font-medium ${isActive ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`
-            }>
+            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
             Library
           </NavLink>
           <NavLink
             to="/playlists"
-            className={({ isActive }) =>
-              `flex-1 text-center py-2 text-xs font-medium ${isActive ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`
-            }>
+            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
             Playlists
           </NavLink>
           <NavLink
             to="/categories"
-            className={({ isActive }) =>
-              `flex-1 text-center py-2 text-xs font-medium ${isActive ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`
-            }>
+            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
             Categories
           </NavLink>
           <NavLink
             to="/tags"
-            className={({ isActive }) =>
-              `flex-1 text-center py-2 text-xs font-medium ${isActive ? "text-violet-700 dark:text-violet-400" : "text-gray-500 dark:text-gray-400"}`
-            }>
+            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "tags" ? "text-violet-700 dark:text-violet-400" : "text-gray-500 dark:text-gray-400"}`}>
             Tags
           </NavLink>{" "}
           <NavLink
@@ -420,7 +419,7 @@ export function Layout() {
         )}
 
         {/* Main content — only this scrolls */}
-        <main className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6">
+        <main className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-6">
           <Outlet />
         </main>
       </div>

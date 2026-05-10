@@ -27,6 +27,11 @@ export const collectionsApi = {
     return res.data.data as CollectionWithContent
   },
 
+  getPreview: async (id: number, limit = 3): Promise<CollectionWithContent> => {
+    const res = await apiClient.get(`/collections/${id}/content?preview=${limit}`)
+    return res.data.data as CollectionWithContent
+  },
+
   getFavorites: async (): Promise<Collection[]> => {
     const res = await apiClient.get('/collections/favorite')
     return res.data.data as Collection[]

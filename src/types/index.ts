@@ -20,6 +20,13 @@ export interface CollectionTag {
   name: string
 }
 
+export interface CollectionStats {
+  avgRate: number
+  toLearn: number
+  inProgress: number
+  learned: number
+}
+
 export interface Collection {
   id: number
   name: string
@@ -31,6 +38,8 @@ export interface Collection {
   category?: Category
   cardCount?: number
   tags?: CollectionTag[]
+  preview?: { id: number; question: string; answer: string }[]
+  stats?: CollectionStats
 }
 
 export interface Content {

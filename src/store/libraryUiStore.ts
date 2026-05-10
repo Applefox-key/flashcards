@@ -6,7 +6,9 @@ interface MyLibraryState {
   search: string
   activeFilter: FilterTag
   activeTagId: number | null
-  expanded: number[] // category ids that are expanded
+  expanded: number[]
+  compactCards: boolean
+  selectedCategoryId: number | null
 }
 
 interface PublicLibraryState {
@@ -27,6 +29,8 @@ export const useLibraryUiStore = create<LibraryUiState>((set) => ({
     activeFilter: 'All',
     activeTagId: null,
     expanded: [],
+    compactCards: false,
+    selectedCategoryId: null,
   },
   publicLibrary: {
     search: '',

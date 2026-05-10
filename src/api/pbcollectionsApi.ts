@@ -14,7 +14,11 @@ export const pbcollectionsApi = {
 
   getAllWithCount: async (): Promise<Collection[]> => {
     const res = await apiClient.get('/pbcollections/count')
-    return res.data.data as Collection[]
+    const raw = res.data.data as Array<Record<string, unknown>>
+    return raw.map((item) => ({
+      ...item,
+      cardCount: (item.content_count as number | undefined) ?? (item.count as number | undefined),
+    })) as Collection[]
   },
 
   getWithContent: async (id: number): Promise<CollectionWithContent> => {

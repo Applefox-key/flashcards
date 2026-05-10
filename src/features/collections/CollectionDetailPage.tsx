@@ -16,9 +16,12 @@ import { FileImportModal } from "@/features/content/FileImportModal";
 import { Reorganizer } from "@/features/content/Reorganizer";
 import { VoiceInputButton } from "@/components/VoiceInputButton";
 import { Button } from "@/components/Button";
+import { Modal } from "@/components/Modal";
+import { FlashCardPreview } from "@/components/FlashCardPreview";
 import { TagSelect } from "@/components/TagSelect";
 import { useToast } from "@/hooks/useToast";
 import { useCardImage } from "@/hooks/useCardImage";
+import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import type { Content, Collection, CardEditRequest, Category } from "@/types";
 
 interface CollectionContentResponse {
@@ -32,7 +35,10 @@ function CardImg({ filename, collectionId, alt }: { filename: string | undefined
   const src = useCardImage(filename, collectionId);
   const hasFile = !!filename && filename !== "null" && filename !== "";
   if (!hasFile) return null;
-  if (!src) return <div className="w-full bg-gray-100 dark:bg-gray-700 rounded animate-pulse mt-2" style={{ height: "6rem" }} />;
+  if (!src)
+    return (
+      <div className="w-full bg-gray-100 dark:bg-gray-700 rounded animate-pulse mt-2" style={{ height: "6rem" }} />
+    );
   return <img src={src} alt={alt} className="mt-2 max-h-40 object-contain rounded border border-gray-100" />;
 }
 
@@ -258,11 +264,13 @@ function CardListRow({
   card,
   collectionId,
   index,
+  onView,
   onDelete,
 }: {
   card: Content;
   collectionId: number;
   index: number;
+  onView: (card: Content) => void;
   onDelete: (id: number) => void;
 }) {
   const toast = useToast();
@@ -344,6 +352,9 @@ function CardListRow({
         {card.note && <span className="col-span-2 text-xs text-gray-400 truncate">{card.note}</span>}
       </div>
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button onClick={() => onView(card)} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+          View
+        </button>
         <button
           onClick={() => setEditing(true)}
           className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
@@ -362,10 +373,12 @@ function CardListRow({
 function CardItem({
   card,
   collectionId,
+  onView,
   onDelete,
 }: {
   card: Content;
   collectionId: number;
+  onView: (card: Content) => void;
   onDelete: (id: number) => void;
 }) {
   const toast = useToast();
@@ -520,7 +533,7 @@ function CardItem({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
+    <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
       <div>
         <p className="text-xs text-gray-400 mb-1">Question</p>
         <p className="font-medium text-gray-900 dark:text-gray-100">{card.question}</p>
@@ -549,6 +562,11 @@ function CardItem({
           ))}
         </div>
         <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => onView(card)}
+            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+            View
+          </button>
           <button
             onClick={() => setEditing(true)}
             className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
@@ -597,6 +615,7 @@ export function CollectionDetailPage() {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [addingCard, setAddingCard] = useState(false);
+  const [viewCard, setViewCard] = useState<Content | null>(null);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [fileOpen, setFileOpen] = useState(false);
   const [reorgMode, setReorgMode] = useState(false);
@@ -712,7 +731,9 @@ export function CollectionDetailPage() {
       <div className="mb-2">
         {/* Title row */}
         <div className="flex items-center gap-3 mb-2">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 -ml-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
               <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
             </svg>
@@ -838,47 +859,52 @@ export function CollectionDetailPage() {
         {!isLoading && (
           <div className="sm:hidden flex flex-col gap-2 mb-4">
             {/* Line 2: status badges + stat chips */}
-            <div className="ml-8 flex gap-2 flex-wrap items-center">
-              <button
-                onClick={() =>
-                  togglePublic.mutate(
-                    { id: collectionId, isPublic: !collection?.isPublic },
-                    { onError: () => toast.error("Failed to update visibility") },
-                  )
-                }
-                disabled={togglePublic.isPending}
-                className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
-                  collection?.isPublic
-                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"
-                    : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
-                }`}>
-                {collection?.isPublic ? "public" : "private"}
-              </button>
-              <button
-                onClick={() =>
-                  toggleFavorite.mutate(
-                    { id: collectionId, isFavorite: !collection?.isFavorite },
-                    { onError: () => toast.error("Failed to update favorite") },
-                  )
-                }
-                disabled={toggleFavorite.isPending}
-                className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
-                  collection?.isFavorite
-                    ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
-                    : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
-                }`}>
-                {collection?.isFavorite ? "★ favorite" : "★"}
-              </button>
-              <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                {cards.length} {cards.length === 1 ? "card" : "cards"}
-              </span>
-              <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                {collection?.category
-                  ? typeof collection.category === "object"
-                    ? (collection.category as Category).name
-                    : (collection.category as unknown as string)
-                  : "—"}
-              </span>
+            <div className="ml-8 flex gap-2 flex-wrap items-center justify-between">
+              <div>
+                <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
+                  {cards.length} {cards.length === 1 ? "card" : "cards"}
+                </span>
+                <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
+                  {collection?.category
+                    ? typeof collection.category === "object"
+                      ? (collection.category as Category).name
+                      : (collection.category as unknown as string)
+                    : "—"}
+                </span>
+              </div>
+              <div>
+                <button
+                  onClick={() =>
+                    togglePublic.mutate(
+                      { id: collectionId, isPublic: !collection?.isPublic },
+                      { onError: () => toast.error("Failed to update visibility") },
+                    )
+                  }
+                  title={collection?.isPublic ? "🔓 public" : "🔒 private"}
+                  disabled={togglePublic.isPending}
+                  className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
+                    collection?.isPublic
+                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"
+                      : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
+                  }`}>
+                  {collection?.isPublic ? "🔓" : "🔒"}
+                </button>
+                <button
+                  onClick={() =>
+                    toggleFavorite.mutate(
+                      { id: collectionId, isFavorite: !collection?.isFavorite },
+                      { onError: () => toast.error("Failed to update favorite") },
+                    )
+                  }
+                  disabled={toggleFavorite.isPending}
+                  className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
+                    collection?.isFavorite
+                      ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                      : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
+                  }`}>
+                  {collection?.isFavorite ? "♥ favorite" : "♥"}
+                </button>
+              </div>
             </div>
 
             {/* Line 3: tags + edit button (popover anchor) */}
@@ -891,17 +917,22 @@ export function CollectionDetailPage() {
                     {tag.name}
                   </span>
                 ))}
-                {collectionTags.length === 0 && <span className="text-xs text-gray-300 dark:text-gray-600">no tags</span>}
+                {collectionTags.length === 0 && (
+                  <span className="text-xs text-gray-300 dark:text-gray-600">no tags</span>
+                )}
                 <button
                   onClick={() => setEditingTags(true)}
+                  title="Edit tags"
                   className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-                  Edit tags
+                  ✏️
                 </button>
               </div>
               {editingTags && (
                 <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Edit tags</span>
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                      Edit tags
+                    </span>
                     <button
                       onClick={() => {
                         setEditingTags(false);
@@ -934,169 +965,218 @@ export function CollectionDetailPage() {
                 </div>
               )}
             </div>
-
-            {/* Practice — full width */}
-            <Link to={`/play/${id}`} className="block w-full mt-1">
-              <Button size="sm" className="w-full justify-center">
-                ▶ Practice
-              </Button>
-            </Link>
           </div>
         )}
         {/* Meta — desktop only (sm and above) */}
         {!isLoading && (
-          <div className="hidden sm:flex gap-3 ml-8 mb-6 text-sm text-gray-400">
-            <span>
-              {cards.length} {cards.length === 1 ? "card" : "cards"}
-            </span>
-            {collection?.category && (
-              <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
-                {typeof collection.category === "object"
-                  ? (collection.category as Category).name
-                  : (collection.category as unknown as string)}
-              </span>
-            )}
-            <button
-              onClick={() =>
-                toggleFavorite.mutate(
-                  { id: collectionId, isFavorite: !collection?.isFavorite },
-                  { onError: () => toast.error("Failed to update favorite") },
-                )
-              }
-              disabled={toggleFavorite.isPending}
-              title={collection?.isFavorite ? "Remove from favorites" : "Add to favorites"}
-              className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
-                collection?.isFavorite ? "text-yellow-400 hover:text-yellow-300" : "text-gray-300 dark:text-gray-600 hover:text-yellow-400"
-              }`}>
-              ★ {collection?.isFavorite ? "favorite" : "add to favorites"}
-            </button>
-            <button
-              onClick={() =>
-                togglePublic.mutate(
-                  { id: collectionId, isPublic: !collection?.isPublic },
-                  { onError: () => toast.error("Failed to update visibility") },
-                )
-              }
-              disabled={togglePublic.isPending}
-              title={collection?.isPublic ? "Make private" : "Make public"}
-              className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
-                collection?.isPublic ? "text-green-500 hover:text-red-400" : "text-gray-300 dark:text-gray-600 hover:text-green-500"
-              }`}>
-              {collection?.isPublic ? "public" : "private"}
-            </button>
-
-            {/* Tags */}
-            <div className="border-l border-gray-200 dark:border-gray-700 pl-3 relative" ref={tagPopoverDesktopRef}>
-              <div className="flex items-center gap-2 flex-wrap">
-                {collectionTags.length > 0 ? (
-                  collectionTags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
-                      {tag.name}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-gray-300 dark:text-gray-600 text-xs">no tags</span>
+          <div>
+            <div className="hidden sm:flex gap-3 ml-8 mb-6 text-sm text-gray-400">
+              <div className="flex items-center flex-rows gap-1.5 justify-center">
+                <span>
+                  {cards.length} {cards.length === 1 ? "card" : "cards"}
+                </span>
+                {collection?.category && (
+                  <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
+                    {typeof collection.category === "object"
+                      ? (collection.category as Category).name
+                      : (collection.category as unknown as string)}
+                  </span>
                 )}
+              </div>
+              <div className="border-l ms-3 flex flex-rows gap-1.5 justify-center items-center">
                 <button
-                  onClick={() => setEditingTags(true)}
-                  className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-                  Edit tags
+                  onClick={() =>
+                    toggleFavorite.mutate(
+                      { id: collectionId, isFavorite: !collection?.isFavorite },
+                      { onError: () => toast.error("Failed to update favorite") },
+                    )
+                  }
+                  disabled={toggleFavorite.isPending}
+                  title={collection?.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  className={`border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
+                    collection?.isFavorite
+                      ? "text-rose-400 hover:text-rose-300"
+                      : "text-gray-300 dark:text-gray-600 hover:text-rose-400"
+                  }`}>
+                  ♥ {collection?.isFavorite ? "favorite" : "add to favorites"}
+                </button>
+                <button
+                  onClick={() =>
+                    togglePublic.mutate(
+                      { id: collectionId, isPublic: !collection?.isPublic },
+                      { onError: () => toast.error("Failed to update visibility") },
+                    )
+                  }
+                  disabled={togglePublic.isPending}
+                  title={collection?.isPublic ? "Make private" : "Make public"}
+                  className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
+                    collection?.isPublic
+                      ? "text-green-500 hover:text-red-400"
+                      : "text-gray-300 dark:text-gray-600 hover:text-green-500"
+                  }`}>
+                  {collection?.isPublic ? "🔓 public" : "🔒 private"}
                 </button>
               </div>
-
-              {editingTags && (
-                <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Edit tags</span>
-                    <button
-                      onClick={() => {
-                        setEditingTags(false);
-                        setPendingTagIds(collectionTags.map((t) => t.id));
-                      }}
-                      className="text-gray-400 hover:text-gray-600 text-lg leading-none">
-                      ×
-                    </button>
-                  </div>
-                  <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
-                  <div className="mt-3 flex justify-end">
-                    <button
-                      onClick={() =>
-                        setCollectionTags.mutate(
-                          { collectionId, tagIds: pendingTagIds },
-                          {
-                            onSuccess: () => {
-                              toast.success("Tags updated");
-                              setEditingTags(false);
-                            },
-                            onError: () => toast.error("Failed to update tags"),
-                          },
-                        )
-                      }
-                      disabled={setCollectionTags.isPending}
-                      className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-                      Save
-                    </button>
-                  </div>
+              {/* Tags */}
+              <div
+                className="border-l ms-3 flex border-gray-200 dark:border-gray-700 pl-3 relative"
+                ref={tagPopoverDesktopRef}>
+                <div className="flex items-center gap-2 flex-wrap ">
+                  {collectionTags.length > 0 ? (
+                    collectionTags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
+                        {tag.name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-300 dark:text-gray-600 text-xs">no tags</span>
+                  )}
+                  <button
+                    onClick={() => setEditingTags(true)}
+                    title="Edit tags"
+                    className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+                    ✏️
+                  </button>
                 </div>
-              )}
+                {editingTags && (
+                  <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                        Edit tags
+                      </span>
+                      <button
+                        onClick={() => {
+                          setEditingTags(false);
+                          setPendingTagIds(collectionTags.map((t) => t.id));
+                        }}
+                        className="text-gray-400 hover:text-gray-600 text-lg leading-none">
+                        ×
+                      </button>
+                    </div>
+                    <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        onClick={() =>
+                          setCollectionTags.mutate(
+                            { collectionId, tagIds: pendingTagIds },
+                            {
+                              onSuccess: () => {
+                                toast.success("Tags updated");
+                                setEditingTags(false);
+                              },
+                              onError: () => toast.error("Failed to update tags"),
+                            },
+                          )
+                        }
+                        disabled={setCollectionTags.isPending}
+                        className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Search + view toggle */}
-      {!isLoading && cards.length > 0 && (
-        <div className="flex items-center gap-2 mb-4">
+      {/* Actions + search + view toggle (sticky on mobile) */}
+      {!isLoading && (
+        <div
+          className="sticky top-[-14px] z-20 sm:static
+            -mx-3 px-3 py-2 sm:mx-0 sm:px-0 sm:py-0
+            bg-white/95 dark:bg-gray-900/95 sm:bg-transparent dark:sm:bg-transparent
+            backdrop-blur-sm sm:backdrop-blur-none
+            border-b border-gray-100 dark:border-gray-800 sm:border-0
+            flex items-center gap-2 mb-3 sm:mb-4">
+          {/* Practice — mobile only */}
+          <Link to={`/play/${id}`} className="sm:hidden shrink-0">
+            <Button size="sm">▶ Practice</Button>
+          </Link>
+          {/* Desktop action buttons */}
+          {!addingCard && (
+            <>
+              <Button size="sm" className="hidden sm:inline-flex" onClick={() => setAddingCard(true)}>
+                + Add card
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="hidden sm:inline-flex"
+                onClick={() => setPasteOpen(true)}>
+                + Paste list
+              </Button>
+              <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setFileOpen(true)}>
+                + Import file
+              </Button>
+              {cards.length > 1 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="hidden sm:inline-flex"
+                  onClick={() => setReorgMode(true)}>
+                  Reorganize
+                </Button>
+              )}
+              <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={handleExport}>
+                ↓ Export
+              </Button>
+            </>
+          )}
           {cards.length > 4 && (
             <input
               type="search"
               placeholder="Search cards..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           )}
-          <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden ml-auto shrink-0">
-            <button
-              onClick={() => setViewMode("grid")}
-              title="Grid view"
-              className={`px-2.5 py-1.5 text-sm transition-colors ${viewMode === "grid" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`}>
-              ⊞
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              title="List view"
-              className={`px-2.5 py-1.5 text-sm transition-colors border-l border-gray-200 dark:border-gray-700 ${viewMode === "list" ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`}>
-              ☰
-            </button>
-          </div>
+          {cards.length > 0 && (
+            <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs ml-auto shrink-0">
+              <button
+                onClick={() => setViewMode("list")}
+                title="List view"
+                className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
+                  viewMode === "list"
+                    ? "bg-indigo-600 text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}>
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <rect x="0" y="1" width="13" height="2" rx="1" fill="currentColor" />
+                  <rect x="0" y="5.5" width="13" height="2" rx="1" fill="currentColor" />
+                  <rect x="0" y="10" width="13" height="2" rx="1" fill="currentColor" />
+                </svg>
+                <span className="hidden sm:inline">List</span>
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                title="Cards view"
+                className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                  viewMode === "grid"
+                    ? "bg-indigo-600 text-white border-l-indigo-600"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}>
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <rect x="0" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                  <rect x="7.5" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                  <rect x="0" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                  <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                </svg>
+                <span className="hidden sm:inline">Cards</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Actions bar */}
-      {!isLoading && !addingCard && (
-        <div className="flex gap-2 mb-4 flex-wrap">
-          <Button size="sm" className="hidden sm:inline-flex" onClick={() => setAddingCard(true)}>
-            + Add card
-          </Button>
-          <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setPasteOpen(true)}>
-            + Paste list
-          </Button>
-          <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setFileOpen(true)}>
-            + Import file
-          </Button>
-          {cards.length > 1 && (
-            <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={() => setReorgMode(true)}>
-              Reorganize
-            </Button>
-          )}
-          {cards.length > 0 && (
-            <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={handleExport}>
-              ↓ Export
-            </Button>
-          )}
+      {/* Progress bar */}
+      {!isLoading && cards.length > 0 && (
+        <div className="mb-4">
+          <CollectionProgressBar stats={collection?.stats} variant="full" />
         </div>
       )}
 
@@ -1134,7 +1214,13 @@ export function CollectionDetailPage() {
       {!isLoading && filtered.length > 0 && viewMode === "grid" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-20 sm:pb-0">
           {filtered.map((card) => (
-            <CardItem key={card.id} card={card} collectionId={collectionId} onDelete={handleDelete} />
+            <CardItem
+              key={card.id}
+              card={card}
+              collectionId={collectionId}
+              onView={setViewCard}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}
@@ -1146,6 +1232,7 @@ export function CollectionDetailPage() {
               card={card}
               collectionId={collectionId}
               index={idx + 1}
+              onView={setViewCard}
               onDelete={handleDelete}
             />
           ))}
@@ -1160,6 +1247,11 @@ export function CollectionDetailPage() {
       {/* Modals */}
       <PasteCardsModal open={pasteOpen} onClose={() => setPasteOpen(false)} collectionId={collectionId} />
       <FileImportModal open={fileOpen} onClose={() => setFileOpen(false)} collectionId={collectionId} />
+
+      {/* Card preview modal */}
+      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="md">
+        {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} />}
+      </Modal>
 
       {/* FAB — mobile only */}
       {!isLoading && !addingCard && (

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pbcollectionsApi } from "@/api";
 import { useCopyCollection } from "@/features/collections/hooks/useCollections";
@@ -9,13 +9,17 @@ import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
 import type { Collection } from "@/types";
 
-function RowSkeleton() {
+function CardSkeleton() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center gap-3 animate-pulse">
-      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded flex-1 max-w-xs" />
-      <div className="h-4 w-16 bg-gray-100 dark:bg-gray-700 rounded-full" />
-      <div className="h-4 w-12 bg-gray-100 dark:bg-gray-700 rounded" />
-      <div className="h-7 w-14 bg-gray-100 dark:bg-gray-700 rounded" />
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2 animate-pulse">
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+      <div className="flex flex-wrap gap-1 mt-1">
+        <div className="h-4 w-16 bg-gray-100 dark:bg-gray-700 rounded-full" />
+        <div className="h-4 w-12 bg-gray-100 dark:bg-gray-700 rounded-full" />
+      </div>
+      <div className="flex items-center gap-2 mt-auto pt-2">
+        <div className="h-3 w-12 bg-gray-100 dark:bg-gray-700 rounded" />
+      </div>
     </div>
   );
 }
@@ -53,7 +57,7 @@ function highlight(text: string | undefined, query: string): React.ReactNode {
   );
 }
 
-interface RowProps {
+interface CardProps {
   col: Collection;
   search: string;
   isMine: boolean;
@@ -62,50 +66,65 @@ interface RowProps {
   copyPending: boolean;
 }
 
-function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: RowProps) {
+function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPending }: CardProps) {
+  const navigate = useNavigate();
   const categoryName = getCategoryName(col);
   const tagNames = getTagNames(col);
+
   return (
-    // <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-start gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors">
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2.5 flex items-center gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/20 transition-all">
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            to={`/library/public/${col.id}`}
-            className="text-gray-600 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-            {highlight(col.name, search)}
-          </Link>
+    <div
+      onClick={() => navigate(`/library/public/${col.id}`)}
+      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
+      <div className="font-medium text-gray-800 dark:text-gray-100 text-sm leading-snug">
+        {highlight(col.name, search)}
+      </div>
+
+      {(categoryName || tagNames.length > 0) && (
+        <div className="flex flex-wrap gap-1">
           {categoryName && (
             <span className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700 px-1.5 py-0.5 rounded-full">
               {highlight(categoryName, search)}
             </span>
           )}
-          {tagNames.length > 0 && (
-            <>
-              {tagNames.map((name) => (
-                <span
-                  key={name}
-                  className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
-                  {highlight(name, search)}
-                </span>
-              ))}
-            </>
-          )}
+          {tagNames.map((name) => (
+            <span
+              key={name}
+              className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
+              {highlight(name, search)}
+            </span>
+          ))}
         </div>
-      </div>
-      <div className="flex items-center gap-3 shrink-0 mt-0.5">
-        {col.cardCount !== undefined && (
-          <span className="text-xs text-gray-400 dark:text-gray-500">{col.cardCount} cards</span>
-        )}
-        {isMine ? (
-          <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium px-2">Your collection</span>
-        ) : isCopied ? (
-          <span className="text-xs text-green-600 dark:text-green-400 font-medium px-2">✓ Copied</span>
-        ) : (
-          <Button size="sm" variant="secondary" onClick={() => onCopy(col)} loading={copyPending}>
-            Copy
-          </Button>
-        )}
+      )}
+
+      <div className="flex items-center justify-between gap-2 mt-auto pt-1">
+        {" "}
+        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{col.cardCount ?? 0} cards</span>
+        <div className="flex items-center gap-2 min-w-0">
+          {" "}
+          <Link
+            to={`/play/flashcard/${col.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg">
+            Practice
+          </Link>
+          {isMine ? (
+            <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium shrink-0">Your collection</span>
+          ) : isCopied ? (
+            <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">✓ Copied</span>
+          ) : (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopy(col);
+              }}
+              loading={copyPending}
+              className="border-none text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
+              Copy
+            </Button>
+          )}{" "}
+        </div>
       </div>
     </div>
   );
@@ -114,7 +133,6 @@ function CollectionRow({ col, search, isMine, isCopied, onCopy, copyPending }: R
 function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: string) => void }) {
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-4">
-      {/* Tabs */}
       <div className="flex shrink-0">
         <Link
           to="/library"
@@ -126,7 +144,6 @@ function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: st
         </span>
       </div>
 
-      {/* Search */}
       <div className="ml-auto pb-2">
         <input
           value={search}
@@ -195,9 +212,7 @@ export function PublicLibraryPage() {
           {allTagNames.map((tag) => (
             <button
               key={tag}
-              onClick={() => {
-                setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "" });
-              }}
+              onClick={() => setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "" })}
               className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                 activeTag === tag
                   ? "bg-violet-100 text-violet-700 border-violet-300"
@@ -210,9 +225,9 @@ export function PublicLibraryPage() {
       )}
 
       {isLoading && (
-        <div className="flex flex-col gap-2">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <RowSkeleton key={i} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <CardSkeleton key={i} />
           ))}
         </div>
       )}
@@ -224,9 +239,9 @@ export function PublicLibraryPage() {
       )}
 
       {!isLoading && filtered.length > 0 && (
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((col) => (
-            <CollectionRow
+            <PublicCollectionCard
               key={col.id}
               col={col}
               search={search}

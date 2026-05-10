@@ -35,13 +35,13 @@ function CollectionRow({ collection }: { collection: Collection }) {
         ))}
       </div>
       {!!collection.isFavorite && (
-        <span className="text-yellow-400" title="Favorite">
-          ★
+        <span className="text-rose-400" title="Favorite">
+          ♥
         </span>
       )}
       {!!collection.isPublic && (
         <span className="text-xs text-green-600 dark:text-green-400 border border-green-300 dark:border-green-700 px-1.5 py-0.5 rounded">
-          public
+          🔓public
         </span>
       )}
       <span className="text-xs text-gray-400 dark:text-gray-500">{collection.cardCount ?? 0} cards</span>
