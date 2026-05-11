@@ -82,9 +82,9 @@ function CollectionCard({
       <div className="font-medium text-gray-800 dark:text-gray-100 text-sm leading-snug">
         {highlight(collection.name, search)}
       </div>
-
+      <CollectionProgressBar stats={data?.stats} variant="minimal" />
       {!compact && data && data.cards.length > 0 && (
-        <div className="flex flex-col gap-0.5 border-t border-gray-100 dark:border-gray-700 pt-2 mt-0.5">
+        <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 pt-2 mt-0.5">
           {data.cards.map((card) => (
             <div key={card.id} className="grid grid-cols-2 gap-1 text-xs text-gray-400 dark:text-gray-500">
               <span className="truncate">{card.question}</span>
@@ -106,9 +106,7 @@ function CollectionCard({
         </div>
       )}
 
-      <CollectionProgressBar stats={data?.stats} variant="minimal" />
-
-      <div className="flex items-center justify-between gap-2 mt-auto pt-1">
+      <div className="flex items-center justify-between gap-2 mt-auto pt-1 border-t">
         <div className="flex items-center gap-2 min-w-0">
           {!!collection.isFavorite && <span className="text-rose-400 shrink-0">♥</span>}
           <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{collection.cardCount ?? 0} cards</span>
