@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router-dom'
-import { PublicNavbar } from '@/components/PublicNavbar'
-import { useAuthStore } from '@/store/authStore'
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
 
 const ACTIVITIES = [
   { icon: "🃏", name: "Flashcards", description: "Flip through cards at your own pace" },
@@ -23,20 +22,16 @@ const FEATURES = [
 ];
 
 export function AboutPage() {
-  const { isAuthenticated, isDemo } = useAuthStore()
-  const navigate = useNavigate()
+  const { isAuthenticated, isDemo } = useAuthStore();
+  const navigate = useNavigate();
 
   function handleDemo() {
-    useAuthStore.getState().enterDemo()
-    navigate('/library')
+    useAuthStore.getState().enterDemo();
+    navigate("/library");
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <PublicNavbar />
-
-      <div className="max-w-2xl mx-auto w-full px-4 flex flex-col gap-6 sm:gap-10 py-8 sm:py-12">
-
+    <div className="max-w-2xl mx-auto w-full px-4 flex flex-col gap-6 sm:gap-10 py-8 sm:py-12">
         {/* Hero */}
         <div className="flex flex-col items-center text-center gap-3">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-indigo-600">FlashMinds</h1>
@@ -49,8 +44,8 @@ export function AboutPage() {
         <div>
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">What is FlashMinds?</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            FlashMinds is a personal flashcard learning tool. Create collections of cards on any topic, organize them into
-            categories, group collections into sets (playlists), and practice with different activities designed to
+            FlashMinds is a personal flashcard learning tool. Create collections of cards on any topic, organize them
+            into categories, group collections into sets (playlists), and practice with different activities designed to
             strengthen memory.
           </p>
         </div>
@@ -97,8 +92,6 @@ export function AboutPage() {
         <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-4">
           Made with ♥ as a personal learning project
         </p>
-
-      </div>
     </div>
   );
 }

@@ -1,183 +1,658 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { usePlaylists, useDeletePlaylist } from "@/hooks/usePlaylistHooks";
-
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { usePlaylists, useDeletePlaylist, useEditPlaylist, usePlaylistContent } from "@/hooks/usePlaylistHooks";
+import { useCollections } from "@/hooks/useCollectionHooks";
 import { PlaylistModal } from "./PlaylistModal";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
-import type { Playlist } from "@/types";
+import type { Playlist, PlaylistCollection, Collection } from "@/types";
 
-function PlaylistCard({
-  playlist,
-  onEdit,
-  onDelete,
-}: {
-  playlist: Playlist;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <button
-          onClick={onEdit}
-          className="font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left">
-          {playlist.name}
-        </button>
-        <div className="flex gap-1 flex-shrink-0">
-          <button
-            onClick={onEdit}
-            className="text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
-            Edit
-          </button>
-          <button
-            onClick={onDelete}
-            className="text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
-            Delete
-          </button>
-        </div>
-      </div>
+const MAX_SLOTS = 10;
 
-      {/* Collection names */}
-      {playlist.collections.length === 0 ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500">No collections — click Edit to add some</p>
-      ) : (
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
-            {playlist.collections.length} {playlist.collections.length === 1 ? "collection" : "collections"}
-          </span>
-          {playlist.collections.map((col) => (
-            <div key={col.id} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-300 flex-shrink-0" />
-              <span className="flex-1">{col.name}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Play button */}
-      {playlist.collections.length > 0 && (
-        <div className="pt-1 border-t border-gray-100 dark:border-gray-700 flex gap-2">
-          <Link to={`/play/${playlist.id}?src=pl`}>
-            <Button size="sm" variant="secondary">
-              ▶ Practice
-            </Button>
-          </Link>
-          <Link to={`/playlists/${playlist.id}/cards`}>
-            <Button size="sm" variant="secondary">
-              View cards
-            </Button>
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-}
+// ── Skeleton ──────────────────────────────────────────────────────────────
 
 function PlaylistSkeleton() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 animate-pulse">
-      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-40 mb-3" />
-      <div className="flex flex-col gap-2">
-        {[1, 2].map((i) => (
-          <div key={i} className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-full" />
+    <div className="animate-pulse flex gap-0 min-h-0">
+      <div className="hidden sm:flex flex-col w-52 shrink-0 gap-1 border-r border-gray-200 dark:border-gray-700 pr-2 mr-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-14 bg-gray-100 dark:bg-gray-800 rounded-lg" />
+        ))}
+      </div>
+      <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {Array.from({ length: MAX_SLOTS }).map((_, i) => (
+          <div key={i} className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl" />
         ))}
       </div>
     </div>
   );
 }
 
-export function PlaylistsPage() {
+// ── Left panel item ───────────────────────────────────────────────────────
+
+function PlaylistListItem({
+  playlist,
+  selected,
+  onClick,
+}: {
+  playlist: Playlist;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-left w-full px-3 py-2.5 rounded-lg transition-colors ${
+        selected
+          ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+      }`}>
+      <div className="font-medium text-sm leading-snug truncate">{playlist.name}</div>
+      <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+        {playlist.collections.length === 0
+          ? "No collections"
+          : `${playlist.collections.length} ${playlist.collections.length === 1 ? "collection" : "collections"}`}
+      </div>
+    </button>
+  );
+}
+
+// ── Tiles ─────────────────────────────────────────────────────────────────
+
+function ViewTile({ col, index, onEmptyClick }: { col?: PlaylistCollection; index: number; onEmptyClick: () => void }) {
+  const navigate = useNavigate();
+
+  if (col) {
+    return (
+      <div
+        onClick={() => navigate(`/collections/${col.id}`)}
+        className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2 sm:py-3
+                   flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1
+                   cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all sm:min-h-[5rem]">
+        <span className="text-xs text-gray-300 dark:text-gray-600 select-none shrink-0 w-5 sm:w-auto text-right sm:text-left">
+          {index + 1}
+        </span>
+        <span className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug flex-1 sm:flex-none truncate">
+          {col.name}
+        </span>
+        {col.isMy === 0 && <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 sm:mt-auto">shared</span>}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={onEmptyClick}
+      className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 px-3 py-2 sm:py-3
+                 flex items-center gap-2 sm:flex-col sm:items-center sm:justify-center sm:gap-1
+                 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-all sm:min-h-[5rem]">
+      <span className="text-xs text-gray-300 dark:text-gray-600 select-none shrink-0 w-5 sm:w-auto text-right sm:text-center">
+        {index + 1}
+      </span>
+      <span className="text-base sm:text-xl leading-none text-gray-200 dark:text-gray-700">+</span>
+    </div>
+  );
+}
+
+function EditTile({
+  id,
+  index,
+  isActive,
+  resolveName,
+  onRemove,
+  onActivate,
+}: {
+  id?: number;
+  index: number;
+  isActive: boolean;
+  resolveName: (id: number) => string;
+  onRemove: () => void;
+  onActivate: () => void;
+}) {
+  if (id != null) {
+    return (
+      <div
+        className="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2 sm:py-3
+                      flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1 sm:min-h-[5rem]">
+        <span className="text-xs text-gray-300 dark:text-gray-600 select-none shrink-0 w-5 sm:w-auto text-right sm:text-left">
+          {index + 1}
+        </span>
+        <span className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug flex-1 sm:flex-none truncate pr-5 sm:pr-5">
+          {resolveName(id)}
+        </span>
+        <button
+          onClick={onRemove}
+          className="absolute top-1.5 right-2 sm:top-2 text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors text-lg leading-none w-6 text-center">
+          ×
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={onActivate}
+      className={`rounded-xl border-2 border-dashed px-3 py-2 sm:py-3
+                  flex items-center gap-2 sm:flex-col sm:items-center sm:justify-center sm:gap-1
+                  cursor-pointer transition-all sm:min-h-[5rem] ${
+                    isActive
+                      ? "border-indigo-400 dark:border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10"
+                  }`}>
+      <span
+        className={`text-xs select-none shrink-0 w-5 sm:w-auto text-right sm:text-center ${isActive ? "text-indigo-400" : "text-gray-300 dark:text-gray-600"}`}>
+        {index + 1}
+      </span>
+      <span
+        className={`text-base sm:text-xl leading-none ${isActive ? "text-indigo-400" : "text-gray-200 dark:text-gray-700"}`}>
+        +
+      </span>
+    </div>
+  );
+}
+
+// ── Inline picker ─────────────────────────────────────────────────────────
+
+function PickerPanel({
+  activeSlot,
+  search,
+  onSearch,
+  tagFilter,
+  onTagFilter,
+  allTagNames,
+  pickerCollections,
+  onPick,
+  onClose,
+  searchRef,
+}: {
+  activeSlot: number;
+  search: string;
+  onSearch: (v: string) => void;
+  tagFilter: string | null;
+  onTagFilter: (v: string | null) => void;
+  allTagNames: string[];
+  pickerCollections: Collection[];
+  onPick: (id: number) => void;
+  onClose: () => void;
+  searchRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  return (
+    <div className="mt-5 border border-indigo-200 dark:border-indigo-700 rounded-xl p-4 bg-indigo-50/60 dark:bg-indigo-900/10">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Filling slot {activeSlot + 1}</span>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none w-6 text-center">
+          ×
+        </button>
+      </div>
+
+      <input
+        ref={searchRef}
+        value={search}
+        onChange={(e) => onSearch(e.target.value)}
+        placeholder="Search collections…"
+        className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
+                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                   focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      />
+
+      {allTagNames.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {allTagNames.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => onTagFilter(tagFilter === tag ? null : tag)}
+              className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                tagFilter === tag
+                  ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-600"
+                  : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400"
+              }`}>
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-3 max-h-52 overflow-y-auto flex flex-col gap-0.5">
+        {pickerCollections.length === 0 ? (
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
+            {search || tagFilter ? "No matches" : "No collections available"}
+          </p>
+        ) : (
+          pickerCollections.map((col) => (
+            <div
+              key={col.id}
+              onClick={() => onPick(col.id)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 cursor-pointer">
+              <span className="flex-1 text-sm text-gray-800 dark:text-gray-200">{col.name}</span>
+              {col.category && (
+                <span className="text-xs text-indigo-400 dark:text-indigo-500 shrink-0">
+                  {(col.category as { name?: string }).name}
+                </span>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Right panel — holds all edit state, reset via key prop ────────────────
+
+function PlaylistPanel({
+  playlist,
+  allCollections,
+  allTagNames,
+  onDelete,
+  deleteLoading,
+  onCreateNew,
+}: {
+  playlist: Playlist;
+  allCollections: Collection[];
+  allTagNames: string[];
+  onDelete: () => void;
+  deleteLoading: boolean;
+  onCreateNew: () => void;
+}) {
+  const [view, setView] = useState<"collections" | "cards">("collections");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [localIds, setLocalIds] = useState<(number | undefined)[]>([]);
+  const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<Playlist | undefined>();
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
+  const editPlaylistMutation = useEditPlaylist();
+  const { data: cards = [], isLoading: cardsLoading } = usePlaylistContent(playlist.id);
+
+  useEffect(() => {
+    if (activeSlot !== null) setTimeout(() => searchRef.current?.focus(), 50);
+  }, [activeSlot]);
+
+  function enterEditMode(slot?: number) {
+    setEditName(playlist.name);
+    const ids: (number | undefined)[] = Array.from({ length: MAX_SLOTS });
+    playlist.collections.forEach((c, i) => {
+      ids[i] = c.id;
+    });
+    setLocalIds(ids);
+    setIsEditing(true);
+    if (slot !== undefined) setActiveSlot(slot);
+  }
+
+  function exitEditMode() {
+    setIsEditing(false);
+    setActiveSlot(null);
+    setSearch("");
+    setTagFilter(null);
+  }
+
+  function handleSave() {
+    if (!editName.trim()) return;
+    const listIds = localIds.filter((id): id is number => id != null);
+    editPlaylistMutation.mutate(
+      { id: playlist.id, data: { name: editName.trim(), listIds } },
+      {
+        onSuccess: () => {
+          toast.success("Playlist saved");
+          exitEditMode();
+        },
+        onError: () => toast.error("Failed to save playlist"),
+      },
+    );
+  }
+
+  function removeSlot(i: number) {
+    setLocalIds((prev) => {
+      const next = [...prev];
+      next[i] = undefined;
+      return next;
+    });
+  }
+
+  function pickCollection(id: number) {
+    if (activeSlot === null) return;
+    const next = [...localIds];
+    next[activeSlot] = id;
+    setLocalIds(next);
+    let nextEmpty = -1;
+    for (let i = activeSlot + 1; i < MAX_SLOTS; i++) {
+      if (next[i] == null) {
+        nextEmpty = i;
+        break;
+      }
+    }
+    setActiveSlot(nextEmpty !== -1 ? nextEmpty : null);
+  }
+
+  function resolveCollectionName(id: number): string {
+    const col = allCollections.find((c) => c.id === id) ?? playlist.collections.find((c) => c.id === id);
+    return col?.name ?? `Collection #${id}`;
+  }
+
+  const pickerCollections = useMemo(
+    () =>
+      allCollections
+        .filter((c) => !localIds.includes(c.id))
+        .filter((c) => !tagFilter || (c.tags ?? []).some((t) => t.name === tagFilter))
+        .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [allCollections, localIds, tagFilter, search],
+  );
+
+  const filledCount = localIds.filter(Boolean).length;
+
+  const sortedCards = useMemo(
+    () =>
+      [...cards].sort(
+        (a, b) =>
+          (a.collectionname ?? "").localeCompare(b.collectionname ?? "") || a.question.localeCompare(b.question),
+      ),
+    [cards],
+  );
+
+  return (
+    <>
+      {!isEditing && (
+        <>
+          <div className="sticky -top-3 sm:-top-6 z-10 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 py-2 mb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2 flex-wrap">
+            <Button size="sm" onClick={onCreateNew} className="sm:hidden">
+              + New
+            </Button>
+            <Button size="sm" variant="danger" onClick={onDelete} loading={deleteLoading} className="ml-3 sm:ml-0">
+              Delete
+            </Button>
+            {playlist.collections.length > 0 && (
+              <Link to={`/play/${playlist.id}?src=pl`}>
+                <Button size="sm" variant="secondary">
+                  ▶ Practice
+                </Button>
+              </Link>
+            )}
+            <Button size="sm" variant="secondary" onClick={() => enterEditMode()}>
+              Edit
+            </Button>
+
+            {/* View toggle */}
+            <div className="ml-auto flex items-center rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs font-medium">
+              <button
+                onClick={() => setView("collections")}
+                className={`px-3 py-1.5 transition-colors ${
+                  view === "collections"
+                    ? "bg-indigo-600 text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}>
+                Collections
+              </button>
+              <button
+                onClick={() => setView("cards")}
+                className={`px-3 py-1.5 border-l border-gray-200 dark:border-gray-700 transition-colors ${
+                  view === "cards"
+                    ? "bg-indigo-600 text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}>
+                Cards
+                {!cardsLoading && cards.length > 0 && <span className="ml-1 opacity-70">{cards.length}</span>}
+              </button>
+            </div>
+          </div>
+
+          {view === "collections" && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {Array.from({ length: MAX_SLOTS }).map((_, i) => (
+                <ViewTile key={i} col={playlist.collections[i]} index={i} onEmptyClick={() => enterEditMode(i)} />
+              ))}
+            </div>
+          )}
+
+          {view === "cards" && (
+            <>
+              {cardsLoading && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden animate-pulse">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                      <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+                      <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+                      <div className="w-24 h-4 bg-gray-100 dark:bg-gray-700 rounded" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!cardsLoading && sortedCards.length === 0 && (
+                <p className="text-center text-gray-400 dark:text-gray-500 py-16">No cards in this playlist</p>
+              )}
+
+              {!cardsLoading && sortedCards.length > 0 && (
+                <>
+                  {/* Desktop table */}
+                  <div className="hidden sm:block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-gray-700/60 border-b border-gray-200 dark:border-gray-700">
+                          <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[38%]">
+                            Question
+                          </th>
+                          <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[38%]">
+                            Answer
+                          </th>
+                          <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[24%]">
+                            Collection
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        {sortedCards.map((card) => (
+                          <tr key={card.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                            <td className="px-4 py-3 text-gray-900 dark:text-gray-100 align-top">{card.question}</td>
+                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 align-top">{card.answer}</td>
+                            <td className="px-4 py-3 align-top">
+                              <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                {card.collectionname ?? "—"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile list */}
+                  <div className="sm:hidden flex flex-col gap-2">
+                    {sortedCards.map((card) => (
+                      <div
+                        key={card.id}
+                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
+                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">Question</p>
+                        <p className="text-sm text-gray-900 dark:text-gray-100 mb-2">{card.question}</p>
+                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">Answer</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{card.answer}</p>
+                        <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 px-2 py-0.5 rounded-full">
+                          {card.collectionname ?? "—"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      {isEditing && (
+        <>
+          <div className="flex items-center gap-2 flex-wrap mb-4">
+            <input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSave()}
+              placeholder="Playlist name"
+              className="flex-1 min-w-0 sm:max-w-xs border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
+                         bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                         focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+            <Button size="sm" onClick={handleSave} loading={editPlaylistMutation.isPending} disabled={!editName.trim()}>
+              Save
+            </Button>
+            <Button size="sm" variant="secondary" onClick={exitEditMode}>
+              Cancel
+            </Button>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                filledCount === MAX_SLOTS
+                  ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+                  : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400"
+              }`}>
+              {filledCount} / {MAX_SLOTS}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: MAX_SLOTS }).map((_, i) => (
+              <EditTile
+                key={i}
+                id={localIds[i]}
+                index={i}
+                isActive={activeSlot === i}
+                resolveName={resolveCollectionName}
+                onRemove={() => removeSlot(i)}
+                onActivate={() => setActiveSlot(i)}
+              />
+            ))}
+          </div>
+
+          {activeSlot !== null && (
+            <PickerPanel
+              activeSlot={activeSlot}
+              search={search}
+              onSearch={setSearch}
+              tagFilter={tagFilter}
+              onTagFilter={setTagFilter}
+              allTagNames={allTagNames}
+              pickerCollections={pickerCollections}
+              onPick={pickCollection}
+              onClose={() => {
+                setActiveSlot(null);
+                setSearch("");
+                setTagFilter(null);
+              }}
+              searchRef={searchRef}
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────
+
+export function PlaylistsPage() {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const toast = useToast();
   const deletePlaylist = useDeletePlaylist();
 
   const { data: playlists = [], isLoading } = usePlaylists();
+  const { data: allCollections = [] } = useCollections();
 
-  const visible = playlists.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+  const effectiveId =
+    selectedId !== null && playlists.some((p) => p.id === selectedId) ? selectedId : (playlists[0]?.id ?? null);
 
-  const openCreate = () => {
-    setEditTarget(undefined);
-    setModalOpen(true);
-  };
+  const selected = playlists.find((p) => p.id === effectiveId) ?? null;
 
-  const openEdit = (playlist: Playlist) => {
-    setEditTarget(playlist);
-    setModalOpen(true);
-  };
+  const allTagNames = useMemo<string[]>(() => {
+    const set = new Set<string>();
+    for (const col of allCollections) {
+      for (const tag of col.tags ?? []) set.add(tag.name);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allCollections]);
 
   const handleDelete = (playlist: Playlist) => {
     if (!window.confirm(`Delete playlist "${playlist.name}"?`)) return;
     deletePlaylist.mutate(playlist.id, {
-      onSuccess: () => toast.success("Playlist deleted"),
+      onSuccess: () => {
+        toast.success("Playlist deleted");
+        setSelectedId(null);
+      },
       onError: () => toast.error("Failed to delete playlist"),
     });
   };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Playlists</h1>
-        <Button size="sm" onClick={openCreate}>
+      <div className="hidden sm:flex items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Playlists</h1>
+        <Button size="sm" onClick={() => setCreateModalOpen(true)}>
           + New set
         </Button>
       </div>
 
-      {playlists.length > 0 && (
-        <div className="mb-6">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search playlists..."
-            className="w-full max-w-sm border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
-                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {[1, 2, 3].map((i) => (
-            <PlaylistSkeleton key={i} />
-          ))}
-        </div>
-      )}
+      {isLoading && <PlaylistSkeleton />}
 
       {!isLoading && playlists.length === 0 && (
         <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <p className="text-lg mb-2">No playlists yet</p>
-          <Button size="sm" onClick={openCreate}>
+          <Button size="sm" onClick={() => setCreateModalOpen(true)}>
             Create your first playlist
           </Button>
         </div>
       )}
 
-      {!isLoading && playlists.length > 0 && visible.length === 0 && (
-        <p className="text-gray-400 dark:text-gray-500 py-8 text-center">No playlists match "{search}"</p>
+      {!isLoading && playlists.length > 0 && (
+        <>
+          {/* Mobile dropdown */}
+          <div className="sm:hidden mb-4 flex items-center gap-2">
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 shrink-0">Playlists:</span>
+            <select
+              value={effectiveId ?? ""}
+              onChange={(e) => setSelectedId(Number(e.target.value))}
+              className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-indigo-50 dark:bg-gray-800 text-indigo-700 dark:text-gray-100 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:[color-scheme:dark]">
+              {playlists.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.collections.length})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex gap-0 min-h-0">
+            {/* Left: playlist list */}
+            <div className="hidden sm:flex flex-col w-52 shrink-0 gap-0.5 border-r border-gray-200 dark:border-gray-700 pr-2 mr-4">
+              {playlists.map((p) => (
+                <PlaylistListItem
+                  key={p.id}
+                  playlist={p}
+                  selected={p.id === effectiveId}
+                  onClick={() => setSelectedId(p.id)}
+                />
+              ))}
+            </div>
+
+            {/* Right: panel (key resets edit state on playlist switch) */}
+            <div className="flex-1 min-w-0">
+              {selected && (
+                <PlaylistPanel
+                  key={selected.id}
+                  playlist={selected}
+                  allCollections={allCollections}
+                  allTagNames={allTagNames}
+                  onDelete={() => handleDelete(selected)}
+                  onCreateNew={() => setCreateModalOpen(true)}
+                  deleteLoading={deletePlaylist.isPending}
+                />
+              )}
+            </div>
+          </div>
+        </>
       )}
 
-      {!isLoading && visible.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {visible.map((playlist) => (
-            <PlaylistCard
-              key={playlist.id}
-              playlist={playlist}
-              onEdit={() => openEdit(playlist)}
-              onDelete={() => handleDelete(playlist)}
-            />
-          ))}
-        </div>
-      )}
-
-      <PlaylistModal
-        key={editTarget?.id ?? "new"}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        editPlaylist={editTarget}
-      />
+      <PlaylistModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
   );
 }

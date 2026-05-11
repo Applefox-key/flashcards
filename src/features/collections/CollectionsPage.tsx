@@ -119,7 +119,7 @@ function CollectionCard({
           )}
         </div>
         <Link
-          to={`/play/flashcard/${collection.id}`}
+          to={`/play/${collection.id}`}
           onClick={(e) => e.stopPropagation()}
           className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg">
           Practice
@@ -197,7 +197,7 @@ function CardsView({
         <div className="hidden sm:flex justify-end mb-2">
           <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start">
           {selectedCollections.map((col) => (
             <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={compact} />
           ))}
@@ -343,44 +343,44 @@ export function CollectionsPage() {
   return (
     <div>
       {/* ── Sticky header block ── */}
-      {/* <div className="bg-gray-50 dark:bg-gray-900 -mx-3 sm:-mx-6 px-3 sm:px-6"> */}
-      <LibraryTabsBar search={search} onSearch={setSearch} active={activeFilter} onChange={setActiveFilter} />
+      <div className="sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
+        <LibraryTabsBar search={search} onSearch={setSearch} active={activeFilter} onChange={setActiveFilter} />
 
-      {allTags.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto items-center border-b border-slate-200/80 dark:border-slate-700/80 py-2">
-          <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">Tags:</span>
-          {allTags.map((tag) => (
-            <button
-              key={tag.id}
-              onClick={() => setActiveTagId(activeTagId === tag.id ? null : tag.id)}
-              className={`shrink-0 px-3 py-1 text-xs rounded-full border transition-colors ${
-                activeTagId === tag.id
-                  ? "bg-violet-600 border-violet-600 text-white"
-                  : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
-              }`}>
-              {tag.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Mobile: category dropdown + compact toggle — only when content is loaded */}
-      {showContent && (
-        <div className="sticky top-[-1rem] z-20 bg-gray-50 dark:bg-gray-900 sm:hidden flex items-center gap-2 py-2 border-b border-gray-200 dark:border-gray-700">
-          <select
-            value={effectiveId ?? ""}
-            onChange={(e) => setMyLibrary({ selectedCategoryId: Number(e.target.value) })}
-            className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-indigo-50 dark:bg-gray-800 text-indigo-700 dark:text-gray-100 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:[color-scheme:dark]">
-            {visibleCategories.map(({ category, collections }) => (
-              <option key={category.id} value={category.id}>
-                {category.name} ({collections.length})
-              </option>
+        {allTags.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto items-center border-b border-slate-200/80 dark:border-slate-700/80 py-2">
+            <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">Tags:</span>
+            {allTags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => setActiveTagId(activeTagId === tag.id ? null : tag.id)}
+                className={`shrink-0 px-3 py-1 text-xs rounded-full border transition-colors ${
+                  activeTagId === tag.id
+                    ? "bg-violet-600 border-violet-600 text-white"
+                    : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
+                }`}>
+                {tag.name}
+              </button>
             ))}
-          </select>
-          <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
-        </div>
-      )}
-      {/* </div> */}
+          </div>
+        )}
+
+        {/* Mobile: category dropdown + compact toggle */}
+        {showContent && (
+          <div className="sm:hidden flex items-center gap-2 py-2 border-b border-gray-200 dark:border-gray-700">
+            <select
+              value={effectiveId ?? ""}
+              onChange={(e) => setMyLibrary({ selectedCategoryId: Number(e.target.value) })}
+              className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-indigo-50 dark:bg-gray-800 text-indigo-700 dark:text-gray-100 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:[color-scheme:dark]">
+              {visibleCategories.map(({ category, collections }) => (
+                <option key={category.id} value={category.id}>
+                  {category.name} ({collections.length})
+                </option>
+              ))}
+            </select>
+            <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
+          </div>
+        )}
+      </div>
 
       {/* ── Content ── */}
       <div className="mt-4">

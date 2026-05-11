@@ -132,7 +132,7 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
 
 function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: string) => void }) {
   return (
-    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-4">
+    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-0">
       <div className="flex shrink-0">
         <Link
           to="/library"
@@ -205,27 +205,32 @@ export function PublicLibraryPage() {
 
   return (
     <div>
-      <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null })} />
+      {/* ── Sticky header block ── */}
+      <div className="sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
+        <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null })} />
 
-      {allTagNames.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-5">
-          {allTagNames.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "" })}
-              className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                activeTag === tag
-                  ? "bg-violet-100 text-violet-700 border-violet-300"
-                  : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
-              }`}>
-              {tag}
-            </button>
-          ))}
-        </div>
-      )}
+        {allTagNames.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 py-2 border-b border-gray-200 dark:border-gray-700">
+            {allTagNames.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "" })}
+                className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                  activeTag === tag
+                    ? "bg-violet-100 text-violet-700 border-violet-300"
+                    : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
+                }`}>
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4">
 
       {isLoading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <CardSkeleton key={i} />
           ))}
@@ -239,7 +244,7 @@ export function PublicLibraryPage() {
       )}
 
       {!isLoading && filtered.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
           {filtered.map((col) => (
             <PublicCollectionCard
               key={col.id}
@@ -253,6 +258,7 @@ export function PublicLibraryPage() {
           ))}
         </div>
       )}
+      </div>{/* mt-4 */}
     </div>
   );
 }

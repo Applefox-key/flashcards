@@ -31,7 +31,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <RootRedirect /> },
       { path: 'login', element: <AuthPage /> },
-      { path: 'about', element: <AboutPage /> },
       { path: 'reset/:token', element: <ResetPasswordPage /> },
       {
         element: <ProtectedRoute />,
@@ -55,6 +54,7 @@ export const router = createBrowserRouter([
               { path: 'categories', element: <CategoriesPage /> },
               { path: 'categories/:id', element: <CategoryCollectionsPage /> },
               { path: 'tags', element: <CollectionTagsPage /> },
+              { path: 'about', element: <AboutPage /> },
               { path: '*', element: <Navigate to="/library" replace /> },
             ],
           },

@@ -104,7 +104,7 @@ export function CategoriesPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 justify-between mb-6">
         <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
         {!addingNew && (
           <Button size="sm" onClick={() => setAddingNew(true)}>
