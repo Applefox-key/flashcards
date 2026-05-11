@@ -84,7 +84,7 @@ function CollectionCard({
       </div>
       <CollectionProgressBar stats={data?.stats} variant="minimal" />
       {!compact && data && data.cards.length > 0 && (
-        <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 pt-2 mt-0.5">
+        <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
           {data.cards.map((card) => (
             <div key={card.id} className="grid grid-cols-2 gap-1 text-xs text-gray-400 dark:text-gray-500">
               <span className="truncate">{card.question}</span>
