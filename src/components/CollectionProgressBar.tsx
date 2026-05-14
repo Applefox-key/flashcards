@@ -39,7 +39,7 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
   ].filter(Boolean) as { width: number; color: string; label: string }[];
 
   const bar = (
-    <div className={`flex h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full ${className}`}>
+    <div className={`flex h-[1px] sm:h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full ${className}`}>
       {segments.map((seg, i) => (
         <div
           key={seg.label}

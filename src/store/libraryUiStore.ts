@@ -9,11 +9,14 @@ interface MyLibraryState {
   expanded: number[]
   compactCards: boolean
   selectedCategoryId: number | null
+  viewMode: 'by-category' | 'all'
+  allPage: number
 }
 
 interface PublicLibraryState {
   search: string
   activeTag: string | null
+  page: number
 }
 
 interface LibraryUiState {
@@ -31,10 +34,13 @@ export const useLibraryUiStore = create<LibraryUiState>((set) => ({
     expanded: [],
     compactCards: false,
     selectedCategoryId: null,
+    viewMode: 'by-category',
+    allPage: 1,
   },
   publicLibrary: {
     search: '',
     activeTag: null,
+    page: 1,
   },
   setMyLibrary: (patch) =>
     set((s) => ({ myLibrary: { ...s.myLibrary, ...patch } })),

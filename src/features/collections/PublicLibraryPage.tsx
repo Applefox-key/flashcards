@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+
+const PB_LIMIT = 20;
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pbcollectionsApi } from "@/api";
@@ -58,6 +60,69 @@ function highlight(text: string | undefined, query: string): React.ReactNode {
   );
 }
 
+function getPageNumbers(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | "...")[] = [];
+  const push = (n: number | "...") => {
+    if (pages[pages.length - 1] !== n) pages.push(n);
+  };
+  push(1);
+  if (current > 3) push("...");
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) push(i);
+  if (current < total - 2) push("...");
+  push(total);
+  return pages;
+}
+
+function Pagination({
+  page,
+  totalPages,
+  onChange,
+}: {
+  page: number;
+  totalPages: number;
+  onChange: (p: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+  const pages = getPageNumbers(page, totalPages);
+  const btnBase = "h-8 min-w-8 px-2 text-sm rounded-lg border transition-colors";
+  const btnInactive =
+    "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800";
+  const btnActive = "bg-indigo-600 border-indigo-600 text-white";
+  const btnDisabled = "opacity-40 cursor-not-allowed";
+
+  return (
+    <div className="flex items-center justify-center gap-1 flex-wrap">
+      <button
+        onClick={() => onChange(page - 1)}
+        disabled={page === 1}
+        className={`${btnBase} ${btnInactive} ${page === 1 ? btnDisabled : ""} px-3`}>
+        ← Prev
+      </button>
+      {pages.map((p, i) =>
+        p === "..." ? (
+          <span key={`e${i}`} className="w-8 text-center text-gray-400 dark:text-gray-500 text-sm select-none">
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onChange(p as number)}
+            className={`${btnBase} ${p === page ? btnActive : btnInactive}`}>
+            {p}
+          </button>
+        ),
+      )}
+      <button
+        onClick={() => onChange(page + 1)}
+        disabled={page === totalPages}
+        className={`${btnBase} ${btnInactive} ${page === totalPages ? btnDisabled : ""} px-3`}>
+        Next →
+      </button>
+    </div>
+  );
+}
+
 interface CardProps {
   col: Collection;
   search: string;
@@ -83,7 +148,7 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
       {(categoryName || tagNames.length > 0) && (
         <div className="flex flex-wrap gap-1">
           {categoryName && (
-            <span className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700 px-1.5 py-0.5 rounded-full">
+            <span className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700 px-1.5 sm:py-0.5 rounded-full">
               {highlight(categoryName, search)}
             </span>
           )}
@@ -97,7 +162,7 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-2 mt-auto pt-1">
+      <div className="flex items-center justify-between gap-2 mt-auto sm:pt-1">
         {" "}
         <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{col.cardCount ?? 0} cards</span>
         <div className="flex items-center gap-2 min-w-0">
@@ -164,6 +229,7 @@ export function PublicLibraryPage() {
   const { publicLibrary, setPublicLibrary } = useLibraryUiStore();
   const search = publicLibrary.search;
   const activeTag = publicLibrary.activeTag;
+  const page = publicLibrary.page ?? 1;
   const [copiedIds, setCopiedIds] = useState<Set<number>>(new Set());
   const toast = useToast();
   const copyCollection = useCopyCollection();
@@ -195,6 +261,9 @@ export function PublicLibraryPage() {
     });
   }, [collections, search, activeTag]);
 
+  const totalPages = Math.ceil(filtered.length / PB_LIMIT);
+  const paged = filtered.slice((page - 1) * PB_LIMIT, page * PB_LIMIT);
+
   const handleCopy = (col: Collection) => {
     copyCollection.mutate(col.id, {
       onSuccess: () => {
@@ -209,14 +278,14 @@ export function PublicLibraryPage() {
     <div>
       {/* ── Sticky header block ── */}
       <div className="sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
-        <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null })} />
+        <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null, page: 1 })} />
 
         {allTagNames.length > 0 && (
           <div className="hidden sm:flex flex-wrap gap-1.5 py-2 border-b border-gray-200 dark:border-gray-700">
             {allTagNames.map((tag) => (
               <button
                 key={tag}
-                onClick={() => setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "" })}
+                onClick={() => setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "", page: 1 })}
                 className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                   activeTag === tag
                     ? "bg-violet-100 text-violet-700 border-violet-300"
@@ -245,19 +314,31 @@ export function PublicLibraryPage() {
         )}
 
         {!isLoading && filtered.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
-            {filtered.map((col) => (
-              <PublicCollectionCard
-                key={col.id}
-                col={col}
-                search={search}
-                isMine={myCollectionIds.has(col.id)}
-                isCopied={copiedIds.has(col.id)}
-                onCopy={handleCopy}
-                copyPending={copyCollection.isPending}
-              />
-            ))}
-          </div>
+          <>
+            {totalPages > 1 && (
+              <div className="hidden sm:flex justify-center mb-3">
+                <Pagination page={page} totalPages={totalPages} onChange={(p) => setPublicLibrary({ page: p })} />
+              </div>
+            )}
+            {totalPages > 1 && (
+              <div className="sm:hidden mb-3">
+                <Pagination page={page} totalPages={totalPages} onChange={(p) => setPublicLibrary({ page: p })} />
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+              {paged.map((col) => (
+                <PublicCollectionCard
+                  key={col.id}
+                  col={col}
+                  search={search}
+                  isMine={myCollectionIds.has(col.id)}
+                  isCopied={copiedIds.has(col.id)}
+                  onCopy={handleCopy}
+                  copyPending={copyCollection.isPending}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
       {/* mt-4 */}

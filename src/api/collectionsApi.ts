@@ -74,4 +74,11 @@ export const collectionsApi = {
   deleteAllCards: async (id: number): Promise<void> => {
     await apiClient.delete(`/collections/${id}/content`)
   },
+
+  getPaginated: async (page: number, limit: number, search?: string): Promise<{ data: Collection[]; total: number; page: number; limit: number }> => {
+    const params: Record<string, unknown> = { page, limit }
+    if (search) params.search = search
+    const res = await apiClient.get(`/collections/`, { params })
+    return res.data
+  },
 }

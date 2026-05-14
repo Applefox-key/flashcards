@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { IoIosArrowForward } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/Button";
 import { collectionsApi } from "@/api";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
-import { useCollections } from "@/hooks/useCollectionHooks";
+import { useCollections, useCollectionsPaginated } from "@/hooks/useCollectionHooks";
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
 import { useLibraryUiStore } from "@/store/libraryUiStore";
 import { FilterDrawer } from "@/features/collections/FilterDrawer";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import { MobileFab } from "@/components/MobileFab";
 import type { Collection, CollectionTag, CollectionStats } from "@/types";
+
+const ALL_LIMIT = 20;
 
 function highlight(text: string, query: string): React.ReactNode {
   if (!query) return text;
@@ -81,7 +84,7 @@ function CollectionCard({
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
-      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
+      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-1 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
       <div className="font-medium text-gray-800 dark:text-gray-100 text-sm leading-snug">
         {highlight(collection.name, search)}
       </div>
@@ -157,31 +160,219 @@ function CompactToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: (
   );
 }
 
+function CollapsibleSection({
+  title,
+  count,
+  collapsed,
+  onToggle,
+  children,
+}: {
+  title: string;
+  count: number;
+  collapsed: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  const showToggle = count > 15;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{title}</p>
+        {showToggle && (
+          <button
+            onClick={onToggle}
+            className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded">
+            <IoIosArrowForward
+              size={16}
+              className={`transition-transform duration-200 ${collapsed ? "" : "rotate-90"}`}
+            />
+          </button>
+        )}
+      </div>
+      {(!showToggle || !collapsed) && children}
+    </div>
+  );
+}
+
+function getPageNumbers(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | "...")[] = [];
+  const push = (n: number | "...") => {
+    if (pages[pages.length - 1] !== n) pages.push(n);
+  };
+  push(1);
+  if (current > 3) push("...");
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) push(i);
+  if (current < total - 2) push("...");
+  push(total);
+  return pages;
+}
+
+function Pagination({
+  page,
+  totalPages,
+  onChange,
+}: {
+  page: number;
+  totalPages: number;
+  onChange: (p: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+  const pages = getPageNumbers(page, totalPages);
+  const btnBase = "h-8 min-w-8 px-2 text-sm rounded-lg border transition-colors";
+  const btnInactive =
+    "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800";
+  const btnActive = "bg-indigo-600 border-indigo-600 text-white";
+  const btnDisabled = "opacity-40 cursor-not-allowed";
+
+  return (
+    <div className="flex items-center justify-center gap-1 flex-wrap">
+      <button
+        onClick={() => onChange(page - 1)}
+        disabled={page === 1}
+        className={`${btnBase} ${btnInactive} ${page === 1 ? btnDisabled : ""} px-3`}>
+        ← Prev
+      </button>
+
+      {pages.map((p, i) =>
+        p === "..." ? (
+          <span key={`e${i}`} className="w-8 text-center text-gray-400 dark:text-gray-500 text-sm select-none">
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onChange(p as number)}
+            className={`${btnBase} ${p === page ? btnActive : btnInactive}`}>
+            {p}
+          </button>
+        ),
+      )}
+
+      <button
+        onClick={() => onChange(page + 1)}
+        disabled={page === totalPages}
+        className={`${btnBase} ${btnInactive} ${page === totalPages ? btnDisabled : ""} px-3`}>
+        Next →
+      </button>
+    </div>
+  );
+}
+
+function AllCollectionsView({ search }: { search: string }) {
+  const { myLibrary, setMyLibrary } = useLibraryUiStore();
+  const page = myLibrary.allPage ?? 1;
+  const compact = myLibrary.compactCards ?? false;
+
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const { data, isLoading, isFetching } = useCollectionsPaginated(page, ALL_LIMIT, debouncedSearch || undefined);
+
+  const visible = useMemo(() => {
+    let cols = data?.data ?? [];
+    if (myLibrary.activeFilter === "Favorites") cols = cols.filter((c) => c.isFavorite);
+    if (myLibrary.activeFilter === "Public") cols = cols.filter((c) => c.isPublic);
+    if (myLibrary.activeTagId !== null)
+      cols = cols.filter((c) => (c.tags ?? []).some((t) => t.id === myLibrary.activeTagId));
+    return cols;
+  }, [data, myLibrary.activeFilter, myLibrary.activeTagId]);
+
+  const totalPages = data ? Math.ceil(data.total / ALL_LIMIT) : 0;
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <CollectionCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : ""}>
+      <div className="hidden sm:flex items-center justify-between mb-2">
+        {data && totalPages > 1 ? (
+          <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
+        ) : (
+          <div />
+        )}
+        <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
+      </div>
+      {totalPages > 1 && (
+        <div className="sm:hidden mb-3">
+          <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start">
+        {visible.map((col) => (
+          <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={compact} />
+        ))}
+        {visible.length === 0 && (
+          <p className="col-span-full text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function CardsView({
   visibleCategories,
   search,
   effectiveId,
+  totalCollections,
 }: {
   visibleCategories: VisibleEntry[];
   search: string;
   effectiveId: number | null;
+  totalCollections: number;
 }) {
   const { myLibrary, setMyLibrary } = useLibraryUiStore();
   const compact = myLibrary.compactCards ?? false;
+  const viewMode = myLibrary.viewMode ?? "by-category";
 
   const selectedCollections =
-    effectiveId !== null ? (visibleCategories.find((e) => e.category.id === effectiveId)?.collections ?? []) : [];
+    viewMode === "by-category" && effectiveId !== null
+      ? (visibleCategories.find((e) => e.category.id === effectiveId)?.collections ?? [])
+      : [];
+
+  function switchToAll() {
+    setMyLibrary({ viewMode: "all", allPage: 1 });
+  }
+
+  function switchToCategory(id: number) {
+    setMyLibrary({ viewMode: "by-category", selectedCategoryId: id });
+  }
 
   return (
     <div className="flex gap-0 min-h-0">
       {/* Left: category list — desktop only */}
       <div className="hidden sm:flex flex-col w-44 shrink-0 gap-0.5 border-r border-gray-200 dark:border-gray-700 pr-2 mr-4">
+        <button
+          onClick={switchToAll}
+          className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+            viewMode === "all"
+              ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+          }`}>
+          <div className="flex items-center justify-between gap-1">
+            <span className="truncate">All collections</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({totalCollections})</span>
+          </div>
+        </button>
+
+        <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+
         {visibleCategories.map(({ category, collections }) => (
           <button
             key={category.id}
-            onClick={() => setMyLibrary({ selectedCategoryId: category.id })}
+            onClick={() => switchToCategory(category.id)}
             className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-              effectiveId === category.id
+              viewMode === "by-category" && effectiveId === category.id
                 ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}>
@@ -193,19 +384,27 @@ function CardsView({
         ))}
       </div>
 
-      {/* Right: compact toggle + collections grid */}
+      {/* Right: content area */}
       <div className="flex-1 min-w-0">
-        <div className="hidden sm:flex justify-end mb-2">
-          <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start">
-          {selectedCollections.map((col) => (
-            <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={compact} />
-          ))}
-          {selectedCollections.length === 0 && (
-            <p className="col-span-full text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
-          )}
-        </div>
+        {viewMode === "all" ? (
+          <AllCollectionsView search={search} />
+        ) : (
+          <>
+            <div className="hidden sm:flex justify-end mb-2">
+              <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start">
+              {selectedCollections.map((col) => (
+                <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={compact} />
+              ))}
+              {selectedCollections.length === 0 && (
+                <p className="col-span-full text-sm text-gray-400 dark:text-gray-500 py-8 text-center">
+                  No collections
+                </p>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -273,20 +472,23 @@ function LibraryTabsBar({
 
 export function CollectionsPage() {
   const [filterOpen, setFilterOpen] = useState(false);
+  const [categoriesCollapsed, setCategoriesCollapsed] = useState(false);
+  const [tagsCollapsed, setTagsCollapsed] = useState(false);
   const { myLibrary, setMyLibrary } = useLibraryUiStore();
   const activeFilter = myLibrary.activeFilter;
   const search = myLibrary.search;
   const activeTagId = myLibrary.activeTagId;
   const compact = myLibrary.compactCards ?? false;
+  const viewMode = myLibrary.viewMode ?? "by-category";
 
   function setActiveFilter(v: FilterTag) {
-    setMyLibrary({ activeFilter: v });
+    setMyLibrary({ activeFilter: v, allPage: 1 });
   }
   function setSearch(v: string) {
-    setMyLibrary({ search: v });
+    setMyLibrary({ search: v, allPage: 1 });
   }
   function setActiveTagId(v: number | null) {
-    setMyLibrary({ activeTagId: v });
+    setMyLibrary({ activeTagId: v, allPage: 1 });
   }
 
   const { data: categoriesRaw = [], isLoading } = useCategoriesWithCollections();
@@ -339,8 +541,8 @@ export function CollectionsPage() {
   const effectiveId =
     selectedId !== null && validIds.has(selectedId) ? selectedId : (visibleCategories[0]?.category.id ?? null);
 
-  const hasNoResults = !isLoading && totalCollections > 0 && visibleCategories.length === 0;
-  const showContent = !isLoading && visibleCategories.length > 0;
+  const hasNoResults = !isLoading && totalCollections > 0 && visibleCategories.length === 0 && viewMode !== "all";
+  const showContent = !isLoading && totalCollections > 0;
 
   return (
     <div>
@@ -366,19 +568,14 @@ export function CollectionsPage() {
           </div>
         )}
 
-        {/* Mobile: category dropdown + compact toggle */}
+        {/* Mobile: current category label + compact toggle */}
         {showContent && (
           <div className="sm:hidden flex items-center gap-2 py-2 border-b border-gray-200 dark:border-gray-700">
-            <select
-              value={effectiveId ?? ""}
-              onChange={(e) => setMyLibrary({ selectedCategoryId: Number(e.target.value) })}
-              className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-indigo-50 dark:bg-gray-800 text-indigo-700 dark:text-gray-100 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:[color-scheme:dark]">
-              {visibleCategories.map(({ category, collections }) => (
-                <option key={category.id} value={category.id}>
-                  {category.name} ({collections.length})
-                </option>
-              ))}
-            </select>
+            <span className="flex-1 truncate text-sm font-medium text-indigo-700 dark:text-indigo-300 px-1">
+              {viewMode === "all"
+                ? `All collections (${totalCollections})`
+                : (visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? "")}
+            </span>
             <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
           </div>
         )}
@@ -419,6 +616,7 @@ export function CollectionsPage() {
             visibleCategories={visibleCategories}
             search={search.toLowerCase().trim()}
             effectiveId={effectiveId}
+            totalCollections={totalCollections}
           />
         )}
       </div>
@@ -429,7 +627,11 @@ export function CollectionsPage() {
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         onOpen={() => setFilterOpen(true)}
-        hasActiveFilters={activeFilter !== "All" || activeTagId !== null}>
+        hasActiveFilters={
+          activeFilter !== "All" ||
+          activeTagId !== null ||
+          (viewMode === "by-category" && myLibrary.selectedCategoryId !== null)
+        }>
         <div>
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Show</p>
           <div className="flex flex-wrap gap-2">
@@ -447,9 +649,57 @@ export function CollectionsPage() {
             ))}
           </div>
         </div>
+
+        {showContent && (
+          <CollapsibleSection
+            title="Categories"
+            count={visibleCategories.length}
+            collapsed={categoriesCollapsed}
+            onToggle={() => setCategoriesCollapsed((v) => !v)}>
+            <div className="flex flex-col gap-0.5">
+              <button
+                onClick={() => {
+                  setMyLibrary({ viewMode: "all", allPage: 1 });
+                  setFilterOpen(false);
+                }}
+                className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  viewMode === "all"
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="truncate">All collections</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({totalCollections})</span>
+                </div>
+              </button>
+              {visibleCategories.map(({ category, collections }) => (
+                <button
+                  key={category.id}
+                  onClick={() => {
+                    setMyLibrary({ viewMode: "by-category", selectedCategoryId: category.id });
+                    setFilterOpen(false);
+                  }}
+                  className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                    viewMode === "by-category" && effectiveId === category.id
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="truncate">{category.name}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({collections.length})</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </CollapsibleSection>
+        )}
+
         {allTags.length > 0 && (
-          <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
+          <CollapsibleSection
+            title="Tags"
+            count={allTags.length}
+            collapsed={tagsCollapsed}
+            onToggle={() => setTagsCollapsed((v) => !v)}>
             <div className="flex flex-wrap gap-1.5">
               {allTags.map((tag) => (
                 <button
@@ -464,7 +714,7 @@ export function CollectionsPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
         )}
       </FilterDrawer>
     </div>

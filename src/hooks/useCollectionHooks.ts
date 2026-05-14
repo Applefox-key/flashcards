@@ -6,7 +6,7 @@ import { useEditCollection as realUseEditCollection } from '@/features/collectio
 import { useDeleteCollection as realUseDeleteCollection } from '@/features/collections/hooks/useCollections'
 import { useDeleteAllCards as realUseDeleteAllCards } from '@/features/collections/hooks/useCollections'
 import * as demo from '@/demo/useDemoCollections'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { collectionsApi } from '@/api'
 
 // Wrap real useCollectionWithContent to support enabled:false in demo mode
@@ -80,4 +80,12 @@ export function useDeleteAllCards() {
   const r = realUseDeleteAllCards()
   const d = demo.useDeleteAllCards()
   return isDemo ? d : r
+}
+
+export function useCollectionsPaginated(page: number, limit: number, search?: string) {
+  return useQuery({
+    queryKey: ['collections', 'paginated', page, limit, search ?? ''],
+    queryFn: () => collectionsApi.getPaginated(page, limit, search),
+    placeholderData: keepPreviousData,
+  })
 }
