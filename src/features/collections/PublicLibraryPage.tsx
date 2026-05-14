@@ -5,6 +5,7 @@ import { pbcollectionsApi } from "@/api";
 import { useCopyCollection } from "@/features/collections/hooks/useCollections";
 import { useCollections } from "@/hooks/useCollectionHooks";
 import { useLibraryUiStore } from "@/store/libraryUiStore";
+import { FilterDrawer } from "@/features/collections/FilterDrawer";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
 import type { Collection } from "@/types";
@@ -74,7 +75,7 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
   return (
     <div
       onClick={() => navigate(`/library/public/${col.id}`)}
-      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
+      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 py-1 px-4 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
       <div className="font-medium text-gray-800 dark:text-gray-100 text-sm leading-snug">
         {highlight(col.name, search)}
       </div>
@@ -133,7 +134,7 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
 function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: string) => void }) {
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-0">
-      <div className="flex shrink-0">
+      <div className="hidden sm:flex shrink-0">
         <Link
           to="/library"
           className="px-5 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent transition-colors">
@@ -144,12 +145,12 @@ function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: st
         </span>
       </div>
 
-      <div className="ml-auto pb-2">
+      <div className="w-full sm:w-auto sm:ml-auto pb-2">
         <input
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search by name, category or tag…"
-          className="w-40 sm:w-64 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
+          className="w-full sm:w-64 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
@@ -159,6 +160,7 @@ function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: st
 }
 
 export function PublicLibraryPage() {
+  const [filterOpen, setFilterOpen] = useState(false);
   const { publicLibrary, setPublicLibrary } = useLibraryUiStore();
   const search = publicLibrary.search;
   const activeTag = publicLibrary.activeTag;
@@ -210,7 +212,7 @@ export function PublicLibraryPage() {
         <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null })} />
 
         {allTagNames.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 py-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="hidden sm:flex flex-wrap gap-1.5 py-2 border-b border-gray-200 dark:border-gray-700">
             {allTagNames.map((tag) => (
               <button
                 key={tag}
@@ -228,37 +230,63 @@ export function PublicLibraryPage() {
       </div>
 
       <div className="mt-4">
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        )}
 
-      {isLoading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      )}
+        {!isLoading && filtered.length === 0 && (
+          <p className="text-center text-gray-400 py-16">
+            {search || activeTag !== null ? "No collections match your search" : "No public collections yet"}
+          </p>
+        )}
 
-      {!isLoading && filtered.length === 0 && (
-        <p className="text-center text-gray-400 py-16">
-          {search || activeTag !== null ? "No collections match your search" : "No public collections yet"}
-        </p>
-      )}
+        {!isLoading && filtered.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+            {filtered.map((col) => (
+              <PublicCollectionCard
+                key={col.id}
+                col={col}
+                search={search}
+                isMine={myCollectionIds.has(col.id)}
+                isCopied={copiedIds.has(col.id)}
+                onCopy={handleCopy}
+                copyPending={copyCollection.isPending}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      {/* mt-4 */}
 
-      {!isLoading && filtered.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
-          {filtered.map((col) => (
-            <PublicCollectionCard
-              key={col.id}
-              col={col}
-              search={search}
-              isMine={myCollectionIds.has(col.id)}
-              isCopied={copiedIds.has(col.id)}
-              onCopy={handleCopy}
-              copyPending={copyCollection.isPending}
-            />
-          ))}
-        </div>
-      )}
-      </div>{/* mt-4 */}
+      <FilterDrawer
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        onOpen={() => setFilterOpen(true)}
+        hasActiveFilters={activeTag !== null}>
+        {allTagNames.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
+            <div className="flex flex-wrap gap-1.5">
+              {allTagNames.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setPublicLibrary({ activeTag: activeTag === tag ? null : tag, search: "" })}
+                  className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                    activeTag === tag
+                      ? "bg-violet-600 border-violet-600 text-white"
+                      : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300"
+                  }`}>
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </FilterDrawer>
     </div>
   );
 }

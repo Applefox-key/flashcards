@@ -4,6 +4,7 @@ import { usePlaylists, useDeletePlaylist, useEditPlaylist, usePlaylistContent } 
 import { useCollections } from "@/hooks/useCollectionHooks";
 import { PlaylistModal } from "./PlaylistModal";
 import { Button } from "@/components/Button";
+import { MobileFab } from "@/components/MobileFab";
 import { useToast } from "@/hooks/useToast";
 import type { Playlist, PlaylistCollection, Collection } from "@/types";
 
@@ -247,7 +248,7 @@ function PlaylistPanel({
   allTagNames,
   onDelete,
   deleteLoading,
-  onCreateNew,
+  onCreateNew: _onCreateNew,
 }: {
   playlist: Playlist;
   allCollections: Collection[];
@@ -263,7 +264,9 @@ function PlaylistPanel({
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const editPlaylistMutation = useEditPlaylist();
   const { data: cards = [], isLoading: cardsLoading } = usePlaylistContent(playlist.id);
@@ -271,6 +274,16 @@ function PlaylistPanel({
   useEffect(() => {
     if (activeSlot !== null) setTimeout(() => searchRef.current?.focus(), 50);
   }, [activeSlot]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handler(e: MouseEvent) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node))
+        setMobileMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [mobileMenuOpen]);
 
   function enterEditMode(slot?: number) {
     setEditName(playlist.name);
@@ -358,21 +371,21 @@ function PlaylistPanel({
     <>
       {!isEditing && (
         <>
-          <div className="sticky -top-3 sm:-top-6 z-10 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 py-2 mb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2 flex-wrap">
-            <Button size="sm" onClick={onCreateNew} className="sm:hidden">
-              + New
-            </Button>
-            <Button size="sm" variant="danger" onClick={onDelete} loading={deleteLoading} className="ml-3 sm:ml-0">
+          <div className="sticky -top-3 sm:-top-6 z-10 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 py-2 mb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+            {/* Desktop: Delete */}
+            <Button size="sm" variant="danger" onClick={onDelete} loading={deleteLoading} className="hidden sm:inline-flex">
               Delete
             </Button>
+
+            {/* Practice — always visible when collections exist */}
             {playlist.collections.length > 0 && (
               <Link to={`/play/${playlist.id}?src=pl`}>
-                <Button size="sm" variant="secondary">
-                  ▶ Practice
-                </Button>
+                <Button size="sm" variant="secondary">▶ Practice</Button>
               </Link>
             )}
-            <Button size="sm" variant="secondary" onClick={() => enterEditMode()}>
+
+            {/* Desktop: Edit */}
+            <Button size="sm" variant="secondary" onClick={() => enterEditMode()} className="hidden sm:inline-flex">
               Edit
             </Button>
 
@@ -397,6 +410,29 @@ function PlaylistPanel({
                 Cards
                 {!cardsLoading && cards.length > 0 && <span className="ml-1 opacity-70">{cards.length}</span>}
               </button>
+            </div>
+
+            {/* Mobile: "..." context menu */}
+            <div ref={mobileMenuRef} className="relative sm:hidden">
+              <button
+                onClick={() => setMobileMenuOpen((v) => !v)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-lg leading-none">
+                ···
+              </button>
+              {mobileMenuOpen && (
+                <div className="absolute right-0 top-9 z-30 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 min-w-[120px]">
+                  <button
+                    onClick={() => { enterEditMode(); setMobileMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => { onDelete(); setMobileMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -652,6 +688,7 @@ export function PlaylistsPage() {
         </>
       )}
 
+      <MobileFab onClick={() => setCreateModalOpen(true)} label="Add playlist" />
       <PlaylistModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
   );

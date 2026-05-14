@@ -19,8 +19,17 @@ function CardImg({ filename, collectionId, alt }: { filename: string | undefined
   const src = useCardImage(filename, collectionId);
   const hasFile = !!filename && filename !== "null" && filename !== "";
   if (!hasFile) return null;
-  if (!src) return <div className="w-full bg-gray-100 dark:bg-gray-700 rounded animate-pulse mt-2" style={{ height: "6rem" }} />;
-  return <img src={src} alt={alt} className="mt-2 max-h-40 object-contain rounded border border-gray-100 dark:border-gray-700" />;
+  if (!src)
+    return (
+      <div className="w-full bg-gray-100 dark:bg-gray-700 rounded animate-pulse mt-2" style={{ height: "6rem" }} />
+    );
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="mt-2 max-h-40 object-contain rounded border border-gray-100 dark:border-gray-700"
+    />
+  );
 }
 
 // ── Read-only card ────────────────────────────────────────────────────
@@ -106,23 +115,25 @@ export function PublicCollectionPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <button
-          onClick={() => navigate("/library/public")}
-          className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
-          </svg>
-        </button>
-        <h1 className="test-base sm:text-2xl font-bold text-gray-900 dark:text-white flex-1">
-          {isLoading ? (
-            <span className="inline-block h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-          ) : (
-            (collection?.name ?? `Collection #${id}`)
-          )}
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <button
+            onClick={() => navigate("/library/public")}
+            className="shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
+            </svg>
+          </button>
+          <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
+            {isLoading ? (
+              <span className="inline-block h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            ) : (
+              (collection?.name ?? `Collection #${id}`)
+            )}
+          </h1>
+        </div>
         {!isLoading && (
-          <>
+          <div className="flex gap-2 sm:gap-3 shrink-0">
             {copied ? (
               <span className="text-sm text-green-600 dark:text-green-400 font-medium px-3">✓ Copied</span>
             ) : (
@@ -133,7 +144,7 @@ export function PublicCollectionPage() {
             <Button size="sm" onClick={() => navigate(`/play/${collectionId}`)}>
               ▶ Practice
             </Button>
-          </>
+          </div>
         )}
       </div>
 

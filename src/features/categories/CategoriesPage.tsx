@@ -4,6 +4,7 @@ import { useCategories, useCreateCategory, useEditCategory, useDeleteCategory } 
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/Button";
+import { MobileFab } from "@/components/MobileFab";
 
 // ── Skeleton ─────────────────────────────────────────────────────────
 
@@ -104,7 +105,7 @@ export function CategoriesPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 justify-between mb-6">
+      <div className="hidden sm:flex items-center sticky sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 justify-between mb-6">
         <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
         {!addingNew && (
           <Button size="sm" onClick={() => setAddingNew(true)}>
@@ -214,6 +215,7 @@ export function CategoriesPage() {
           })}
         </div>
       )}
+      <MobileFab onClick={() => setAddingNew(true)} label="Add category" />
     </div>
   );
 }

@@ -61,18 +61,22 @@ export function Layout() {
   const location = useLocation();
   const isDemo = useIsDemo();
 
+  const isGamePage = /^\/play\/[^/]+\/[^/]+/.test(location.pathname);
+
   const activeSection =
     location.pathname === "/library" ||
-    location.pathname.startsWith("/library/") ||
+    (location.pathname.startsWith("/library/") && location.pathname !== "/library/public") ||
     location.pathname.startsWith("/collections/")
       ? "library"
-      : location.pathname === "/playlists" || location.pathname.startsWith("/playlists/")
-        ? "playlists"
-        : location.pathname === "/categories" || location.pathname.startsWith("/categories/")
-          ? "categories"
-          : location.pathname === "/tags"
-            ? "tags"
-            : null;
+      : location.pathname === "/library/public"
+        ? "public"
+        : location.pathname === "/playlists" || location.pathname.startsWith("/playlists/")
+          ? "playlists"
+          : location.pathname === "/categories" || location.pathname.startsWith("/categories/")
+            ? "categories"
+            : location.pathname === "/tags"
+              ? "tags"
+              : null;
   const [appsOpen, setAppsOpen] = useState(false);
 
   useEffect(() => {
@@ -115,22 +119,25 @@ export function Layout() {
         </div>
       )}
 
-      {/* Navbar — fixed at top, never scrolls */}
-      <header className="shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10">
-        <div className="h-14 flex items-center px-4 gap-4">
-          <div className="flex items-center">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-              aria-label="Toggle sidebar">
-              <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1" />
-              <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1" />
-              <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300" />
-            </button>
-            <NavLink to="/library" className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-              FlashMinds
-            </NavLink>
-          </div>
+      {/* Navbar — hidden on mobile game pages only */}
+      <header className={`shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10${isGamePage ? " hidden sm:block" : ""}`}>
+        <div className="h-14 flex items-center px-4 gap-4 relative">
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
+            aria-label="Toggle sidebar">
+            <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1" />
+            <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1" />
+            <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300" />
+          </button>
+
+          {/* Title: centered absolutely on mobile, inline on desktop */}
+          <NavLink
+            to="/library"
+            className="text-lg font-bold text-indigo-600 dark:text-indigo-400 absolute left-1/2 -translate-x-1/2 sm:static sm:translate-x-0">
+            FlashMinds
+          </NavLink>
+
           <nav className="ml-4 hidden sm:flex gap-2">
             <NavLink
               to="/library"
@@ -156,18 +163,20 @@ export function Layout() {
 
           <NavLink
             to="/about"
-            // className="hidden sm:inline flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             className={({ isActive }) =>
-              `hidden sm:inline px-3 py-1.5 rounded text-sm font-medium ${isActive ? "hidden sm:inline bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
+              `hidden sm:inline px-3 py-1.5 rounded text-sm font-medium ${isActive ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
             }
             title="About">
             <span className="text-xs">About</span>
           </NavLink>
 
           <div className="ml-auto flex items-center justify-end gap-3">
-            <DarkModeToggle />
-            {/* Apps switcher */}
-            <div id="apps-dropdown-root" className="relative">
+            {/* DarkModeToggle — desktop only */}
+            <span className="hidden sm:flex">
+              <DarkModeToggle />
+            </span>
+            {/* Apps switcher — desktop only */}
+            <div id="apps-dropdown-root" className="relative hidden sm:block">
               <button
                 onClick={() => setAppsOpen((prev) => !prev)}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm border transition-colors ${
@@ -181,9 +190,8 @@ export function Layout() {
                   <rect x="1" y="10" width="5" height="5" rx="1.5" />
                   <rect x="10" y="10" width="5" height="5" rx="1.5" />
                 </svg>
-                <span className="hidden sm:inline">Apps</span>
+                <span>Apps</span>
                 <svg
-                  className="hidden sm:block"
                   width="10"
                   height="10"
                   viewBox="0 0 10 10"
@@ -247,7 +255,7 @@ export function Layout() {
             </div>
             <NavLink to="/profile" className="flex items-center hover:opacity-80 transition-opacity">
               {user && <NavAvatar name={user.name} img={user.img} userId={user.id} />}
-            </NavLink>{" "}
+            </NavLink>
             <button
               onClick={handleLogout}
               className="hidden sm:inline flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
@@ -256,78 +264,16 @@ export function Layout() {
             </button>
           </div>
         </div>
-
-        {/* Mobile bottom nav row — hidden on desktop */}
-        <nav className="sm:hidden flex px-2">
-          <NavLink
-            to="/library"
-            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-            Library
-          </NavLink>
-          <NavLink
-            to="/playlists"
-            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-            Playlists
-          </NavLink>
-          <NavLink
-            to="/categories"
-            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-            Categories
-          </NavLink>
-          <NavLink
-            to="/tags"
-            className={`flex-1 text-center py-2 text-xs font-medium ${activeSection === "tags" ? "text-violet-700 dark:text-violet-400" : "text-gray-500 dark:text-gray-400"}`}>
-            Tags
-          </NavLink>{" "}
-          <NavLink
-            to="/about"
-            className="flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-            title="About">
-            <svg
-              className="sm:hidden"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-          </NavLink>{" "}
-          <button
-            onClick={handleLogout}
-            className=" ml-4 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-            title="Logout">
-            <svg
-              className="sm:hidden"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
-        </nav>
       </header>
 
       {/* Body — fills remaining height, never overflows */}
       <div className="relative flex flex-1 min-h-0">
         {/* Backdrop — mobile only, closes sidebar on tap */}
-        {sidebarOpen && <div className="fixed inset-0 z-10 bg-black/20 sm:hidden" onClick={toggleSidebar} />}
+        {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/20 sm:hidden" onClick={toggleSidebar} />}
 
         {/* Sidebar — overlays on mobile, pushes content on desktop */}
         {sidebarOpen && (
-          <aside className="absolute inset-y-0 left-0 z-20 w-64 sm:relative sm:inset-y-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
+          <aside className="absolute inset-y-0 left-0 z-30 w-64 sm:relative sm:inset-y-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
             <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Navigation</p>
             <nav className="flex flex-col gap-1">
               <NavLink
@@ -373,7 +319,11 @@ export function Layout() {
                 onClick={handleLogout}
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 py-1 text-left transition-colors">
                 Logout
-              </button>{" "}
+              </button>
+              <div className="flex items-center justify-between py-1">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Theme</span>
+                <DarkModeToggle />
+              </div>
               <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
               <NavLink
                 to="/about"
@@ -407,10 +357,46 @@ export function Layout() {
         )}
 
         {/* Main content — only this scrolls */}
-        <main className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-6">
+        <main className={`flex-1 min-w-0 overflow-y-auto ${isGamePage ? "p-3" : "p-3 sm:p-6 pb-20 sm:pb-6"}`}>
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile bottom navigation — hidden on game pages */}
+      {!isGamePage && <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex">
+        <NavLink
+          to="/library"
+          className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+          Library
+        </NavLink>
+        <NavLink
+          to="/playlists"
+          className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+          Playlists
+        </NavLink>
+        <NavLink
+          to="/categories"
+          className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+          Categories
+        </NavLink>
+        <NavLink
+          to="/library/public"
+          className={`flex-1 flex flex-nowrap items-center justify-center py-3 gap-0.5 text-xs font-medium ${activeSection === "public" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          </svg>
+          Public
+        </NavLink>
+      </nav>}
 
       <Toaster />
     </div>

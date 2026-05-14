@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/Button";
@@ -6,7 +7,9 @@ import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useCollections } from "@/hooks/useCollectionHooks";
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
 import { useLibraryUiStore } from "@/store/libraryUiStore";
+import { FilterDrawer } from "@/features/collections/FilterDrawer";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
+import { MobileFab } from "@/components/MobileFab";
 import type { Collection, CollectionTag, CollectionStats } from "@/types";
 
 function highlight(text: string, query: string): React.ReactNode {
@@ -106,7 +109,7 @@ function CollectionCard({
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-2 mt-auto pt-1 border-t">
+      <div className={`flex items-center justify-between gap-2 mt-auto pt-1 ${!compact ? "border-t" : ""}`}>
         <div className="flex items-center gap-2 min-w-0">
           {!!collection.isFavorite && <span className="text-rose-400 shrink-0">♥</span>}
           <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{collection.cardCount ?? 0} cards</span>
@@ -133,7 +136,7 @@ function CompactToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: (
   return (
     <button
       onClick={onToggle}
-      title={compact ? "Показать превью" : "Компактный вид"}
+      title={compact ? "Show preview" : "Compact view"}
       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors shrink-0 ${
         compact
           ? "bg-indigo-600 border-indigo-600 text-white"
@@ -224,7 +227,7 @@ function LibraryTabsBar({
 }) {
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-0">
-      <div className="flex items-center w-full sm:w-auto shrink-0">
+      <div className="hidden sm:flex items-center sm:w-auto shrink-0">
         <span className="px-5 py-2.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 -mb-px cursor-default select-none">
           My Library
         </span>
@@ -252,7 +255,7 @@ function LibraryTabsBar({
           <button
             key={tag}
             onClick={() => onChange(tag)}
-            className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+            className={`hidden sm:block px-3 py-1 text-xs rounded-full border transition-colors ${
               active === tag
                 ? "bg-indigo-600 border-indigo-600 text-white"
                 : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-600"
@@ -269,6 +272,7 @@ function LibraryTabsBar({
 }
 
 export function CollectionsPage() {
+  const [filterOpen, setFilterOpen] = useState(false);
   const { myLibrary, setMyLibrary } = useLibraryUiStore();
   const activeFilter = myLibrary.activeFilter;
   const search = myLibrary.search;
@@ -345,7 +349,7 @@ export function CollectionsPage() {
         <LibraryTabsBar search={search} onSearch={setSearch} active={activeFilter} onChange={setActiveFilter} />
 
         {allTags.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto items-center border-b border-slate-200/80 dark:border-slate-700/80 py-2">
+          <div className="hidden sm:flex gap-2 overflow-x-auto items-center border-b border-slate-200/80 dark:border-slate-700/80 py-2">
             <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">Tags:</span>
             {allTags.map((tag) => (
               <button
@@ -418,6 +422,51 @@ export function CollectionsPage() {
           />
         )}
       </div>
+
+      <MobileFab to="/collections/new" label="Add collection" />
+
+      <FilterDrawer
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        onOpen={() => setFilterOpen(true)}
+        hasActiveFilters={activeFilter !== "All" || activeTagId !== null}>
+        <div>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Show</p>
+          <div className="flex flex-wrap gap-2">
+            {FILTER_TAGS.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setActiveFilter(tag)}
+                className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
+                  activeFilter === tag
+                    ? "bg-indigo-600 border-indigo-600 text-white"
+                    : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                }`}>
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+        {allTags.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
+            <div className="flex flex-wrap gap-1.5">
+              {allTags.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => setActiveTagId(activeTagId === tag.id ? null : tag.id)}
+                  className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                    activeTagId === tag.id
+                      ? "bg-violet-600 border-violet-600 text-white"
+                      : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300"
+                  }`}>
+                  {tag.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </FilterDrawer>
     </div>
   );
 }

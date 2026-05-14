@@ -8,17 +8,17 @@ interface Props {
   onPlayAgain: () => void;
   onBack: () => void;
   answerFirst?: boolean;
+  delay?: number;
 }
 
 const FADE_OUT = 300;
 const FADE_IN = 300;
 
-export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirst = false }: Props) {
+export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirst = false, delay = 2 }: Props) {
   const [cards] = useState(() => shuffle(initialCards));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [running, setRunning] = useState(false);
-  const [delay, setDelay] = useState(2); // seconds per side
   const [done, setDone] = useState(false);
   const [visible, setVisible] = useState(true);
 
@@ -159,19 +159,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
           }`}>
           {running ? "⏸ Pause" : "▶ Start"}
         </button>
-
-        <div className="flex items-center gap-2 flex-1">
-          <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Delay: {delay}s</span>
-          <input
-            type="range"
-            min={0.5}
-            max={5}
-            step={0.5}
-            value={delay}
-            onChange={(e) => setDelay(Number(e.target.value))}
-            className="flex-1 accent-indigo-500"
-          />
-        </div>
+        <span className="text-xs text-gray-400 dark:text-gray-500">{delay}s per side</span>
       </div>
 
       {/* Manual navigation when paused */}

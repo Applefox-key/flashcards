@@ -22,6 +22,7 @@ import { TagSelect } from "@/components/TagSelect";
 import { useToast } from "@/hooks/useToast";
 import { useCardImage } from "@/hooks/useCardImage";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
+import { InfoDrawer } from "@/components/InfoDrawer";
 import type { Content, Collection, CardEditRequest, Category } from "@/types";
 
 interface CollectionContentResponse {
@@ -279,6 +280,19 @@ function CardListRow({
   const [question, setQuestion] = useState(card.question);
   const [answer, setAnswer] = useState(card.answer);
   const [note, setNote] = useState(card.note ?? "");
+  const [rowMenuOpen, setRowMenuOpen] = useState(false);
+  const rowMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!rowMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (rowMenuRef.current && !rowMenuRef.current.contains(e.target as Node)) {
+        setRowMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [rowMenuOpen]);
 
   function handleSave() {
     editCard.mutate(
@@ -351,7 +365,8 @@ function CardListRow({
         <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
         {card.note && <span className="col-span-2 text-xs text-gray-400 truncate">{card.note}</span>}
       </div>
-      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+      {/* Desktop: hover buttons */}
+      <div className="hidden sm:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <button onClick={() => onView(card)} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
           View
         </button>
@@ -365,6 +380,34 @@ function CardListRow({
           className="text-xs text-gray-400 hover:text-red-500 transition-colors">
           Delete
         </button>
+      </div>
+      {/* Mobile: ··· kebab menu */}
+      <div className="relative sm:hidden shrink-0" ref={rowMenuRef}>
+        <button
+          onClick={() => setRowMenuOpen((v) => !v)}
+          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm leading-none">
+          •••
+        </button>
+        {rowMenuOpen && (
+          <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[140px] py-1">
+            <button
+              onClick={() => { setRowMenuOpen(false); onView(card); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              View
+            </button>
+            <button
+              onClick={() => { setRowMenuOpen(false); setEditing(true); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              Edit
+            </button>
+            <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
+            <button
+              onClick={() => { setRowMenuOpen(false); onDelete(card.id); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+              Delete
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -622,6 +665,7 @@ export function CollectionDetailPage() {
   const [editingTags, setEditingTags] = useState(false);
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const tagPopoverMobileRef = useRef<HTMLDivElement>(null);
   const tagPopoverDesktopRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -856,118 +900,6 @@ export function CollectionDetailPage() {
             </div>
           </div>
 
-          {/* ── MOBILE header (< sm) ── */}
-          {!isLoading && (
-            <div className="sm:hidden flex flex-col gap-2 mb-4">
-              {/* Line 2: status badges + stat chips */}
-              <div className="ml-8 flex gap-2 flex-wrap items-center justify-between">
-                <div>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                    {cards.length} {cards.length === 1 ? "card" : "cards"}
-                  </span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                    {collection?.category
-                      ? typeof collection.category === "object"
-                        ? (collection.category as Category).name
-                        : (collection.category as unknown as string)
-                      : "—"}
-                  </span>
-                </div>
-                <div>
-                  <button
-                    onClick={() =>
-                      togglePublic.mutate(
-                        { id: collectionId, isPublic: !collection?.isPublic },
-                        { onError: () => toast.error("Failed to update visibility") },
-                      )
-                    }
-                    title={collection?.isPublic ? "🔓 public" : "🔒 private"}
-                    disabled={togglePublic.isPending}
-                    className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
-                      collection?.isPublic
-                        ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"
-                        : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
-                    }`}>
-                    {collection?.isPublic ? "🔓" : "🔒"}
-                  </button>
-                  <button
-                    onClick={() =>
-                      toggleFavorite.mutate(
-                        { id: collectionId, isFavorite: !collection?.isFavorite },
-                        { onError: () => toast.error("Failed to update favorite") },
-                      )
-                    }
-                    disabled={toggleFavorite.isPending}
-                    className={`text-xs px-2 py-0.5 rounded-full border transition-colors disabled:opacity-40 ${
-                      collection?.isFavorite
-                        ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
-                        : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
-                    }`}>
-                    {collection?.isFavorite ? "♥ favorite" : "♥"}
-                  </button>
-                </div>
-              </div>
-
-              {/* Line 3: tags + edit button (popover anchor) */}
-              <div className="ml-8 relative" ref={tagPopoverMobileRef}>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {collectionTags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
-                      {tag.name}
-                    </span>
-                  ))}
-                  {collectionTags.length === 0 && (
-                    <span className="text-xs text-gray-300 dark:text-gray-600">no tags</span>
-                  )}
-                  <button
-                    onClick={() => setEditingTags(true)}
-                    title="Edit tags"
-                    className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-                    ✏️
-                  </button>
-                </div>
-                {editingTags && (
-                  <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                        Edit tags
-                      </span>
-                      <button
-                        onClick={() => {
-                          setEditingTags(false);
-                          setPendingTagIds(collectionTags.map((t) => t.id));
-                        }}
-                        className="text-gray-400 hover:text-gray-600 text-lg leading-none">
-                        ×
-                      </button>
-                    </div>
-                    <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
-                    <div className="mt-3 flex justify-end">
-                      <button
-                        onClick={() =>
-                          setCollectionTags.mutate(
-                            { collectionId, tagIds: pendingTagIds },
-                            {
-                              onSuccess: () => {
-                                toast.success("Tags updated");
-                                setEditingTags(false);
-                              },
-                              onError: () => toast.error("Failed to update tags"),
-                            },
-                          )
-                        }
-                        disabled={setCollectionTags.isPending}
-                        className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
           {/* Meta — desktop only (sm and above) */}
           {!isLoading && (
             <div>
@@ -1244,6 +1176,131 @@ export function CollectionDetailPage() {
       {!isLoading && cards.length > 0 && filtered.length === 0 && (
         <p className="text-center text-gray-400 py-8">No cards match your search.</p>
       )}
+
+      {/* Collection info drawer — mobile only */}
+      <InfoDrawer
+        open={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        onOpen={() => setInfoOpen(true)}
+        title={collection?.name ?? `Collection #${id}`}>
+        {!isLoading && (
+          <>
+            <div>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                Details
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
+                  {cards.length} {cards.length === 1 ? "card" : "cards"}
+                </span>
+                {collection?.category && (
+                  <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
+                    {typeof collection.category === "object"
+                      ? (collection.category as Category).name
+                      : (collection.category as unknown as string)}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                Settings
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() =>
+                    togglePublic.mutate(
+                      { id: collectionId, isPublic: !collection?.isPublic },
+                      { onError: () => toast.error("Failed to update visibility") },
+                    )
+                  }
+                  disabled={togglePublic.isPending}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors disabled:opacity-40 ${
+                    collection?.isPublic
+                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"
+                      : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
+                  }`}>
+                  {collection?.isPublic ? "🔓 public" : "🔒 private"}
+                </button>
+                <button
+                  onClick={() =>
+                    toggleFavorite.mutate(
+                      { id: collectionId, isFavorite: !collection?.isFavorite },
+                      { onError: () => toast.error("Failed to update favorite") },
+                    )
+                  }
+                  disabled={toggleFavorite.isPending}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors disabled:opacity-40 ${
+                    collection?.isFavorite
+                      ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                      : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
+                  }`}>
+                  {collection?.isFavorite ? "♥ favorite" : "♥"}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tags</p>
+                {!editingTags && (
+                  <button
+                    onClick={() => setEditingTags(true)}
+                    className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
+                    Edit
+                  </button>
+                )}
+              </div>
+              {!editingTags ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {collectionTags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
+                      {tag.name}
+                    </span>
+                  ))}
+                  {collectionTags.length === 0 && (
+                    <span className="text-xs text-gray-300 dark:text-gray-600">no tags</span>
+                  )}
+                </div>
+              ) : (
+                <div ref={tagPopoverMobileRef}>
+                  <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
+                  <div className="mt-3 flex gap-2 justify-end">
+                    <button
+                      onClick={() => {
+                        setEditingTags(false);
+                        setPendingTagIds(collectionTags.map((t) => t.id));
+                      }}
+                      className="text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() =>
+                        setCollectionTags.mutate(
+                          { collectionId, tagIds: pendingTagIds },
+                          {
+                            onSuccess: () => {
+                              toast.success("Tags updated");
+                              setEditingTags(false);
+                            },
+                            onError: () => toast.error("Failed to update tags"),
+                          },
+                        )
+                      }
+                      disabled={setCollectionTags.isPending}
+                      className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </InfoDrawer>
 
       {/* Modals */}
       <PasteCardsModal open={pasteOpen} onClose={() => setPasteOpen(false)} collectionId={collectionId} />

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { contentApi } from "@/api";
 import { shuffle } from "@/utils/gameUtils";
-import { DifficultyFilter } from "./DifficultyFilter";
 import { FlashCardFace } from "@/components/FlashCardFace";
 import { useIsDemo } from "@/hooks/useIsDemo";
 import { useDemoStore } from "@/demo/demoStore";
@@ -12,6 +11,8 @@ interface Props {
   collectionId: number;
   rateFilter: number | null;
   onFilterChange: (val: number | null) => void;
+  answerFirst: boolean;
+  isShuffled: boolean;
 }
 
 // Длительности анимации (ms)
@@ -20,14 +21,12 @@ const FADE_IN = 300; // плавное появление
 
 // ── Main component ──────────────────────────────────────────────────
 
-export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, onFilterChange }: Props) {
+export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _rateFilter, onFilterChange: _onFilterChange, answerFirst, isShuffled }: Props) {
   const isDemo = useIsDemo();
   const demoStore = useDemoStore();
-  const [cards, setCards] = useState<Content[]>(() => [...initialCards]);
+  const [cards] = useState<Content[]>(() => isShuffled ? shuffle([...initialCards]) : [...initialCards]);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [isShuffled, setIsShuffled] = useState(false);
-  const [answerFirst, setAnswerFirst] = useState(false);
   // visible = true → карточка видна, false → невидима (между картами)
   const [visible, setVisible] = useState(true);
   const [ratingMap, setRatingMap] = useState<Record<number, number>>(() => {
@@ -80,20 +79,6 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
     return () => window.removeEventListener("keydown", onKey);
   }, [goNext, goPrev]);
 
-  function toggleShuffle() {
-    const next = !isShuffled;
-    setIsShuffled(next);
-    setCards(next ? shuffle([...initialCards]) : [...initialCards]);
-    setIndex(0);
-    setFlipped(false);
-  }
-
-  function toggleAnswerFirst() {
-    setAnswerFirst((a) => !a);
-    setFlipped(false);
-    setIndex(0);
-  }
-
   function handleRate(cardId: number, star: number) {
     const newRate = ratingMap[cardId] === star ? 0 : star;
     setRatingMap((prev) => ({ ...prev, [cardId]: newRate }));
@@ -113,29 +98,10 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter, o
   const frontImg = answerFirst ? card.imgA : card.imgQ;
   const backImg = answerFirst ? card.imgQ : card.imgA;
 
-  const btnBase = "text-xs border rounded px-2 py-0.5 transition-colors";
-  const btnActive =
-    "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400";
-  const btnInactive =
-    "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500";
-
   const isNavigating = !visible;
 
   return (
     <div className="mx-auto flex flex-col gap-4">
-      {/* Controls row */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <button onClick={toggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive}`}>
-          {answerFirst ? "A → Q" : "Q → A"}
-        </button>
-        <button onClick={toggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
-          ⇄ Shuffle
-        </button>
-        <div className="ml-auto">
-          <DifficultyFilter selected={rateFilter} onChange={onFilterChange} />
-        </div>
-      </div>
-
       {/* Card wrapper — opacity + scale fade, click to flip */}
       <div
         style={{
