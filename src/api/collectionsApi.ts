@@ -75,9 +75,19 @@ export const collectionsApi = {
     await apiClient.delete(`/collections/${id}/content`)
   },
 
-  getPaginated: async (page: number, limit: number, search?: string): Promise<{ data: Collection[]; total: number; page: number; limit: number }> => {
+  getPaginated: async (
+    page: number,
+    limit: number,
+    search?: string,
+    isFavorite?: boolean,
+    isPublic?: boolean,
+    tagId?: number,
+  ): Promise<{ data: Collection[]; total: number; page: number; limit: number }> => {
     const params: Record<string, unknown> = { page, limit }
     if (search) params.search = search
+    if (isFavorite) params.isFavorite = 1
+    if (isPublic) params.isPublic = 1
+    if (tagId != null) params.tagId = tagId
     const res = await apiClient.get(`/collections/`, { params })
     return res.data
   },

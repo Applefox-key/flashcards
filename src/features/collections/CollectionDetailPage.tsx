@@ -657,6 +657,9 @@ export function CollectionDetailPage() {
 
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortField, setSortField] = useState<"question" | "answer" | "note" | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [addingCard, setAddingCard] = useState(false);
   const [viewCard, setViewCard] = useState<Content | null>(null);
   const [pasteOpen, setPasteOpen] = useState(false);
@@ -669,6 +672,7 @@ export function CollectionDetailPage() {
   const tagPopoverMobileRef = useRef<HTMLDivElement>(null);
   const tagPopoverDesktopRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
 
   const setCollectionTags = useSetCollectionTags();
   const { data: collectionTags = [] } = useQuery({
@@ -707,6 +711,17 @@ export function CollectionDetailPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    if (!sortMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(e.target as Node)) {
+        setSortMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [sortMenuOpen]);
+
   const parsed = rawData as unknown as CollectionContentResponse[] | undefined;
   const collectionData = parsed?.[0];
   const collection = collectionData?.collection;
@@ -717,6 +732,14 @@ export function CollectionDetailPage() {
       c.question?.toLowerCase().includes(search.toLowerCase()) ||
       c.answer?.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const sorted = sortField
+    ? [...filtered].sort((a, b) => {
+        const va = (a[sortField] ?? "").toLowerCase();
+        const vb = (b[sortField] ?? "").toLowerCase();
+        return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
+      })
+    : filtered;
 
   function handleDelete(cardId: number) {
     if (!confirm("Delete this card?")) return;
@@ -787,7 +810,11 @@ export function CollectionDetailPage() {
               {isLoading ? (
                 <span className="inline-block h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               ) : (
-                (collection?.name ?? `Collection #${id}`)
+                <Link
+                  to={`/collections/${id}/edit`}
+                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                  {collection?.name ?? `Collection #${id}`}
+                </Link>
               )}
             </h1>{" "}
             {/* ── DESKTOP actions row (sm and above) ──*/}
@@ -1067,38 +1094,107 @@ export function CollectionDetailPage() {
               />
             )}
             {cards.length > 0 && (
-              <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs ml-auto shrink-0">
-                <button
-                  onClick={() => setViewMode("list")}
-                  title="List view"
-                  className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
-                    viewMode === "list"
-                      ? "bg-indigo-600 text-white"
-                      : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}>
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                    <rect x="0" y="1" width="13" height="2" rx="1" fill="currentColor" />
-                    <rect x="0" y="5.5" width="13" height="2" rx="1" fill="currentColor" />
-                    <rect x="0" y="10" width="13" height="2" rx="1" fill="currentColor" />
-                  </svg>
-                  <span className="hidden sm:inline">List</span>
-                </button>
-                <button
-                  onClick={() => setViewMode("grid")}
-                  title="Cards view"
-                  className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
-                    viewMode === "grid"
-                      ? "bg-indigo-600 text-white border-l-indigo-600"
-                      : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}>
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                    <rect x="0" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                    <rect x="7.5" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                    <rect x="0" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                    <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                  </svg>
-                  <span className="hidden sm:inline">Cards</span>
-                </button>
+              <div className="flex items-center gap-2 ml-auto shrink-0">
+                {/* Sort button */}
+                <div className="relative" ref={sortMenuRef}>
+                  <button
+                    onClick={() => setSortMenuOpen((v) => !v)}
+                    title="Sort cards"
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs transition-colors ${
+                      sortField
+                        ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
+                        : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M1 3h11M3 6.5h7M5 10h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                    {sortField ? (
+                      <span>{sortField === "question" ? "Q" : sortField === "answer" ? "A" : "N"} {sortDir === "asc" ? "↑" : "↓"}</span>
+                    ) : (
+                      <span className="hidden sm:inline">Sort</span>
+                    )}
+                  </button>
+                  {sortMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[160px] py-1">
+                      {(["question", "answer", "note"] as const).map((field) => (
+                        <button
+                          key={field}
+                          onClick={() => { setSortField(field); setSortMenuOpen(false); }}
+                          className={`flex items-center justify-between w-full px-3 py-2 text-sm transition-colors ${
+                            sortField === field
+                              ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          }`}>
+                          <span className="capitalize">{field}</span>
+                          {sortField === field && <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>}
+                        </button>
+                      ))}
+                      <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
+                      <button
+                        onClick={() => { setSortDir("asc"); setSortMenuOpen(false); }}
+                        className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
+                          sortDir === "asc"
+                            ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        }`}>
+                        ↑ Ascending
+                      </button>
+                      <button
+                        onClick={() => { setSortDir("desc"); setSortMenuOpen(false); }}
+                        className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
+                          sortDir === "desc"
+                            ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        }`}>
+                        ↓ Descending
+                      </button>
+                      {sortField && (
+                        <>
+                          <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
+                          <button
+                            onClick={() => { setSortField(null); setSortMenuOpen(false); }}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            × Clear sort
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {/* View toggle */}
+                <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
+                  <button
+                    onClick={() => setViewMode("list")}
+                    title="List view"
+                    className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
+                      viewMode === "list"
+                        ? "bg-indigo-600 text-white"
+                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <rect x="0" y="1" width="13" height="2" rx="1" fill="currentColor" />
+                      <rect x="0" y="5.5" width="13" height="2" rx="1" fill="currentColor" />
+                      <rect x="0" y="10" width="13" height="2" rx="1" fill="currentColor" />
+                    </svg>
+                    <span className="hidden sm:inline">List</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    title="Cards view"
+                    className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                      viewMode === "grid"
+                        ? "bg-indigo-600 text-white border-l-indigo-600"
+                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <rect x="0" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                      <rect x="7.5" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                      <rect x="0" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                      <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                    </svg>
+                    <span className="hidden sm:inline">Cards</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -1144,9 +1240,9 @@ export function CollectionDetailPage() {
       )}
 
       {/* Cards */}
-      {!isLoading && filtered.length > 0 && viewMode === "grid" && (
+      {!isLoading && sorted.length > 0 && viewMode === "grid" && (
         <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-20 sm:pb-0">
-          {filtered.map((card) => (
+          {sorted.map((card) => (
             <CardItem
               key={card.id}
               card={card}
@@ -1157,9 +1253,9 @@ export function CollectionDetailPage() {
           ))}
         </div>
       )}
-      {!isLoading && filtered.length > 0 && viewMode === "list" && (
+      {!isLoading && sorted.length > 0 && viewMode === "list" && (
         <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-20 sm:pb-0">
-          {filtered.map((card, idx) => (
+          {sorted.map((card, idx) => (
             <CardListRow
               key={card.id}
               card={card}

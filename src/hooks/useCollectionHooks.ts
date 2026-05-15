@@ -82,10 +82,10 @@ export function useDeleteAllCards() {
   return isDemo ? d : r
 }
 
-export function useCollectionsPaginated(page: number, limit: number, search?: string) {
+export function useCollectionsPaginated(page: number, limit: number, search?: string, isFavorite?: boolean, isPublic?: boolean, tagId?: number) {
   return useQuery({
-    queryKey: ['collections', 'paginated', page, limit, search ?? ''],
-    queryFn: () => collectionsApi.getPaginated(page, limit, search),
+    queryKey: ['collections', 'paginated', page, limit, search ?? '', isFavorite ?? false, isPublic ?? false, tagId ?? null],
+    queryFn: () => collectionsApi.getPaginated(page, limit, search, isFavorite, isPublic, tagId),
     placeholderData: keepPreviousData,
   })
 }

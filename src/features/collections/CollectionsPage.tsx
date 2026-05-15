@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { IoIosArrowForward } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -270,16 +270,19 @@ function AllCollectionsView({ search }: { search: string }) {
     return () => clearTimeout(t);
   }, [search]);
 
-  const { data, isLoading, isFetching } = useCollectionsPaginated(page, ALL_LIMIT, debouncedSearch || undefined);
+  const isFavoriteFilter = myLibrary.activeFilter === "Favorites";
+  const isPublicFilter = myLibrary.activeFilter === "Public";
 
-  const visible = useMemo(() => {
-    let cols = data?.data ?? [];
-    if (myLibrary.activeFilter === "Favorites") cols = cols.filter((c) => c.isFavorite);
-    if (myLibrary.activeFilter === "Public") cols = cols.filter((c) => c.isPublic);
-    if (myLibrary.activeTagId !== null)
-      cols = cols.filter((c) => (c.tags ?? []).some((t) => t.id === myLibrary.activeTagId));
-    return cols;
-  }, [data, myLibrary.activeFilter, myLibrary.activeTagId]);
+  const { data, isLoading, isFetching } = useCollectionsPaginated(
+    page,
+    ALL_LIMIT,
+    debouncedSearch || undefined,
+    isFavoriteFilter || undefined,
+    isPublicFilter || undefined,
+    myLibrary.activeTagId ?? undefined,
+  );
+
+  const visible = data?.data ?? [];
 
   const totalPages = data ? Math.ceil(data.total / ALL_LIMIT) : 0;
 

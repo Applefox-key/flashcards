@@ -120,7 +120,7 @@ export function Layout() {
       )}
 
       {/* Navbar — hidden on mobile game pages only */}
-      <header className={`shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10${isGamePage ? " hidden sm:block" : ""}`}>
+      <header className={`shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30${isGamePage ? " hidden sm:block" : ""}`}>
         <div className="h-14 flex items-center px-4 gap-4 relative">
           <button
             onClick={toggleSidebar}
