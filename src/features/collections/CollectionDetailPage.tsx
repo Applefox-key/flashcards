@@ -15,6 +15,9 @@ import { PasteCardsModal } from "@/features/content/PasteCardsModal";
 import { FileImportModal } from "@/features/content/FileImportModal";
 import { Reorganizer } from "@/features/content/Reorganizer";
 import { VoiceInputButton } from "@/components/VoiceInputButton";
+import { TranslateButton } from "@/components/TranslateButton";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { ALL_SPEECH_LANGS, type LangCode } from "@/lib/userSettings";
 import { Button } from "@/components/Button";
 import { Modal } from "@/components/Modal";
 import { FlashCardPreview } from "@/components/FlashCardPreview";
@@ -131,10 +134,16 @@ function ImageUploadField({
 
 function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: () => void }) {
   const toast = useToast();
+  const { speechLangs } = useUserSettings();
+  const validLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
+  const initQLang = validLangs[0]?.code ?? ("en-US" as LangCode);
+  const initALang = validLangs[1]?.code ?? validLangs[0]?.code ?? ("en-US" as LangCode);
   const addCard = useAddCard();
   const addCardWithImage = useAddCardWithImage();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [questionLang, setQuestionLang] = useState<LangCode>(initQLang);
+  const [answerLang, setAnswerLang] = useState<LangCode>(initALang);
   const [note, setNote] = useState("");
   const [imgQFile, setImgQFile] = useState<File | null>(null);
   const [imgAFile, setImgAFile] = useState<File | null>(null);
@@ -192,7 +201,7 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">Question</label>
-            <VoiceInputButton onResult={setQuestion} />
+            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
           </div>
           <textarea
             value={question}
@@ -216,7 +225,10 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">Answer</label>
-            <VoiceInputButton onResult={setAnswer} />
+            <div className="flex items-center gap-1">
+              <TranslateButton sourceText={question} sourceLang={questionLang} targetLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
+              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} />
+            </div>
           </div>
           <textarea
             value={answer}
@@ -391,18 +403,27 @@ function CardListRow({
         {rowMenuOpen && (
           <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[140px] py-1">
             <button
-              onClick={() => { setRowMenuOpen(false); onView(card); }}
+              onClick={() => {
+                setRowMenuOpen(false);
+                onView(card);
+              }}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               View
             </button>
             <button
-              onClick={() => { setRowMenuOpen(false); setEditing(true); }}
+              onClick={() => {
+                setRowMenuOpen(false);
+                setEditing(true);
+              }}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               Edit
             </button>
             <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
             <button
-              onClick={() => { setRowMenuOpen(false); onDelete(card.id); }}
+              onClick={() => {
+                setRowMenuOpen(false);
+                onDelete(card.id);
+              }}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
               Delete
             </button>
@@ -425,6 +446,7 @@ function CardItem({
   onDelete: (id: number) => void;
 }) {
   const toast = useToast();
+  const { speechLangs } = useUserSettings();
   const editCard = useEditCard();
   const [editing, setEditing] = useState(false);
   const [question, setQuestion] = useState(card.question);
@@ -435,6 +457,11 @@ function CardItem({
   const [clearImgQ, setClearImgQ] = useState(false);
   const [clearImgA, setClearImgA] = useState(false);
   const [hoverRate, setHoverRate] = useState(0);
+  const cardValidLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
+  const cardInitQLang = cardValidLangs[0]?.code ?? ("en-US" as LangCode);
+  const cardInitALang = cardValidLangs[1]?.code ?? cardValidLangs[0]?.code ?? ("en-US" as LangCode);
+  const [questionLang, setQuestionLang] = useState<LangCode>(cardInitQLang);
+  const [answerLang, setAnswerLang] = useState<LangCode>(cardInitALang);
 
   function handleSave() {
     const hasImageChange = imgQFile || imgAFile || clearImgQ || clearImgA;
@@ -495,7 +522,7 @@ function CardItem({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-400">Question</label>
-            <VoiceInputButton onResult={setQuestion} />
+            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
           </div>
           <textarea
             value={question}
@@ -518,7 +545,10 @@ function CardItem({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-400">Answer</label>
-            <VoiceInputButton onResult={setAnswer} />
+            <div className="flex items-center gap-1">
+              <TranslateButton sourceText={question} sourceLang={questionLang} targetLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
+              <VoiceInputButton onResult={setAnswer} defaultLang={cardInitALang} onLangChange={setAnswerLang} />
+            </div>
           </div>
           <textarea
             value={answer}
@@ -825,6 +855,11 @@ export function CollectionDetailPage() {
                 </Button>
               </Link>
               {!isLoading && cards.length > 0 && (
+                <Button variant="secondary" size="sm" onClick={() => setReorgMode(true)}>
+                  Reorganize
+                </Button>
+              )}
+              {!isLoading && cards.length > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -1070,15 +1105,7 @@ export function CollectionDetailPage() {
                   onClick={() => setFileOpen(true)}>
                   + Import file
                 </Button>
-                {cards.length > 1 && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="hidden sm:inline-flex"
-                    onClick={() => setReorgMode(true)}>
-                    Reorganize
-                  </Button>
-                )}
+
                 <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={handleExport}>
                   ↓ Export
                 </Button>
@@ -1109,7 +1136,10 @@ export function CollectionDetailPage() {
                       <path d="M1 3h11M3 6.5h7M5 10h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                     {sortField ? (
-                      <span>{sortField === "question" ? "Q" : sortField === "answer" ? "A" : "N"} {sortDir === "asc" ? "↑" : "↓"}</span>
+                      <span>
+                        {sortField === "question" ? "Q" : sortField === "answer" ? "A" : "N"}{" "}
+                        {sortDir === "asc" ? "↑" : "↓"}
+                      </span>
                     ) : (
                       <span className="hidden sm:inline">Sort</span>
                     )}
@@ -1119,7 +1149,10 @@ export function CollectionDetailPage() {
                       {(["question", "answer", "note"] as const).map((field) => (
                         <button
                           key={field}
-                          onClick={() => { setSortField(field); setSortMenuOpen(false); }}
+                          onClick={() => {
+                            setSortField(field);
+                            setSortMenuOpen(false);
+                          }}
                           className={`flex items-center justify-between w-full px-3 py-2 text-sm transition-colors ${
                             sortField === field
                               ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
@@ -1131,7 +1164,10 @@ export function CollectionDetailPage() {
                       ))}
                       <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
                       <button
-                        onClick={() => { setSortDir("asc"); setSortMenuOpen(false); }}
+                        onClick={() => {
+                          setSortDir("asc");
+                          setSortMenuOpen(false);
+                        }}
                         className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
                           sortDir === "asc"
                             ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
@@ -1140,7 +1176,10 @@ export function CollectionDetailPage() {
                         ↑ Ascending
                       </button>
                       <button
-                        onClick={() => { setSortDir("desc"); setSortMenuOpen(false); }}
+                        onClick={() => {
+                          setSortDir("desc");
+                          setSortMenuOpen(false);
+                        }}
                         className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
                           sortDir === "desc"
                             ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
@@ -1152,7 +1191,10 @@ export function CollectionDetailPage() {
                         <>
                           <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
                           <button
-                            onClick={() => { setSortField(null); setSortMenuOpen(false); }}
+                            onClick={() => {
+                              setSortField(null);
+                              setSortMenuOpen(false);
+                            }}
                             className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             × Clear sort
                           </button>

@@ -3,8 +3,9 @@ import { useUserSettings } from "@/hooks/useUserSettings";
 import { ALL_SPEECH_LANGS, type LangCode } from "@/lib/userSettings";
 
 interface Props {
-  /** Called continuously with the current transcript while recording. */
   onResult: (text: string) => void;
+  onLangChange?: (lang: LangCode) => void;
+  defaultLang?: LangCode;
   className?: string;
 }
 
@@ -36,12 +37,12 @@ const supported = !!getSpeechRecognition();
  * Microphone button with an inline language selector driven by the user's profile settings.
  * Calls `onResult(transcript)` continuously while recording.
  */
-export function VoiceInputButton({ onResult, className = "" }: Props) {
+export function VoiceInputButton({ onResult, onLangChange, defaultLang, className = "" }: Props) {
   const { speechLangs } = useUserSettings();
   const langs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code));
 
   const [recording, setRecording] = useState(false);
-  const [lang, setLang] = useState<LangCode>(speechLangs[0] ?? "");
+  const [lang, setLang] = useState<LangCode>(defaultLang ?? speechLangs[0] ?? "");
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
   // When the user's lang list changes, reset active lang to the first in the new list
@@ -92,6 +93,7 @@ export function VoiceInputButton({ onResult, className = "" }: Props) {
     e.stopPropagation();
     if (recording) stop();
     setLang(code);
+    onLangChange?.(code);
   }
 
   return (
