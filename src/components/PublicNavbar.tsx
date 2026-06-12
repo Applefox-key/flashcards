@@ -6,7 +6,7 @@ const APPS = [
   {
     name: "FlashMinds",
     desc: "Collections & flashcards",
-    href: "https://flashcards.learnapp.pro",
+    href: "https://flashcards.learnypie.com",
     current: true,
     iconBg: "#eef2ff",
     iconColor: "#4f46e5",
@@ -14,7 +14,7 @@ const APPS = [
   {
     name: "Phrasely",
     desc: "90-second method",
-    href: "https://phrasely.learnapp.pro",
+    href: "https://phrasely.learnypie.com",
     current: false,
     iconBg: "#faf5ff",
     iconColor: "#0d9488",
@@ -22,7 +22,7 @@ const APPS = [
   {
     name: "Tracker",
     desc: "Progress & vocabulary",
-    href: "https://tracker.learnapp.pro",
+    href: "https://tracker.learnypie.com",
     current: false,
     iconBg: "#f0fdf4",
     iconColor: "#16a34a",
@@ -103,7 +103,7 @@ export function PublicNavbar() {
             {appsOpen && (
               <div className="absolute right-0 top-10 z-50 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-3">
                 <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 px-1">
-                  learnapp.pro — all tools
+                  learnypie.com — all tools
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {APPS.map((app) =>

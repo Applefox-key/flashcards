@@ -1,6 +1,6 @@
 // Utility helpers go here
 
-const API_URL = import.meta.env.VITE_API_URL ?? "https://api.learnapp.pro";
+const API_URL = import.meta.env.VITE_API_URL ?? "https://api.learnypie.com";
 
 export function getAvatarUrl(img: string | undefined, userId?: number | string): string {
   if (!img) return "";

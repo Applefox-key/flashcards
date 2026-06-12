@@ -11,7 +11,7 @@ const APPS = [
   {
     name: "FlashMinds",
     desc: "Collections & flashcards",
-    href: "https://flashcards.learnapp.pro",
+    href: "https://flashcards.learnypie.com",
     current: true,
     iconBg: "#eef2ff",
     iconColor: "#4f46e5",
@@ -20,7 +20,7 @@ const APPS = [
   {
     name: "Phrasely",
     desc: "90-second method",
-    href: "https://phrasely.learnapp.pro",
+    href: "https://phrasely.learnypie.com",
     current: false,
     iconBg: "#faf5ff",
     iconColor: "#0d9488",
@@ -28,7 +28,7 @@ const APPS = [
   {
     name: "Tracker",
     desc: "Progress & vocabulary",
-    href: "https://tracker.learnapp.pro",
+    href: "https://tracker.learnypie.com",
     current: false,
     iconBg: "#f0fdf4",
     iconColor: "#16a34a",
@@ -120,7 +120,8 @@ export function Layout() {
       )}
 
       {/* Navbar — hidden on mobile game pages only */}
-      <header className={`shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30${isGamePage ? " hidden sm:block" : ""}`}>
+      <header
+        className={`shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30${isGamePage ? " hidden sm:block" : ""}`}>
         <div className="h-14 flex items-center px-4 gap-4 relative">
           <button
             onClick={toggleSidebar}
@@ -207,7 +208,7 @@ export function Layout() {
               {appsOpen && (
                 <div className="absolute right-0 top-10 z-50 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-3">
                   <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 px-1">
-                    learnapp.pro — all tools
+                    learnypie.com — all tools
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {APPS.map((app) =>
@@ -363,40 +364,42 @@ export function Layout() {
       </div>
 
       {/* Mobile bottom navigation — hidden on game pages */}
-      {!isGamePage && <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex">
-        <NavLink
-          to="/library"
-          className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-          Library
-        </NavLink>
-        <NavLink
-          to="/playlists"
-          className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-          Playlists
-        </NavLink>
-        <NavLink
-          to="/categories"
-          className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-          Categories
-        </NavLink>
-        <NavLink
-          to="/library/public"
-          className={`flex-1 flex flex-nowrap items-center justify-center py-3 gap-0.5 text-xs font-medium ${activeSection === "public" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
-          Public
-        </NavLink>
-      </nav>}
+      {!isGamePage && (
+        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex">
+          <NavLink
+            to="/library"
+            className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            Library
+          </NavLink>
+          <NavLink
+            to="/playlists"
+            className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            Playlists
+          </NavLink>
+          <NavLink
+            to="/categories"
+            className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            Categories
+          </NavLink>
+          <NavLink
+            to="/library/public"
+            className={`flex-1 flex flex-nowrap items-center justify-center py-3 gap-0.5 text-xs font-medium ${activeSection === "public" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            Public
+          </NavLink>
+        </nav>
+      )}
 
       <Toaster />
     </div>
