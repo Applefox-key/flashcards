@@ -115,7 +115,9 @@ export function GamePage() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
+        <button
+          onClick={handleBack}
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
           </svg>
@@ -188,21 +190,18 @@ export function GamePage() {
         onClose={() => setSettingsOpen(false)}
         onOpen={() => setSettingsOpen(true)}
         side="right"
+        topValue="bottom-0"
         tabLabel="SETTINGS"
         tabIcon={<FiSettings size={14} />}
         title="Game Settings"
-        hasActiveIndicator={hasActiveSettings}
->
-
+        hasActiveIndicator={hasActiveSettings}>
         {/* Direction */}
         {type !== "pairs" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               Direction
             </p>
-            <button
-              onClick={handleToggleAnswerFirst}
-              className={`${btnBase} ${answerFirst ? btnActive : btnInactive}`}>
+            <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive}`}>
               {answerFirst ? "A → Q" : "Q → A"}
             </button>
           </div>
@@ -222,9 +221,7 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               Card Order
             </p>
-            <button
-              onClick={handleToggleShuffle}
-              className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
+            <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
               ⇄ Shuffle
             </button>
           </div>
@@ -233,13 +230,9 @@ export function GamePage() {
         {/* Speed — timed only */}
         {type === "timed" && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              Speed
-            </p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Speed</p>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap w-12">
-                {timedDelay}s
-              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap w-12">{timedDelay}s</span>
               <input
                 type="range"
                 min={0.5}

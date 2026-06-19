@@ -103,7 +103,7 @@ export function CategoriesPage() {
   }
 
   return (
-    <div>
+    <div className="pt-3 sm:pt-0">
       {/* Header */}
       <div className="hidden sm:flex items-center sticky sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 justify-between mb-6">
         <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>

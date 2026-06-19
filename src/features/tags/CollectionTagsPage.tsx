@@ -178,7 +178,7 @@ export function CollectionTagsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 flex items-center justify-between mb-6">
+      <div className="sticky top-0 pt-3 sm:pt-0 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 flex items-center justify-between mb-6">
         <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Tags</h1>
         {!addingNew && (
           <Button size="sm" onClick={() => setAddingNew(true)}>

@@ -11,6 +11,7 @@ import { FilterDrawer } from "@/features/collections/FilterDrawer";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
 import type { Collection } from "@/types";
+import { PiShootingStarThin } from "react-icons/pi";
 
 function CardSkeleton() {
   return (
@@ -170,8 +171,8 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
           <Link
             to={`/play/flashcard/${col.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg">
-            Practice
+            className="flex opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg">
+            <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
           </Link>
           {isMine ? (
             <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium shrink-0">Your collection</span>
@@ -277,7 +278,7 @@ export function PublicLibraryPage() {
   return (
     <div>
       {/* ── Sticky header block ── */}
-      <div className="sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
+      <div className="sticky top-0 pt-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
         <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null, page: 1 })} />
 
         {allTagNames.length > 0 && (

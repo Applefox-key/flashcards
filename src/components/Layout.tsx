@@ -358,7 +358,7 @@ export function Layout() {
         )}
 
         {/* Main content — only this scrolls */}
-        <main className={`flex-1 min-w-0 overflow-y-auto ${isGamePage ? "p-3" : "p-3 sm:p-6 pb-20 sm:pb-6"}`}>
+        <main className={`flex-1 min-w-0 overflow-y-auto ${isGamePage ? "p-3" : "p-3 pt-0 sm:p-6 pb-20 sm:pb-6"}`}>
           <Outlet />
         </main>
       </div>
@@ -368,22 +368,22 @@ export function Layout() {
         <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex">
           <NavLink
             to="/library"
-            className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            className={`flex-1 text-center py-3 text-md font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
             Library
           </NavLink>
           <NavLink
             to="/playlists"
-            className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            className={`flex-1 text-center py-3 text-md font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
             Playlists
           </NavLink>
           <NavLink
             to="/categories"
-            className={`flex-1 text-center py-3 text-xs font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            className={`flex-1 text-center py-3 text-md font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
             Categories
           </NavLink>
           <NavLink
             to="/library/public"
-            className={`flex-1 flex flex-nowrap items-center justify-center py-3 gap-0.5 text-xs font-medium ${activeSection === "public" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+            className={`flex-1 flex flex-nowrap items-center justify-center py-3 gap-0.5 text-md font-medium ${activeSection === "public" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
             <svg
               width="16"
               height="16"

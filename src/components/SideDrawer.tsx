@@ -6,9 +6,11 @@ interface SideDrawerProps {
   onOpen: () => void;
   side?: "left" | "right";
   tabLabel: string;
+  topValue?: string;
   tabIcon?: React.ReactNode;
   title: string;
   hasActiveIndicator?: boolean;
+  rotate?: boolean;
   /** When false the drawer is visible on all screen sizes (default: true = mobile only) */
   mobileOnly?: boolean;
   children: React.ReactNode;
@@ -18,7 +20,9 @@ export function SideDrawer({
   open,
   onClose,
   onOpen,
-  side = "right",
+  side = "left",
+  topValue = "top-1/2",
+  rotate = false,
   tabLabel,
   tabIcon,
   title,
@@ -39,28 +43,6 @@ export function SideDrawer({
 
   return (
     <>
-      {/* Peek tab */}
-      <button
-        onClick={onOpen}
-        className={`${hide} fixed top-1/2 -translate-y-1/2 z-30
-          bg-indigo-600 text-white shadow-lg select-none
-          flex flex-col items-center gap-1 px-1.5 py-3
-          ${isRight ? "right-0 rounded-l-xl" : "left-0 rounded-r-xl"}`}>
-        {tabIcon}
-        <span
-          className="text-[9px] font-bold leading-none tracking-wide"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-          {tabLabel}
-        </span>
-        {hasActiveIndicator && (
-          <span
-            className={`absolute -top-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-gray-900 ${
-              isRight ? "-left-1" : "-right-1"
-            }`}
-          />
-        )}
-      </button>
-
       {/* Backdrop */}
       <div
         onClick={onClose}
@@ -69,12 +51,34 @@ export function SideDrawer({
         }`}
       />
 
-      {/* Drawer panel */}
+      {/* Drawer panel — tab is attached and moves with it */}
       <div
         className={`${hide} fixed inset-y-0 z-50 w-72 bg-white dark:bg-gray-900 shadow-2xl
           flex flex-col transition-transform duration-300 ease-in-out
           ${isRight ? "right-0" : "left-0"}
           ${open ? "translate-x-0" : isRight ? "translate-x-full" : "-translate-x-full"}`}>
+        {/* Tab — sticks out from the outer edge of the panel */}
+        <button
+          onClick={open ? onClose : onOpen}
+          className={`absolute  -translate-y-1/2
+            bg-indigo-600 text-white shadow-lg select-none
+            flex flex-col items-center gap-1 px-1.5 py-3 ${topValue}
+            ${isRight ? "left-0 -translate-x-full rounded-l-xl" : "right-0 translate-x-full rounded-r-xl"}`}>
+          {tabIcon}
+          <span
+            className="text-[12px] font-bold leading-none tracking-wide"
+            style={rotate ? { writingMode: "vertical-rl", transform: "rotate(180deg)" } : {}}>
+            {tabLabel}
+          </span>
+          {hasActiveIndicator && (
+            <span
+              className={`absolute -top-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-gray-900 ${
+                isRight ? "-right-1" : "-left-1"
+              }`}
+            />
+          )}
+        </button>
+
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <span className="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate">{title}</span>
           <button

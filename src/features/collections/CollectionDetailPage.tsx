@@ -25,8 +25,12 @@ import { TagSelect } from "@/components/TagSelect";
 import { useToast } from "@/hooks/useToast";
 import { useCardImage } from "@/hooks/useCardImage";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
-import { InfoDrawer } from "@/components/InfoDrawer";
 import type { Content, Collection, CardEditRequest, Category } from "@/types";
+import { PiListBold, PiShootingStarThin } from "react-icons/pi";
+import { IoTrashBinOutline } from "react-icons/io5";
+import { BsGridFill } from "react-icons/bs";
+import { SideDrawer } from "@/components/SideDrawer";
+import { FaInfo } from "react-icons/fa6";
 
 interface CollectionContentResponse {
   collection: Collection;
@@ -142,8 +146,8 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
   const addCardWithImage = useAddCardWithImage();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
-  const [questionLang, setQuestionLang] = useState<LangCode>(initQLang);
-  const [answerLang, setAnswerLang] = useState<LangCode>(initALang);
+  const [, setQuestionLang] = useState<LangCode>(initQLang);
+  const [, setAnswerLang] = useState<LangCode>(initALang);
   const [note, setNote] = useState("");
   const [imgQFile, setImgQFile] = useState<File | null>(null);
   const [imgAFile, setImgAFile] = useState<File | null>(null);
@@ -226,7 +230,7 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">Answer</label>
             <div className="flex items-center gap-1">
-              <TranslateButton sourceText={question} sourceLang={questionLang} targetLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
+              <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
               <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} />
             </div>
           </div>
@@ -371,11 +375,17 @@ function CardListRow({
 
   return (
     <div className="group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-      <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">{index}</span>
-      <div className="flex-1 min-w-0 grid grid-cols-2 gap-x-4 gap-y-0.5">
-        <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{card.question}</span>
-        <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
-        {card.note && <span className="col-span-2 text-xs text-gray-400 truncate">{card.note}</span>}
+      <div className="flex items-start gap-3 flex-1 min-w-0">
+        <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
+          {index}
+        </span>
+        <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
+          <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{card.question}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
+          {card.note && (
+            <span className="sm:col-span-2 text-xs text-gray-400 truncate bg-amber-100 w-fit">{card.note}</span>
+          )}
+        </div>
       </div>
       {/* Desktop: hover buttons */}
       <div className="hidden sm:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -460,8 +470,8 @@ function CardItem({
   const cardValidLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
   const cardInitQLang = cardValidLangs[0]?.code ?? ("en-US" as LangCode);
   const cardInitALang = cardValidLangs[1]?.code ?? cardValidLangs[0]?.code ?? ("en-US" as LangCode);
-  const [questionLang, setQuestionLang] = useState<LangCode>(cardInitQLang);
-  const [answerLang, setAnswerLang] = useState<LangCode>(cardInitALang);
+  const [, setQuestionLang] = useState<LangCode>(cardInitQLang);
+  const [, setAnswerLang] = useState<LangCode>(cardInitALang);
 
   function handleSave() {
     const hasImageChange = imgQFile || imgAFile || clearImgQ || clearImgA;
@@ -546,7 +556,7 @@ function CardItem({
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-400">Answer</label>
             <div className="flex items-center gap-1">
-              <TranslateButton sourceText={question} sourceLang={questionLang} targetLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
+              <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
               <VoiceInputButton onResult={setAnswer} defaultLang={cardInitALang} onLangChange={setAnswerLang} />
             </div>
           </div>
@@ -699,10 +709,14 @@ export function CollectionDetailPage() {
   const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [addCardDropdownOpen, setAddCardDropdownOpen] = useState(false);
+  const [editDropdownOpen, setEditDropdownOpen] = useState(false);
   const tagPopoverMobileRef = useRef<HTMLDivElement>(null);
   const tagPopoverDesktopRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
+  const addCardDropdownRef = useRef<HTMLDivElement>(null);
+  const editDropdownRef = useRef<HTMLDivElement>(null);
 
   const setCollectionTags = useSetCollectionTags();
   const { data: collectionTags = [] } = useQuery({
@@ -751,6 +765,28 @@ export function CollectionDetailPage() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [sortMenuOpen]);
+
+  useEffect(() => {
+    if (!addCardDropdownOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (addCardDropdownRef.current && !addCardDropdownRef.current.contains(e.target as Node)) {
+        setAddCardDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [addCardDropdownOpen]);
+
+  useEffect(() => {
+    if (!editDropdownOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (editDropdownRef.current && !editDropdownRef.current.contains(e.target as Node)) {
+        setEditDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [editDropdownOpen]);
 
   const parsed = rawData as unknown as CollectionContentResponse[] | undefined;
   const collectionData = parsed?.[0];
@@ -825,7 +861,7 @@ export function CollectionDetailPage() {
   return (
     <div>
       {/* ── Sticky header + action bar ── */}
-      <div className="sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 border-b border-gray-200 dark:border-gray-700 mb-2">
+      <div className="sticky top-0 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 border-b border-gray-200 dark:border-gray-700 mb-2">
         <div className="mb-2">
           {/* Title row */}
           <div className="flex items-center gap-3 mb-2">
@@ -847,43 +883,20 @@ export function CollectionDetailPage() {
                 </Link>
               )}
             </h1>{" "}
-            {/* ── DESKTOP actions row (sm and above) ──*/}
+            {/* ── Search — desktop only  ──*/}
             <div className="hidden sm:flex items-center gap-2 flex-wrap ml-8">
-              <Link to={`/collections/${id}/edit`}>
-                <Button variant="secondary" size="sm">
-                  Edit collection
-                </Button>
-              </Link>
-              {!isLoading && cards.length > 0 && (
-                <Button variant="secondary" size="sm" onClick={() => setReorgMode(true)}>
-                  Reorganize
-                </Button>
+              {/* Search — desktop only */}
+              {cards.length > 4 && (
+                <input
+                  type="search"
+                  placeholder="Search cards..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="hidden sm:block flex-1 min-w-[300px] border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                />
               )}
-              {!isLoading && cards.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDeleteAllCards}
-                  loading={deleteAllCards.isPending}
-                  className="text-red-400 hover:text-red-600">
-                  Clear cards
-                </Button>
-              )}
-              {!isLoading && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDeleteCollection}
-                  loading={deleteCollection.isPending}
-                  className="text-red-400 hover:text-red-600">
-                  Delete
-                </Button>
-              )}
-              <Link to={`/play/${id}`} className="ml-auto">
-                <Button size="sm">▶ Practice</Button>
-              </Link>
             </div>
-            {/* ··· button — mobile only */}
+            {/* menu... button — mobile only */}
             <div className="relative sm:hidden" ref={mobileMenuRef}>
               <button
                 onClick={() => setMobileMenuOpen((v) => !v)}
@@ -955,14 +968,17 @@ export function CollectionDetailPage() {
                     }}
                     disabled={deleteCollection.isPending}
                     className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-50 transition-colors disabled:opacity-40">
-                    <span className="text-xs text-red-300">🗑</span> Delete collection
+                    <span className="text-xs text-red-300">
+                      <IoTrashBinOutline />
+                    </span>{" "}
+                    Delete collection
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Meta — desktop only (sm and above) */}
+          {/* Meta row— desktop only (sm and above) */}
           {!isLoading && (
             <div>
               <div className="hidden sm:flex gap-3 ml-8 mb-2 text-sm text-gray-400">
@@ -1077,47 +1093,146 @@ export function CollectionDetailPage() {
             </div>
           )}
         </div>
-
         {/* Actions + search + view toggle (sticky on mobile) */}
         {!isLoading && (
+          //    {/* Desktop action buttons */}
           <div className="flex items-center gap-2 py-2">
-            {/* Practice — mobile only */}
-            <Link to={`/play/${id}`} className="sm:hidden shrink-0">
-              <Button size="sm">▶ Practice</Button>
-            </Link>
-            {/* Desktop action buttons */}
-            {!addingCard && (
-              <>
-                <Button size="sm" className="hidden sm:inline-flex" onClick={() => setAddingCard(true)}>
-                  + Add card
+            <div className="hidden sm:flex items-center gap-2 flex-wrap ml-6">
+              {/* ── DESKTOP Practice──*/}
+              <Link to={`/play/${id}`}>
+                <Button className="rounded-lg" size="sm">
+                  <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
                 </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="hidden sm:inline-flex"
-                  onClick={() => setPasteOpen(true)}>
-                  + Paste list
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="hidden sm:inline-flex"
-                  onClick={() => setFileOpen(true)}>
-                  + Import file
-                </Button>
-
-                <Button variant="secondary" size="sm" className="hidden sm:inline-flex" onClick={handleExport}>
-                  ↓ Export
-                </Button>
-              </>
-            )}
+              </Link>
+              {!addingCard && (
+                <>
+                  {/* Split button: left = Add card, right = dropdown arrow */}
+                  <div className="relative hidden sm:flex" ref={addCardDropdownRef}>
+                    <div className="flex rounded-lg overflow-visible">
+                      <button
+                        onClick={() => setAddingCard(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors rounded-l-lg border border-indigo-600">
+                        + Add card
+                      </button>
+                      <button
+                        onClick={() => setAddCardDropdownOpen((v) => !v)}
+                        className="inline-flex items-center px-2 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors rounded-r-lg border-l border-indigo-500">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                          <path
+                            d="M2 4l4 4 4-4"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            fill="none"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    {addCardDropdownOpen && (
+                      <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[160px] py-1">
+                        <button
+                          onClick={() => {
+                            setAddCardDropdownOpen(false);
+                            setPasteOpen(true);
+                          }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                          <span className="text-gray-400">⎘</span> Paste list
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAddCardDropdownOpen(false);
+                            setFileOpen(true);
+                          }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                          <span className="text-gray-400">↑</span> Import file
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+              {/* Split button: left = Edit collection, right = dropdown */}
+              <div className="relative flex" ref={editDropdownRef}>
+                <div className="flex">
+                  <button
+                    onClick={() => navigate(`/collections/${id}/edit`)}
+                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-l-lg">
+                    Edit collection
+                  </button>
+                  <button
+                    onClick={() => setEditDropdownOpen((v) => !v)}
+                    className="inline-flex items-center px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-l-0 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-r-lg">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                      <path
+                        d="M2 4l4 4 4-4"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                {editDropdownOpen && !isLoading && (
+                  <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[170px] py-1">
+                    {cards.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setEditDropdownOpen(false);
+                          setReorgMode(true);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span className="text-gray-400">⇅</span> Reorganize
+                      </button>
+                    )}
+                    {cards.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setEditDropdownOpen(false);
+                          handleExport();
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span className="text-gray-400">↓</span> Export
+                      </button>
+                    )}
+                    <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
+                    {cards.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setEditDropdownOpen(false);
+                          handleDeleteAllCards();
+                        }}
+                        disabled={deleteAllCards.isPending}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40">
+                        <span className="text-red-300">✕</span> Clear cards
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setEditDropdownOpen(false);
+                        handleDeleteCollection();
+                      }}
+                      disabled={deleteCollection.isPending}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40">
+                      <span className="text-red-300">
+                        <IoTrashBinOutline />
+                      </span>{" "}
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Search — mobile only */}
             {cards.length > 4 && (
               <input
                 type="search"
                 placeholder="Search cards..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="sm:hidden ml-12 flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             )}
             {cards.length > 0 && (
@@ -1213,12 +1328,7 @@ export function CollectionDetailPage() {
                         ? "bg-indigo-600 text-white"
                         : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}>
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <rect x="0" y="1" width="13" height="2" rx="1" fill="currentColor" />
-                      <rect x="0" y="5.5" width="13" height="2" rx="1" fill="currentColor" />
-                      <rect x="0" y="10" width="13" height="2" rx="1" fill="currentColor" />
-                    </svg>
-                    <span className="hidden sm:inline">List</span>
+                    <PiListBold className="text-[18px]" /> <span className="hidden sm:inline">List</span>
                   </button>
                   <button
                     onClick={() => setViewMode("grid")}
@@ -1228,28 +1338,21 @@ export function CollectionDetailPage() {
                         ? "bg-indigo-600 text-white border-l-indigo-600"
                         : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}>
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <rect x="0" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                      <rect x="7.5" y="0" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                      <rect x="0" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                      <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
-                    </svg>
+                    <BsGridFill className="text-[15px]" />
                     <span className="hidden sm:inline">Cards</span>
                   </button>
                 </div>
               </div>
             )}
           </div>
+        )}{" "}
+        {/* Progress bar */}
+        {!isLoading && cards.length > 0 && (
+          <div className="mb-4">
+            <CollectionProgressBar stats={collection?.stats} variant="full" />
+          </div>
         )}
       </div>
-      {/* /sticky header wrapper */}
-
-      {/* Progress bar */}
-      {!isLoading && cards.length > 0 && (
-        <div className="mb-4">
-          <CollectionProgressBar stats={collection?.stats} variant="full" />
-        </div>
-      )}
 
       {/* Inline add form */}
       {addingCard && <AddCardForm collectionId={collectionId} onDone={() => setAddingCard(false)} />}
@@ -1283,7 +1386,7 @@ export function CollectionDetailPage() {
 
       {/* Cards */}
       {!isLoading && sorted.length > 0 && viewMode === "grid" && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-20 sm:pb-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-36 sm:pb-0">
           {sorted.map((card) => (
             <CardItem
               key={card.id}
@@ -1296,7 +1399,7 @@ export function CollectionDetailPage() {
         </div>
       )}
       {!isLoading && sorted.length > 0 && viewMode === "list" && (
-        <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-20 sm:pb-0">
+        <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-36 sm:pb-0">
           {sorted.map((card, idx) => (
             <CardListRow
               key={card.id}
@@ -1316,10 +1419,14 @@ export function CollectionDetailPage() {
       )}
 
       {/* Collection info drawer — mobile only */}
-      <InfoDrawer
+
+      <SideDrawer
         open={infoOpen}
         onClose={() => setInfoOpen(false)}
         onOpen={() => setInfoOpen(true)}
+        topValue="top-[125px]"
+        tabLabel="info"
+        tabIcon={<FaInfo />}
         title={collection?.name ?? `Collection #${id}`}>
         {!isLoading && (
           <>
@@ -1327,17 +1434,18 @@ export function CollectionDetailPage() {
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                 Details
               </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                  {cards.length} {cards.length === 1 ? "card" : "cards"}
-                </span>
+              <div className="flex flex-col flex-wrap gap-2">
                 {collection?.category && (
-                  <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
+                  <span className="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
+                    {" "}
                     {typeof collection.category === "object"
                       ? (collection.category as Category).name
                       : (collection.category as unknown as string)}
                   </span>
-                )}
+                )}{" "}
+                <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
+                  {cards.length} {cards.length === 1 ? "card" : "cards"}
+                </span>
               </div>
             </div>
 
@@ -1345,7 +1453,7 @@ export function CollectionDetailPage() {
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                 Settings
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 flex-col">
                 <button
                   onClick={() =>
                     togglePublic.mutate(
@@ -1359,7 +1467,7 @@ export function CollectionDetailPage() {
                       ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"
                       : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
                   }`}>
-                  {collection?.isPublic ? "🔓 public" : "🔒 private"}
+                  {collection?.isPublic ? "🔓 public collection" : "🔒 private collection"}
                 </button>
                 <button
                   onClick={() =>
@@ -1374,7 +1482,7 @@ export function CollectionDetailPage() {
                       ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
                       : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
                   }`}>
-                  {collection?.isFavorite ? "♥ favorite" : "♥"}
+                  {collection?.isFavorite ? "♥ favorite" : "♥ add to favorites"}
                 </button>
               </div>
             </div>
@@ -1438,7 +1546,7 @@ export function CollectionDetailPage() {
             </div>
           </>
         )}
-      </InfoDrawer>
+      </SideDrawer>
 
       {/* Modals */}
       <PasteCardsModal open={pasteOpen} onClose={() => setPasteOpen(false)} collectionId={collectionId} />
@@ -1449,6 +1557,17 @@ export function CollectionDetailPage() {
         {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} />}
       </Modal>
 
+      {/* Practice bar — mobile only, fixed above bottom nav */}
+      {!isLoading && (
+        <div className="sm:hidden fixed bottom-10 left-0 right-0 z-40 py-2 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700">
+          <Link to={`/play/${id}`} className="block">
+            <Button className="w-full  rounded-none justify-center" size="md">
+              <PiShootingStarThin className="w-8 h-8 mr-2" /> PRACTICE
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* FAB — mobile only */}
       {!isLoading && !addingCard && (
         <button
@@ -1456,7 +1575,7 @@ export function CollectionDetailPage() {
             setAddingCard(true);
             document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="fixed bottom-6 right-6 z-50 sm:hidden w-14 h-14 rounded-full bg-indigo-600 text-white font-light shadow-lg hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center">
+          className="fixed bottom-[100px] right-2 z-50 sm:hidden w-14 h-14 rounded-full bg-indigo-600 text-white font-light shadow-lg hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z" />
           </svg>

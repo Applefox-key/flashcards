@@ -4,6 +4,7 @@ interface FilterDrawerProps {
   open: boolean;
   onClose: () => void;
   onOpen: () => void;
+  label?: string;
   hasActiveFilters?: boolean;
   children: React.ReactNode;
 }
@@ -14,15 +15,22 @@ const FilterIcon = () => (
   </svg>
 );
 
-export function FilterDrawer({ open, onClose, onOpen, hasActiveFilters = false, children }: FilterDrawerProps) {
+export function FilterDrawer({
+  open,
+  onClose,
+  onOpen,
+  label = "FILTER",
+  hasActiveFilters = false,
+  children,
+}: FilterDrawerProps) {
   return (
     <SideDrawer
       open={open}
       onClose={onClose}
       onOpen={onOpen}
-      side="right"
-      tabLabel="FILTER"
+      tabLabel={label}
       tabIcon={<FilterIcon />}
+      topValue="top-[130px] flex-row"
       title="Filters"
       hasActiveIndicator={hasActiveFilters}>
       {children}

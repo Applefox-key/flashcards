@@ -7,6 +7,7 @@ import { useCardImage } from "@/hooks/useCardImage";
 import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/Button";
 import type { Content, Collection } from "@/types";
+import { PiShootingStarThin } from "react-icons/pi";
 
 interface CollectionContentResponse {
   collection: Collection;
@@ -142,7 +143,7 @@ export function PublicCollectionPage() {
               </Button>
             )}
             <Button size="sm" onClick={() => navigate(`/play/${collectionId}`)}>
-              ▶ Practice
+              <PiShootingStarThin /> Practice
             </Button>
           </div>
         )}

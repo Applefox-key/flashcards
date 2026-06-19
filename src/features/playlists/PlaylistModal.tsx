@@ -101,7 +101,10 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
     // Find next empty slot after current (filters stay untouched)
     let nextEmpty = -1;
     for (let i = activeSlot + 1; i < MAX_SLOTS; i++) {
-      if (next[i] == null) { nextEmpty = i; break; }
+      if (next[i] == null) {
+        nextEmpty = i;
+        break;
+      }
     }
     setActiveSlot(nextEmpty !== -1 ? nextEmpty : null);
   }
@@ -140,7 +143,9 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
 
     if (isFilled) {
       return (
-        <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
+        <div
+          key={i}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm">
           <span className="text-xs text-gray-400 w-5 shrink-0">{i + 1}</span>
           <span className="flex-1 text-gray-800 dark:text-gray-200">{resolveCollectionName(id)}</span>
           <button
@@ -170,7 +175,9 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
   const pickerContent = (listClassName: string) => (
     <>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Slot {activeSlot !== null ? activeSlot + 1 : ""}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          Slot {activeSlot !== null ? activeSlot + 1 : ""}
+        </span>
         <button
           onClick={closePicker}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none w-6 text-center">
@@ -205,7 +212,9 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
       )}
       <div className={listClassName}>
         {pickerCollections.length === 0 ? (
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">{search || tagFilter ? "No matches" : "No collections available"}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
+            {search || tagFilter ? "No matches" : "No collections available"}
+          </p>
         ) : (
           pickerCollections.map((col) => (
             <div
@@ -271,7 +280,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
 
               {/* Right column: picker panel — desktop only */}
               {activeSlot !== null && (
-                <div className="hidden sm:block border border-indigo-200 dark:border-indigo-700 rounded-lg p-3 bg-indigo-50 dark:bg-indigo-900/20 sticky top-0">
+                <div className="hidden sm:block border border-indigo-200 dark:border-indigo-700 rounded-lg p-3 bg-indigo-50 dark:bg-indigo-900/20 sticky top-0  ">
                   {pickerContent("max-h-64 overflow-y-auto mt-2")}
                 </div>
               )}
@@ -285,7 +294,9 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
             )}
           </div>
 
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Sets can contain up to {MAX_SLOTS} collections.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+            Sets can contain up to {MAX_SLOTS} collections.
+          </p>
         </div>
 
         <div className="flex gap-3 pt-1">

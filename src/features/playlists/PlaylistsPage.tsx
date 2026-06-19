@@ -7,6 +7,7 @@ import { Button } from "@/components/Button";
 import { MobileFab } from "@/components/MobileFab";
 import { useToast } from "@/hooks/useToast";
 import type { Playlist, PlaylistCollection, Collection } from "@/types";
+import { PiShootingStarThin } from "react-icons/pi";
 
 const MAX_SLOTS = 10;
 
@@ -278,8 +279,7 @@ function PlaylistPanel({
   useEffect(() => {
     if (!mobileMenuOpen) return;
     function handler(e: MouseEvent) {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node))
-        setMobileMenuOpen(false);
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) setMobileMenuOpen(false);
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -373,14 +373,21 @@ function PlaylistPanel({
         <>
           <div className="sticky -top-3 sm:-top-6 z-10 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 py-2 mb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
             {/* Desktop: Delete */}
-            <Button size="sm" variant="danger" onClick={onDelete} loading={deleteLoading} className="hidden sm:inline-flex">
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={onDelete}
+              loading={deleteLoading}
+              className="hidden sm:inline-flex">
               Delete
             </Button>
 
             {/* Practice — always visible when collections exist */}
             {playlist.collections.length > 0 && (
               <Link to={`/play/${playlist.id}?src=pl`}>
-                <Button size="sm" variant="secondary">▶ Practice</Button>
+                <Button size="sm" variant="secondary">
+                  <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+                </Button>
               </Link>
             )}
 
@@ -422,12 +429,18 @@ function PlaylistPanel({
               {mobileMenuOpen && (
                 <div className="absolute right-0 top-9 z-30 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 min-w-[120px]">
                   <button
-                    onClick={() => { enterEditMode(); setMobileMenuOpen(false); }}
+                    onClick={() => {
+                      enterEditMode();
+                      setMobileMenuOpen(false);
+                    }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                     Edit
                   </button>
                   <button
-                    onClick={() => { onDelete(); setMobileMenuOpen(false); }}
+                    onClick={() => {
+                      onDelete();
+                      setMobileMenuOpen(false);
+                    }}
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
                     Delete
                   </button>
@@ -643,7 +656,7 @@ export function PlaylistsPage() {
       {!isLoading && playlists.length > 0 && (
         <>
           {/* Mobile dropdown */}
-          <div className="sm:hidden mb-4 flex items-center gap-2">
+          <div className="sm:hidden pt-3 mb-4 flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 shrink-0">Playlists:</span>
             <select
               value={effectiveId ?? ""}

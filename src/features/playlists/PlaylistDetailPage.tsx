@@ -5,6 +5,7 @@ import { PlaylistModal } from "./PlaylistModal";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
 import type { PlaylistCollection } from "@/types";
+import { PiShootingStarThin } from "react-icons/pi";
 
 export function PlaylistDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -92,7 +93,9 @@ export function PlaylistDetailPage() {
       {playlist.collections.length > 0 && (
         <div className="mb-6">
           <Link to={`/play/${playlistId}?src=pl`}>
-            <Button size="sm">▶ Practice</Button>
+            <Button size="sm">
+              <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+            </Button>
           </Link>
         </div>
       )}

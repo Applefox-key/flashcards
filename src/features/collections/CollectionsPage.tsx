@@ -12,8 +12,9 @@ import { FilterDrawer } from "@/features/collections/FilterDrawer";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import { MobileFab } from "@/components/MobileFab";
 import type { Collection, CollectionTag, CollectionStats } from "@/types";
+import { PiShootingStarThin } from "react-icons/pi";
 
-const ALL_LIMIT = 20;
+const ALL_LIMIT = 50;
 
 function highlight(text: string, query: string): React.ReactNode {
   if (!query) return text;
@@ -84,24 +85,34 @@ function CollectionCard({
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
-      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-1 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
-      <div className="font-medium text-gray-800 dark:text-gray-100 text-sm leading-snug">
-        {highlight(collection.name, search)}
+      className="group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-1 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
+      <div className="font-medium  text-gray-800 dark:text-gray-100 text-sm leading-snug">
+        <div className="flex justify-between">{highlight(collection.name, search)}</div>
+
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 pb-0.5 pt-0.5">
+            {collection.cardCount ?? 0} cards
+          </span>
+          {!!collection.isFavorite && <span className="text-lg text-rose-400 ">♥</span>}
+          {!!collection.isPublic && <span className="text-sm pb-1">🔓</span>}
+        </div>
       </div>
       <CollectionProgressBar stats={data?.stats} variant="minimal" />
       {!compact && data && data.cards.length > 0 && (
-        <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
-          {data.cards.map((card) => (
-            <div key={card.id} className="grid grid-cols-2 gap-1 text-xs text-gray-400 dark:text-gray-500">
-              <span className="truncate">{card.question}</span>
-              <span className="truncate text-gray-300 dark:text-gray-600">{card.answer}</span>
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
+            {data.cards.map((card) => (
+              <div key={card.id} className="grid grid-cols-2 gap-1 text-xs text-gray-400 dark:text-gray-500">
+                <span className="truncate">{card.question}</span>
+                <span className="truncate text-gray-300 dark:text-gray-600">{card.answer}</span>
+              </div>
+            ))}
+          </div>{" "}
+        </>
       )}
 
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1  ">
           {tags.map((tag) => (
             <span
               key={tag.id}
@@ -111,24 +122,92 @@ function CollectionCard({
           ))}
         </div>
       )}
+      <Link
+        to={`/play/${collection.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="flex justify-center item-center opacity-0 absolute bottom-0 text-center right-0 w-full group-hover:opacity-100 transition-opacity shrink-0 text-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-b-lg">
+        <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+      </Link>
+    </div>
+  );
+}
 
-      <div className={`flex items-center justify-between gap-2 mt-auto pt-1 ${!compact ? "border-t" : ""}`}>
-        <div className="flex items-center gap-2 min-w-0">
-          {!!collection.isFavorite && <span className="text-rose-400 shrink-0">♥</span>}
-          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{collection.cardCount ?? 0} cards</span>
-          {!!collection.isPublic && (
-            <span className="text-xs text-green-600 dark:text-green-400 border border-green-300 dark:border-green-700 px-1.5 py-0.5 rounded shrink-0">
-              🔓 public
+function CollectionListRow({
+  collection,
+  search,
+  tags,
+}: {
+  collection: Collection;
+  search: string;
+  tags: CollectionTag[];
+}) {
+  const navigate = useNavigate();
+  const { data } = useQuery({
+    queryKey: ["collections", collection.id, "preview"],
+    queryFn: () => collectionsApi.getPreview(collection.id, 3),
+    staleTime: 5 * 60 * 1000,
+    select: (d) => {
+      const raw = d as unknown as Array<{
+        collection: { stats?: CollectionStats };
+        content: { id: number; question: string; answer: string }[];
+      }>;
+      return {
+        cards: raw[0]?.content ?? [],
+        stats: raw[0]?.collection?.stats,
+      };
+    },
+  });
+
+  return (
+    <div
+      onClick={() => navigate(`/collections/${collection.id}`)}
+      className="group relative flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors first:rounded-t-xl last:rounded-b-xl border-b border-gray-100 dark:border-gray-700/60 last:border-b-0">
+      <span className="flex-1 min-w-0 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
+        {highlight(collection.name, search)}
+      </span>
+
+      {tags.length > 0 && (
+        <div className="hidden xl:flex gap-1 shrink-0">
+          {tags.slice(0, 2).map((tag) => (
+            <span
+              key={tag.id}
+              className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
+              {tag.name}
             </span>
-          )}
+          ))}
         </div>
-        <Link
-          to={`/play/${collection.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg">
-          Practice
-        </Link>
+      )}
+
+      <div className="w-20 shrink-0 absolute bottom-0 w-full left-0">
+        <CollectionProgressBar stats={data?.stats} variant="minimal" />
       </div>
+
+      <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
+        {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
+        {!!collection.isPublic && <span className="text-xs">🔓</span>} {collection.cardCount ?? 0} cards
+      </span>
+
+      <Link
+        to={`/play/${collection.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="absolute right-0 inset-y-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-r-md whitespace-nowrap">
+        <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+      </Link>
+
+      {data && data.cards.length > 0 && (
+        <div className="pointer-events-none absolute left-0 right-0 top-full z-30 pt-px opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-75">
+          <div className="mx-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-lg shadow-lg px-3 py-2.5">
+            <div className="flex flex-col gap-1.5">
+              {data.cards.map((card) => (
+                <div key={card.id} className="grid grid-cols-2 gap-3 text-xs">
+                  <span className="text-gray-700 dark:text-gray-300 truncate">{card.question}</span>
+                  <span className="text-gray-400 dark:text-gray-500 truncate">{card.answer}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -298,7 +377,7 @@ function AllCollectionsView({ search }: { search: string }) {
 
   return (
     <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : ""}>
-      <div className="hidden sm:flex items-center justify-between mb-2">
+      <div className="hidden sm:flex items-center justify-between mb-2 sticky top-[60px] z-10 bg-white dark:bg-gray-800 ">
         {data && totalPages > 1 ? (
           <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
         ) : (
@@ -311,7 +390,19 @@ function AllCollectionsView({ search }: { search: string }) {
           <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start">
+      {compact && (
+        <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800">
+          {visible.map((col) => (
+            <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
+          ))}
+          {visible.length === 0 && (
+            <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
+          )}
+        </div>
+      )}
+
+      <div
+        className={`${compact ? "hidden " : ""}grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start`}>
         {visible.map((col) => (
           <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={compact} />
         ))}
@@ -319,6 +410,19 @@ function AllCollectionsView({ search }: { search: string }) {
           <p className="col-span-full text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="sm:hidden mt-4">
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onChange={(p) => {
+              setMyLibrary({ allPage: p });
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -396,7 +500,20 @@ function CardsView({
             <div className="hidden sm:flex justify-end mb-2">
               <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start">
+
+            {compact && (
+              <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800">
+                {selectedCollections.map((col) => (
+                  <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
+                ))}
+                {selectedCollections.length === 0 && (
+                  <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
+                )}
+              </div>
+            )}
+
+            <div
+              className={`${compact ? "hidden " : ""}grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start`}>
               {selectedCollections.map((col) => (
                 <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={compact} />
               ))}
@@ -415,6 +532,12 @@ function CardsView({
 
 const FILTER_TAGS = ["All", "Favorites", "Public"] as const;
 type FilterTag = (typeof FILTER_TAGS)[number];
+
+const FILTER_TAG_ICONS: Record<FilterTag, React.ReactNode> = {
+  All: null,
+  Favorites: <span className="text-rose-400 leading-none">♥</span>,
+  Public: <span className="leading-none">🔓</span>,
+};
 
 function LibraryTabsBar({
   search,
@@ -453,18 +576,21 @@ function LibraryTabsBar({
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
-        {FILTER_TAGS.map((tag) => (
-          <button
-            key={tag}
-            onClick={() => onChange(tag)}
-            className={`hidden sm:block px-3 py-1 text-xs rounded-full border transition-colors ${
-              active === tag
-                ? "bg-indigo-600 border-indigo-600 text-white"
-                : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-600"
-            }`}>
-            {tag}
-          </button>
-        ))}
+        <div className="hidden sm:flex items-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-xs shrink-0">
+          {FILTER_TAGS.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => onChange(tag)}
+              className={`flex items-center gap-1 px-3 py-1.5 transition-colors border-l first:border-l-0 border-gray-300 dark:border-gray-600 whitespace-nowrap ${
+                active === tag
+                  ? "bg-indigo-600 border-indigo-600 text-white"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+              }`}>
+              {FILTER_TAG_ICONS[tag]}
+              {tag}
+            </button>
+          ))}
+        </div>
         <Link to="/collections/new" className="shrink-0 hidden sm:block">
           <Button size="sm">+ New Collection</Button>
         </Link>
@@ -548,9 +674,9 @@ export function CollectionsPage() {
   const showContent = !isLoading && totalCollections > 0;
 
   return (
-    <div>
+    <div className="pb-10">
       {/* ── Sticky header block ── */}
-      <div className="sticky -top-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
+      <div className="sticky top-0 pt-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
         <LibraryTabsBar search={search} onSearch={setSearch} active={activeFilter} onChange={setActiveFilter} />
 
         {allTags.length > 0 && (
@@ -573,12 +699,18 @@ export function CollectionsPage() {
 
         {/* Mobile: current category label + compact toggle */}
         {showContent && (
-          <div className="sm:hidden flex items-center gap-2 py-2 border-b border-gray-200 dark:border-gray-700">
-            <span className="flex-1 truncate text-sm font-medium text-indigo-700 dark:text-indigo-300 px-1">
-              {viewMode === "all"
-                ? `All collections (${totalCollections})`
-                : (visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? "")}
-            </span>
+          <div className="sm:hidden ml-4 flex items-center gap-2 py-2 border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setFilterOpen(true)}
+              className="flex-1 min-w-0 flex items-center gap-1 px-1 text-left active:opacity-70 transition-opacity">
+              <span className="truncate text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                {viewMode === "all"
+                  ? `All collections (${totalCollections})`
+                  : (visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? "")}
+              </span>
+              <IoIosArrowForward size={14} className="shrink-0 text-indigo-400 dark:text-indigo-500" />
+            </button>
+
             <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
           </div>
         )}
@@ -630,6 +762,7 @@ export function CollectionsPage() {
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         onOpen={() => setFilterOpen(true)}
+        label=" "
         hasActiveFilters={
           activeFilter !== "All" ||
           activeTagId !== null ||
@@ -637,16 +770,17 @@ export function CollectionsPage() {
         }>
         <div>
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Show</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-fit m-auto items-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-xs self-start">
             {FILTER_TAGS.map((tag) => (
               <button
                 key={tag}
                 onClick={() => setActiveFilter(tag)}
-                className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
+                className={`flex items-center gap-1 px-3 py-1.5 transition-colors border-l first:border-l-0 border-gray-300 dark:border-gray-600 whitespace-nowrap ${
                   activeFilter === tag
                     ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                 }`}>
+                {FILTER_TAG_ICONS[tag]}
                 {tag}
               </button>
             ))}

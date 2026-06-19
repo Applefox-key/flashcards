@@ -116,7 +116,7 @@ export function CollectionEditPage() {
   }
 
   return (
-    <div className="max-w-lg">
+    <div className="max-w-lg m-auto">
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate(-1)}
@@ -197,7 +197,9 @@ export function CollectionEditPage() {
           <div className="border-t border-red-100 dark:border-red-900/40 pt-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Delete collection</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Permanently removes the collection and all its cards</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Permanently removes the collection and all its cards
+              </p>
             </div>
             <Button
               variant="danger"
