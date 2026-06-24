@@ -34,7 +34,7 @@ export const useLibraryUiStore = create<LibraryUiState>((set) => ({
     expanded: [],
     compactCards: false,
     selectedCategoryId: null,
-    viewMode: 'by-category',
+    viewMode: 'all',
     allPage: 1,
   },
   publicLibrary: {
