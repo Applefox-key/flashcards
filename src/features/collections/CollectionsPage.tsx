@@ -83,6 +83,10 @@ function CollectionCard({
 
   if (isLoading) return <CollectionCardSkeleton />;
 
+  const cardCount = data?.stats
+    ? data.stats.toLearn + data.stats.inProgress + data.stats.learned
+    : (collection.cardCount ?? 0);
+
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
@@ -92,7 +96,7 @@ function CollectionCard({
 
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 pb-0.5 pt-0.5">
-            {collection.cardCount ?? 0} cards
+            {cardCount} cards
           </span>
           {!!collection.isFavorite && <span className="text-lg text-rose-400 ">♥</span>}
           {!!collection.isPublic && <span className="text-sm pb-1">🔓</span>}
@@ -185,7 +189,11 @@ function CollectionListRow({
 
       <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
         {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
-        {!!collection.isPublic && <span className="text-xs">🔓</span>} {collection.cardCount ?? 0} cards
+        {!!collection.isPublic && <span className="text-xs">🔓</span>}{" "}
+        {data?.stats
+          ? data.stats.toLearn + data.stats.inProgress + data.stats.learned
+          : (collection.cardCount ?? 0)}{" "}
+        cards
       </span>
 
       <Link
