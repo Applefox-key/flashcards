@@ -610,7 +610,7 @@ export function PlaylistsPage() {
   const { data: allCollections = [] } = useCollections();
 
   const effectiveId =
-    selectedId !== null && playlists.some((p) => p.id === selectedId) ? selectedId : (playlists[0]?.id ?? null);
+    selectedId !== null && playlists.some((p) => p.id === selectedId) ? selectedId : null;
 
   const selected = playlists.find((p) => p.id === effectiveId) ?? null;
 
@@ -662,6 +662,11 @@ export function PlaylistsPage() {
               value={effectiveId ?? ""}
               onChange={(e) => setSelectedId(Number(e.target.value))}
               className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-indigo-50 dark:bg-gray-800 text-indigo-700 dark:text-gray-100 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:[color-scheme:dark]">
+              {effectiveId === null && (
+                <option value="" disabled>
+                  Select a playlist…
+                </option>
+              )}
               {playlists.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} ({p.collections.length})
@@ -685,7 +690,7 @@ export function PlaylistsPage() {
 
             {/* Right: panel (key resets edit state on playlist switch) */}
             <div className="flex-1 min-w-0">
-              {selected && (
+              {selected ? (
                 <PlaylistPanel
                   key={selected.id}
                   playlist={selected}
@@ -695,6 +700,17 @@ export function PlaylistsPage() {
                   onCreateNew={() => setCreateModalOpen(true)}
                   deleteLoading={deletePlaylist.isPending}
                 />
+              ) : (
+                <div className="flex flex-col items-center justify-center min-h-[320px] text-center px-8 py-12">
+                  <div className="text-4xl mb-4 select-none">🎵</div>
+                  <p className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Select a playlist to get started
+                  </p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm leading-relaxed">
+                    A playlist lets you group multiple collections together so you can practice all of them in a single
+                    session — perfect for combining related topics or subjects.
+                  </p>
+                </div>
               )}
             </div>
           </div>

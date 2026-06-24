@@ -99,3 +99,4 @@ export function mapColumns(rows: string[][], colMap: ColumnMap): ParsedCard[] {
     })
     .filter((c): c is ParsedCard => c !== null)
 }
+

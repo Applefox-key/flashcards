@@ -1,7 +1,15 @@
 import { useCardImage } from "@/hooks/useCardImage";
 import { SpeakButton } from "@/components/SpeakButton";
 
-function CardImg({ filename, collectionId, dark = false }: { filename?: string; collectionId: number; dark?: boolean }) {
+function CardImg({
+  filename,
+  collectionId,
+  dark = false,
+}: {
+  filename?: string;
+  collectionId: number;
+  dark?: boolean;
+}) {
   const src = useCardImage(filename, collectionId);
   if (!filename || filename === "null" || filename === "") return null;
   return (
@@ -49,6 +57,25 @@ interface FlashCardFaceProps {
   animated?: boolean;
 }
 
+function highlightNote(note: string, question: string, answer: string) {
+  const terms = [question, answer].map((t) => t.trim()).filter(Boolean);
+  if (!terms.length) return <>{note}</>;
+  const pattern = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  const parts = note.split(pattern);
+  return (
+    <>
+      {parts.map((part, i) =>
+        pattern.test(part) ? (
+          <strong className="underline" key={i}>
+            {part}
+          </strong>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
 export function FlashCardFace({
   frontLabel,
   backLabel,
@@ -99,7 +126,9 @@ export function FlashCardFace({
           <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-3 px-6 py-2">
             <p className="text-2xl font-semibold text-white text-center">{backText}</p>
             <CardImg filename={backImg} collectionId={collectionId} dark />
-            {note && <p className="text-sm text-indigo-200 italic text-center">{note}</p>}
+            {note && (
+              <p className="text-sm text-indigo-200 italic text-center">{highlightNote(note, frontText, backText)}</p>
+            )}
           </div>
           <div className="shrink-0 px-6 pt-1 pb-4 text-center">
             <span className="text-xs text-indigo-300">Click to flip back</span>

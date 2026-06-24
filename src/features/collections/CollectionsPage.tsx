@@ -8,11 +8,12 @@ import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useCollections, useCollectionsPaginated } from "@/hooks/useCollectionHooks";
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
 import { useLibraryUiStore } from "@/store/libraryUiStore";
-import { FilterDrawer } from "@/features/collections/FilterDrawer";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import { MobileFab } from "@/components/MobileFab";
 import type { Collection, CollectionTag, CollectionStats } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
+import { SideDrawer } from "@/components/SideDrawer";
+import { IoFilter } from "react-icons/io5";
 
 const ALL_LIMIT = 50;
 
@@ -195,7 +196,7 @@ function CollectionListRow({
       </Link>
 
       {data && data.cards.length > 0 && (
-        <div className="pointer-events-none absolute left-0 right-0 top-full z-30 pt-px opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-75">
+        <div className="pointer-events-none absolute left-0 right-0 top-full z-10 pt-px opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-75">
           <div className="mx-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-lg shadow-lg px-3 py-2.5">
             <div className="flex flex-col gap-1.5">
               {data.cards.map((card) => (
@@ -377,7 +378,7 @@ function AllCollectionsView({ search }: { search: string }) {
 
   return (
     <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : ""}>
-      <div className="hidden sm:flex items-center justify-between mb-2 sticky top-[60px] z-10 bg-white dark:bg-gray-800 ">
+      <div className="hidden sm:flex items-center justify-between mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900">
         {data && totalPages > 1 ? (
           <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
         ) : (
@@ -497,7 +498,7 @@ function CardsView({
           <AllCollectionsView search={search} />
         ) : (
           <>
-            <div className="hidden sm:flex justify-end mb-2">
+            <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900 ">
               <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
             </div>
 
@@ -757,8 +758,108 @@ export function CollectionsPage() {
       </div>
 
       <MobileFab to="/collections/new" label="Add collection" />
-
-      <FilterDrawer
+      <SideDrawer
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        onOpen={() => setFilterOpen(true)}
+        tabLabel={
+          viewMode === "all"
+            ? `All collections (${totalCollections}) ❯`
+            : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} ❯`
+        }
+        tabIcon={<IoFilter />}
+        topValue="top-[130px] w-full flex flex-row nowrap"
+        title="Filters"
+        hasActiveIndicator={
+          activeFilter !== "All" ||
+          activeTagId !== null ||
+          (viewMode === "by-category" && myLibrary.selectedCategoryId !== null)
+        }>
+        <div>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Show</p>
+          <div className="flex w-fit m-auto items-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-xs self-start">
+            {FILTER_TAGS.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setActiveFilter(tag)}
+                className={`flex items-center gap-1 px-3 py-1.5 transition-colors border-l first:border-l-0 border-gray-300 dark:border-gray-600 whitespace-nowrap ${
+                  activeFilter === tag
+                    ? "bg-indigo-600 border-indigo-600 text-white"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                }`}>
+                {FILTER_TAG_ICONS[tag]}
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+        {showContent && (
+          <CollapsibleSection
+            title="Categories"
+            count={visibleCategories.length}
+            collapsed={categoriesCollapsed}
+            onToggle={() => setCategoriesCollapsed((v) => !v)}>
+            <div className="flex flex-col gap-0.5">
+              <button
+                onClick={() => {
+                  setMyLibrary({ viewMode: "all", allPage: 1 });
+                  setFilterOpen(false);
+                }}
+                className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  viewMode === "all"
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="truncate">All collections</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({totalCollections})</span>
+                </div>
+              </button>
+              {visibleCategories.map(({ category, collections }) => (
+                <button
+                  key={category.id}
+                  onClick={() => {
+                    setMyLibrary({ viewMode: "by-category", selectedCategoryId: category.id });
+                    setFilterOpen(false);
+                  }}
+                  className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                    viewMode === "by-category" && effectiveId === category.id
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="truncate">{category.name}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({collections.length})</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </CollapsibleSection>
+        )}
+        {allTags.length > 0 && (
+          <CollapsibleSection
+            title="Tags"
+            count={allTags.length}
+            collapsed={tagsCollapsed}
+            onToggle={() => setTagsCollapsed((v) => !v)}>
+            <div className="flex flex-wrap gap-1.5">
+              {allTags.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => setActiveTagId(activeTagId === tag.id ? null : tag.id)}
+                  className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                    activeTagId === tag.id
+                      ? "bg-violet-600 border-violet-600 text-white"
+                      : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300"
+                  }`}>
+                  {tag.name}
+                </button>
+              ))}
+            </div>
+          </CollapsibleSection>
+        )}
+      </SideDrawer>
+      {/* <FilterDrawer
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         onOpen={() => setFilterOpen(true)}
@@ -853,7 +954,7 @@ export function CollectionsPage() {
             </div>
           </CollapsibleSection>
         )}
-      </FilterDrawer>
+      </FilterDrawer> */}
     </div>
   );
 }

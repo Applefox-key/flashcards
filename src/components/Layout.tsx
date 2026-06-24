@@ -274,9 +274,14 @@ export function Layout() {
 
         {/* Sidebar — overlays on mobile, pushes content on desktop */}
         {sidebarOpen && (
-          <aside className="absolute inset-y-0 left-0 z-30 w-64 sm:relative sm:inset-y-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
+          <aside className="absolute inset-y-0 left-0 z-50 w-64 sm:relative sm:inset-y-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
             <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Navigation</p>
             <nav className="flex flex-col gap-1">
+              <div className="flex items-center justify-between py-1">
+                <span className="text-sm text-gray-700 dark:text-gray-300">Theme</span>
+                <DarkModeToggle />
+              </div>
+              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
               <NavLink
                 to="/library"
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
@@ -321,10 +326,6 @@ export function Layout() {
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 py-1 text-left transition-colors">
                 Logout
               </button>
-              <div className="flex items-center justify-between py-1">
-                <span className="text-sm text-gray-700 dark:text-gray-300">Theme</span>
-                <DarkModeToggle />
-              </div>
               <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
               <NavLink
                 to="/about"

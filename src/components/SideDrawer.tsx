@@ -53,7 +53,7 @@ export function SideDrawer({
 
       {/* Drawer panel — tab is attached and moves with it */}
       <div
-        className={`${hide} fixed inset-y-0 z-50 w-72 bg-white dark:bg-gray-900 shadow-2xl
+        className={`${hide} fixed inset-y-0 z-40 w-72 bg-white dark:bg-gray-900 shadow-2xl
           flex flex-col transition-transform duration-300 ease-in-out
           ${isRight ? "right-0" : "left-0"}
           ${open ? "translate-x-0" : isRight ? "translate-x-full" : "-translate-x-full"}`}>
@@ -62,7 +62,7 @@ export function SideDrawer({
           onClick={open ? onClose : onOpen}
           className={`absolute  -translate-y-1/2
             bg-indigo-600 text-white shadow-lg select-none
-            flex flex-col items-center gap-1 px-1.5 py-3 ${topValue}
+            flex flex-row items-center gap-1 px-1.5 py-3 ${topValue}
             ${isRight ? "left-0 -translate-x-full rounded-l-xl" : "right-0 translate-x-full rounded-r-xl"}`}>
           {tabIcon}
           <span

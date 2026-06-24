@@ -277,6 +277,26 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
 
 // ── Card item ───────────────────────────────────────────────────────
 
+function highlightNote(note: string, question: string, answer: string) {
+  const terms = [question, answer].map((t) => t.trim()).filter(Boolean);
+  if (!terms.length) return <>{note}</>;
+  const pattern = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  const parts = note.split(pattern);
+  return (
+    <>
+      {parts.map((part, i) =>
+        pattern.test(part) ? (
+          <strong className="underline" key={i}>
+            {part}
+          </strong>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
 function CardListRow({
   card,
   collectionId,
@@ -383,7 +403,9 @@ function CardListRow({
           <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{card.question}</span>
           <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
           {card.note && (
-            <span className="sm:col-span-2 text-xs text-gray-400 truncate bg-amber-100 w-fit">{card.note}</span>
+            <span className="sm:col-span-2 text-xs text-gray-400 truncate bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full truncate italic">
+              {highlightNote(card.note, card.question, card.answer)}
+            </span>
           )}
         </div>
       </div>
@@ -627,7 +649,9 @@ function CardItem({
         <p className="text-xs text-gray-400 mb-1">Answer</p>
         <p className="text-gray-800 dark:text-gray-200">{card.answer}</p>
         <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
-        {card.note && <p className="text-xs text-gray-400 mt-1 italic">{card.note}</p>}
+        {card.note && (
+          <p className="text-xs text-gray-400 mt-1 italic">{highlightNote(card.note, card.question, card.answer)}</p>
+        )}
       </div>
       <div className="flex items-center justify-between">
         <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
