@@ -45,6 +45,39 @@ export function parseTwoLists(questions: string, answers: string): ParsedCard[] 
   return cards
 }
 
+/**
+ * Mode 4: blocks separated by blank lines; sep on its own line divides question / answer / note (optional)
+ *
+ * Example (sep = ";"):
+ *   Line 1 of question
+ *   Line 2 of question
+ *   ;
+ *   Line 1 of answer
+ *   Line 2 of answer
+ *   ;
+ *   Optional note
+ */
+export function parseBlocks(text: string, sep = ';'): ParsedCard[] {
+  return text
+    .split(/\n{2,}/)
+    .map((block) => {
+      const parts: string[][] = [[]]
+      for (const line of block.split('\n')) {
+        if (line.trim() === sep) {
+          parts.push([])
+        } else {
+          parts[parts.length - 1].push(line)
+        }
+      }
+      const question = clean(parts[0]?.join('\n') ?? '')
+      const answer = clean(parts[1]?.join('\n') ?? '')
+      const note = clean(parts[2]?.join('\n') ?? '')
+      if (!question || !answer) return null
+      return { id: uid(), question, answer, note }
+    })
+    .filter((c): c is ParsedCard => c !== null)
+}
+
 /** Mode 3: alternating lines — line 1 = question, line 2 = answer, repeat */
 export function parseAlternating(text: string): ParsedCard[] {
   const lines = text.split('\n').map(clean).filter(Boolean)

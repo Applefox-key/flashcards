@@ -2,21 +2,23 @@ import { useState } from "react";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
 import { CardPreviewTable } from "./CardPreviewTable";
-import { parseDelimited, parseTwoLists, parseAlternating } from "@/utils/parseCards";
+import { parseDelimited, parseBlocks, parseTwoLists, parseAlternating } from "@/utils/parseCards";
 import { useBulkAddCards } from "./hooks/useContent";
 import { useToast } from "@/hooks/useToast";
 import type { ParsedCard } from "@/utils/parseCards";
 
-type Mode = "delimited" | "two-lists" | "alternating";
+type Mode = "delimited" | "block" | "two-lists" | "alternating";
 
 const MODE_LABELS: Record<Mode, string> = {
   delimited: "Delimiter",
+  block: "Block format",
   "two-lists": "Two lists",
   alternating: "Alternating lines",
 };
 
 const MODE_HINTS: Record<Mode, string> = {
   delimited: "Each line: question ; answer ; note (optional)",
+  block: "Cards separated by blank lines. Separator on its own line divides question / answer / note (optional)",
   "two-lists": "Questions in first box, answers in second box — matched by line",
   alternating: "Line 1 = question, line 2 = answer, repeat",
 };
@@ -41,6 +43,7 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
   function handleParse() {
     let result: ParsedCard[] = [];
     if (mode === "delimited") result = parseDelimited(text, sep);
+    else if (mode === "block") result = parseBlocks(text, sep);
     else if (mode === "two-lists") result = parseTwoLists(text, text2);
     else result = parseAlternating(text);
 
@@ -112,7 +115,7 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
           <p className="text-xs text-gray-500 dark:text-gray-400">{MODE_HINTS[mode]}</p>
 
           {/* Delimiter config */}
-          {mode === "delimited" && (
+          {(mode === "delimited" || mode === "block") && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-400">Separator:</span>
               {[";", "\t", ","].map((s) => (
@@ -143,7 +146,13 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={mode === "two-lists" ? "Questions (one per line)..." : "Paste your content here..."}
+            placeholder={
+              mode === "two-lists"
+                ? "Questions (one per line)..."
+                : mode === "block"
+                  ? `Question line 1\nQuestion line 2\n;\nAnswer line 1\nAnswer line 2\n;\nOptional note\n\nNext card question\n;\nNext card answer`
+                  : "Paste your content here..."
+            }
             rows={mode === "two-lists" ? 6 : 10}
             className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-mono resize-none
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
