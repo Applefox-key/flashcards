@@ -29,7 +29,7 @@ export function CollectionCreatePage() {
         await setCollectionTags.mutateAsync({ collectionId: col.id, tagIds });
       }
       toast.success("Collection created");
-      navigate(`/collections/${col.id}`);
+      navigate(`/collections/${col.id}`, { replace: true });
     } catch {
       toast.error("Failed to create collection");
     }

@@ -68,7 +68,7 @@ export function CollectionEditPage() {
             {
               onSuccess: () => {
                 toast.success("Collection saved");
-                navigate(`/collections/${colId}`);
+                navigate(`/collections/${colId}`, { replace: true });
               },
               onError: () => toast.error("Failed to save tags"),
             },

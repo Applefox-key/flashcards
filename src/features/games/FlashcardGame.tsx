@@ -4,6 +4,10 @@ import { shuffle } from "@/utils/gameUtils";
 import { FlashCardFace } from "@/components/FlashCardFace";
 import { useIsDemo } from "@/hooks/useIsDemo";
 import { useDemoStore } from "@/demo/demoStore";
+import { useEditCard } from "@/hooks/useContentHooks";
+import { useToast } from "@/hooks/useToast";
+import { Modal } from "@/components/Modal";
+import { Button } from "@/components/Button";
 import type { Content } from "@/types";
 
 interface Props {
@@ -24,7 +28,9 @@ const FADE_IN = 300; // плавное появление
 export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _rateFilter, onFilterChange: _onFilterChange, answerFirst, isShuffled }: Props) {
   const isDemo = useIsDemo();
   const demoStore = useDemoStore();
-  const [cards] = useState<Content[]>(() => isShuffled ? shuffle([...initialCards]) : [...initialCards]);
+  const editCard = useEditCard();
+  const toast = useToast();
+  const [cards, setCards] = useState<Content[]>(() => isShuffled ? shuffle([...initialCards]) : [...initialCards]);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   // visible = true → карточка видна, false → невидима (между картами)
@@ -36,6 +42,12 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _
     });
     return m;
   });
+
+  // Edit modal
+  const [editOpen, setEditOpen] = useState(false);
+  const [editQuestion, setEditQuestion] = useState("");
+  const [editAnswer, setEditAnswer] = useState("");
+  const [editNote, setEditNote] = useState("");
 
   const card = cards[index];
 
@@ -68,6 +80,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (editOpen) return;
       if (e.key === "ArrowRight") goNext();
       else if (e.key === "ArrowLeft") goPrev();
       else if (e.key === " ") {
@@ -77,7 +90,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, editOpen]);
 
   function handleRate(cardId: number, star: number) {
     const newRate = ratingMap[cardId] === star ? 0 : star;
@@ -87,6 +100,33 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _
     } else {
       contentApi.edit({ id: cardId, rate: newRate }).catch(() => {});
     }
+  }
+
+  function openEditModal() {
+    if (!card) return;
+    setEditQuestion(card.question);
+    setEditAnswer(card.answer);
+    setEditNote(card.note ?? "");
+    setEditOpen(true);
+  }
+
+  function handleEditSave() {
+    if (!card || !editQuestion.trim() || !editAnswer.trim()) return;
+    editCard.mutate(
+      { collectionId, data: { id: card.id, question: editQuestion, answer: editAnswer, note: editNote || undefined } },
+      {
+        onSuccess: () => {
+          setCards((prev) =>
+            prev.map((c) =>
+              c.id === card.id ? { ...c, question: editQuestion, answer: editAnswer, note: editNote || undefined } : c,
+            ),
+          );
+          toast.success("Card updated");
+          setEditOpen(false);
+        },
+        onError: () => toast.error("Failed to update card"),
+      },
+    );
   }
 
   if (!card) return <p className="text-gray-400 text-center py-16">No cards to show.</p>;
@@ -174,6 +214,62 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _
           Next →
         </button>
       </div>
+
+      {/* Edit button */}
+      <div className="flex justify-center">
+        <button
+          onClick={openEditModal}
+          className="text-xs text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+            <path d="M11.5 1.5a1.5 1.5 0 0 1 2.121 2.121l-8.5 8.5a.5.5 0 0 1-.192.121l-3 1a.5.5 0 0 1-.636-.636l1-3a.5.5 0 0 1 .121-.192l8.5-8.5z" />
+          </svg>
+          Edit card
+        </button>
+      </div>
+
+      {/* Edit modal */}
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit card">
+        <div className="flex flex-col gap-4">
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Question</label>
+            <textarea
+              value={editQuestion}
+              onChange={(e) => setEditQuestion(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Answer</label>
+            <textarea
+              value={editAnswer}
+              onChange={(e) => setEditAnswer(e.target.value)}
+              rows={3}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Note (optional)</label>
+            <input
+              value={editNote}
+              onChange={(e) => setEditNote(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="secondary" size="sm" onClick={() => setEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleEditSave}
+              loading={editCard.isPending}
+              disabled={!editQuestion.trim() || !editAnswer.trim()}>
+              Save
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
