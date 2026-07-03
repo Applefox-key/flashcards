@@ -18,7 +18,7 @@ const MODE_LABELS: Record<Mode, string> = {
 
 const MODE_HINTS: Record<Mode, string> = {
   delimited: "Each line: question ; answer ; note (optional)",
-  block: "Cards separated by blank lines. Separator on its own line divides question / answer / note (optional)",
+  block: "Cards separated by blank lines. Separator anywhere in the block splits question / answer / note (optional)",
   "two-lists": "Questions in first box, answers in second box — matched by line",
   alternating: "Line 1 = question, line 2 = answer, repeat",
 };
@@ -150,7 +150,7 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
               mode === "two-lists"
                 ? "Questions (one per line)..."
                 : mode === "block"
-                  ? `Question line 1\nQuestion line 2\n;\nAnswer line 1\nAnswer line 2\n;\nOptional note\n\nNext card question\n;\nNext card answer`
+                  ? `Question line 1\nQuestion line 2 ; Answer line 1\nAnswer line 2 ; Optional note\n\nSingle line question ; answer\n\nQuestion ; answer ; note`
                   : "Paste your content here..."
             }
             rows={mode === "two-lists" ? 6 : 10}

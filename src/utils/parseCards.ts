@@ -46,32 +46,25 @@ export function parseTwoLists(questions: string, answers: string): ParsedCard[] 
 }
 
 /**
- * Mode 4: blocks separated by blank lines; sep on its own line divides question / answer / note (optional)
+ * Mode 4: blocks separated by blank lines; sep anywhere in the block divides Q / A / note (optional)
  *
  * Example (sep = ";"):
  *   Line 1 of question
- *   Line 2 of question
- *   ;
- *   Line 1 of answer
- *   Line 2 of answer
- *   ;
- *   Optional note
+ *   Line 2 of question ; Line 1 of answer
+ *   Line 2 of answer ; Optional note
+ *
+ *   Single line question ; answer ; note
  */
 export function parseBlocks(text: string, sep = ';'): ParsedCard[] {
   return text
     .split(/\n{2,}/)
     .map((block) => {
-      const parts: string[][] = [[]]
-      for (const line of block.split('\n')) {
-        if (line.trim() === sep) {
-          parts.push([])
-        } else {
-          parts[parts.length - 1].push(line)
-        }
-      }
-      const question = clean(parts[0]?.join('\n') ?? '')
-      const answer = clean(parts[1]?.join('\n') ?? '')
-      const note = clean(parts[2]?.join('\n') ?? '')
+      const trimmed = block.trim()
+      if (!trimmed) return null
+      const parts = trimmed.split(sep)
+      const question = clean(parts[0] ?? '')
+      const answer = clean(parts[1] ?? '')
+      const note = parts.length > 2 ? clean(parts.slice(2).join(sep)) : ''
       if (!question || !answer) return null
       return { id: uid(), question, answer, note }
     })
