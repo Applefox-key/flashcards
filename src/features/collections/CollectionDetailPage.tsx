@@ -655,13 +655,13 @@ function CardItem({
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
           <p className="text-xs text-gray-400 mb-1">Question</p>
-          <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 ">{card.question}</p>
+          <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">{card.question}</p>
           <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
         </div>
         <div className="border-t border-gray-100 dark:border-gray-700" />
         <div>
           <p className="text-xs text-gray-400 mb-1">Answer</p>
-          <p className="text-gray-800 dark:text-gray-200">{card.answer}</p>
+          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{card.answer}</p>
           <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
           {card.note && (
             <p className="text-xs text-gray-400 mt-1 italic">{highlightNote(card.note, card.question, card.answer)}</p>

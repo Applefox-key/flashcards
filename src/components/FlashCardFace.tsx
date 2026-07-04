@@ -108,7 +108,7 @@ export function FlashCardFace({
           </div>
           <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2">
             <div className="my-auto w-full flex flex-col items-center gap-3">
-              <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">{frontText}</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center whitespace-pre-line">{frontText}</p>
               <CardImg filename={frontImg} collectionId={collectionId} />
             </div>
           </div>
@@ -127,7 +127,7 @@ export function FlashCardFace({
           </div>
           <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2">
             <div className="my-auto w-full flex flex-col items-center gap-3">
-              <p className="text-2xl font-semibold text-white text-center">{backText}</p>
+              <p className="text-2xl font-semibold text-white text-center whitespace-pre-line">{backText}</p>
               <CardImg filename={backImg} collectionId={collectionId} dark />
               {note && (
                 <p className="text-sm text-indigo-200 italic text-center">{highlightNote(note, frontText, backText)}</p>
