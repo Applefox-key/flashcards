@@ -85,7 +85,7 @@ function ImageUploadField({
 
   return (
     <div className="flex flex-col gap-1 mt-2">
-      <span className="text-xs text-gray-400">{label}</span>
+      <span className="text-xs text-gray-400 md:hidden">{label}</span>
       <input
         ref={inputRef}
         type="file"
@@ -346,123 +346,134 @@ function CardListRow({
     );
   }
 
-  if (editing) {
-    return (
-      <div className="bg-white dark:bg-gray-800 px-4 py-3 flex flex-col gap-2">
-        <div className="flex gap-2">
-          <input
-            className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Question"
-          />
-          <input
-            className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Answer"
-          />
-        </div>
-        <input
-          className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Note (optional)"
-        />
-        <div className="flex gap-2 justify-end">
-          <Button
-            size="sm"
-            onClick={handleSave}
-            loading={editCard.isPending}
-            disabled={!question.trim() || !answer.trim()}>
-            Save
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              setEditing(false);
-              setQuestion(card.question);
-              setAnswer(card.answer);
-              setNote(card.note ?? "");
-            }}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-      <div className="flex items-start gap-3 flex-1 min-w-0">
-        <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
-          {index}
-        </span>
-        <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
-          <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{card.question}</span>
-          <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
-          {card.note && (
-            <span className="sm:col-span-2 text-xs text-gray-400 truncate bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full truncate italic">
-              {highlightNote(card.note, card.question, card.answer)}
-            </span>
+    <>
+      <Modal
+        open={editing}
+        onClose={() => {
+          setEditing(false);
+          setQuestion(card.question);
+          setAnswer(card.answer);
+          setNote(card.note ?? "");
+        }}
+        title="Edit card"
+        size="md">
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <input
+              className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Question"
+              autoFocus
+            />
+            <input
+              className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              placeholder="Answer"
+            />
+          </div>
+          <input
+            className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Note (optional)"
+          />
+          <div className="flex gap-2 justify-end">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setEditing(false);
+                setQuestion(card.question);
+                setAnswer(card.answer);
+                setNote(card.note ?? "");
+              }}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              loading={editCard.isPending}
+              disabled={!question.trim() || !answer.trim()}>
+              Save
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      <div className="group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
+            {index}
+          </span>
+          <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
+            <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{card.question}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
+            {card.note && (
+              <span className="sm:col-span-2 text-xs text-gray-400 truncate bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full truncate italic">
+                {highlightNote(card.note, card.question, card.answer)}
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Desktop: hover buttons */}
+        <div className="hidden sm:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <button
+            onClick={() => onView(card)}
+            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+            View
+          </button>
+          <button
+            onClick={() => setEditing(true)}
+            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+            Edit
+          </button>
+          <button
+            onClick={() => onDelete(card.id)}
+            className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+            Delete
+          </button>
+        </div>
+        {/* Mobile: ··· kebab menu */}
+        <div className="relative sm:hidden shrink-0" ref={rowMenuRef}>
+          <button
+            onClick={() => setRowMenuOpen((v) => !v)}
+            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm leading-none">
+            •••
+          </button>
+          {rowMenuOpen && (
+            <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[140px] py-1">
+              <button
+                onClick={() => {
+                  setRowMenuOpen(false);
+                  onView(card);
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                View
+              </button>
+              <button
+                onClick={() => {
+                  setRowMenuOpen(false);
+                  setEditing(true);
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Edit
+              </button>
+              <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
+              <button
+                onClick={() => {
+                  setRowMenuOpen(false);
+                  onDelete(card.id);
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                Delete
+              </button>
+            </div>
           )}
         </div>
       </div>
-      {/* Desktop: hover buttons */}
-      <div className="hidden sm:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={() => onView(card)} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-          View
-        </button>
-        <button
-          onClick={() => setEditing(true)}
-          className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-          Edit
-        </button>
-        <button
-          onClick={() => onDelete(card.id)}
-          className="text-xs text-gray-400 hover:text-red-500 transition-colors">
-          Delete
-        </button>
-      </div>
-      {/* Mobile: ··· kebab menu */}
-      <div className="relative sm:hidden shrink-0" ref={rowMenuRef}>
-        <button
-          onClick={() => setRowMenuOpen((v) => !v)}
-          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm leading-none">
-          •••
-        </button>
-        {rowMenuOpen && (
-          <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[140px] py-1">
-            <button
-              onClick={() => {
-                setRowMenuOpen(false);
-                onView(card);
-              }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              View
-            </button>
-            <button
-              onClick={() => {
-                setRowMenuOpen(false);
-                setEditing(true);
-              }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              Edit
-            </button>
-            <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
-            <button
-              onClick={() => {
-                setRowMenuOpen(false);
-                onDelete(card.id);
-              }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-              Delete
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -548,82 +559,6 @@ function CardItem({
     setEditing(false);
   }
 
-  if (editing) {
-    return (
-      <div className="bg-white dark:bg-gray-800 border border-indigo-300 dark:border-indigo-700 rounded-lg p-4 flex flex-col gap-3">
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-400">Question</label>
-            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
-          </div>
-          <textarea
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            rows={2}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          />
-          <ImageUploadField
-            label="Question image"
-            currentFilename={clearImgQ ? undefined : card.imgQ}
-            collectionId={collectionId}
-            file={imgQFile}
-            onFileChange={setImgQFile}
-            onClear={() => {
-              setClearImgQ(true);
-              setImgQFile(null);
-            }}
-          />
-        </div>
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-400">Answer</label>
-            <div className="flex items-center gap-1">
-              <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
-              <VoiceInputButton onResult={setAnswer} defaultLang={cardInitALang} onLangChange={setAnswerLang} />
-            </div>
-          </div>
-          <textarea
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            rows={2}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          />
-          <ImageUploadField
-            label="Answer image"
-            currentFilename={clearImgA ? undefined : card.imgA}
-            collectionId={collectionId}
-            file={imgAFile}
-            onFileChange={setImgAFile}
-            onClear={() => {
-              setClearImgA(true);
-              setImgAFile(null);
-            }}
-          />
-        </div>
-        <div>
-          <label className="text-xs text-gray-400 block mb-1">Note (optional)</label>
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          />
-        </div>
-        <div className="flex gap-2 justify-end">
-          <Button variant="secondary" size="sm" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            loading={editCard.isPending}
-            disabled={!question.trim() || !answer.trim()}>
-            Save
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   const displayRate = hoverRate || card.rate || 0;
 
   function handleRate(star: number) {
@@ -638,55 +573,135 @@ function CardItem({
   }
 
   return (
-    <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
-      <div>
-        <p className="text-xs text-gray-400 mb-1">Question</p>
-        <p className="font-medium text-gray-900 dark:text-gray-100">{card.question}</p>
-        <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
-      </div>
-      <div className="border-t border-gray-100 dark:border-gray-700" />
-      <div>
-        <p className="text-xs text-gray-400 mb-1">Answer</p>
-        <p className="text-gray-800 dark:text-gray-200">{card.answer}</p>
-        <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
-        {card.note && (
-          <p className="text-xs text-gray-400 mt-1 italic">{highlightNote(card.note, card.question, card.answer)}</p>
-        )}
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
-          {[1, 2, 3, 4, 5].map((star) => (
+    <>
+      <Modal open={editing} onClose={handleCancel} title="Edit card" size="lg">
+        <div className="flex flex-col gap-3">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-gray-400">Question</label>
+              <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
+            </div>
+            <div className="flex flex-col-reverse md:flex-row gap-2">
+              <ImageUploadField
+                label="Question image"
+                currentFilename={clearImgQ ? undefined : card.imgQ}
+                collectionId={collectionId}
+                file={imgQFile}
+                onFileChange={setImgQFile}
+                onClear={() => {
+                  setClearImgQ(true);
+                  setImgQFile(null);
+                }}
+              />
+              <textarea
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                rows={2}
+                autoFocus
+                className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-gray-400">Answer</label>
+              <div className="flex items-center gap-1">
+                <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
+                <VoiceInputButton onResult={setAnswer} defaultLang={cardInitALang} onLangChange={setAnswerLang} />
+              </div>
+            </div>
+            <div className="flex flex-col-reverse md:flex-row gap-2">
+              <ImageUploadField
+                label="Answer image"
+                currentFilename={clearImgA ? undefined : card.imgA}
+                collectionId={collectionId}
+                file={imgAFile}
+                onFileChange={setImgAFile}
+                onClear={() => {
+                  setClearImgA(true);
+                  setImgAFile(null);
+                }}
+              />
+              <textarea
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                rows={2}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Note (optional)</label>
+            <input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="secondary" size="sm" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              loading={editCard.isPending}
+              disabled={!question.trim() || !answer.trim()}>
+              Save
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
+        <div>
+          <p className="text-xs text-gray-400 mb-1">Question</p>
+          <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 ">{card.question}</p>
+          <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
+        </div>
+        <div className="border-t border-gray-100 dark:border-gray-700" />
+        <div>
+          <p className="text-xs text-gray-400 mb-1">Answer</p>
+          <p className="text-gray-800 dark:text-gray-200">{card.answer}</p>
+          <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
+          {card.note && (
+            <p className="text-xs text-gray-400 mt-1 italic">{highlightNote(card.note, card.question, card.answer)}</p>
+          )}
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => handleRate(star)}
+                onMouseEnter={() => setHoverRate(star)}
+                disabled={editCard.isPending}
+                className={`text-base leading-none transition-colors disabled:opacity-40 ${
+                  star <= displayRate ? "text-yellow-400" : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
+                }`}>
+                ★
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              key={star}
-              onClick={() => handleRate(star)}
-              onMouseEnter={() => setHoverRate(star)}
-              disabled={editCard.isPending}
-              className={`text-base leading-none transition-colors disabled:opacity-40 ${
-                star <= displayRate ? "text-yellow-400" : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
-              }`}>
-              ★
+              onClick={() => onView(card)}
+              className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+              View
             </button>
-          ))}
-        </div>
-        <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => onView(card)}
-            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-            View
-          </button>
-          <button
-            onClick={() => setEditing(true)}
-            className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(card.id)}
-            className="text-xs text-red-400 hover:text-red-600 transition-colors">
-            Delete
-          </button>
+            <button
+              onClick={() => setEditing(true)}
+              className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(card.id)}
+              className="text-xs text-red-400 hover:text-red-600 transition-colors">
+              Delete
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -816,6 +831,7 @@ export function CollectionDetailPage() {
   const collectionData = parsed?.[0];
   const collection = collectionData?.collection;
   const cards: Content[] = collectionData?.content ?? [];
+  console.log(cards);
 
   const filtered = cards.filter(
     (c) =>
@@ -1577,7 +1593,7 @@ export function CollectionDetailPage() {
       <FileImportModal open={fileOpen} onClose={() => setFileOpen(false)} collectionId={collectionId} />
 
       {/* Card preview modal */}
-      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="md">
+      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="lg">
         {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} />}
       </Modal>
 

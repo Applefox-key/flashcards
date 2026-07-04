@@ -25,12 +25,19 @@ const FADE_IN = 300; // плавное появление
 
 // ── Main component ──────────────────────────────────────────────────
 
-export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _rateFilter, onFilterChange: _onFilterChange, answerFirst, isShuffled }: Props) {
+export function FlashcardGame({
+  cards: initialCards,
+  collectionId,
+  rateFilter: _rateFilter,
+  onFilterChange: _onFilterChange,
+  answerFirst,
+  isShuffled,
+}: Props) {
   const isDemo = useIsDemo();
   const demoStore = useDemoStore();
   const editCard = useEditCard();
   const toast = useToast();
-  const [cards, setCards] = useState<Content[]>(() => isShuffled ? shuffle([...initialCards]) : [...initialCards]);
+  const [cards, setCards] = useState<Content[]>(() => (isShuffled ? shuffle([...initialCards]) : [...initialCards]));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   // visible = true → карточка видна, false → невидима (между картами)
@@ -228,7 +235,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, rateFilter: _
       </div>
 
       {/* Edit modal */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit card">
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit card" size="lg">
         <div className="flex flex-col gap-4">
           <div>
             <label className="text-xs text-gray-400 block mb-1">Question</label>

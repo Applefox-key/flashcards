@@ -106,9 +106,11 @@ export function FlashCardFace({
             <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
             <SpeakButton text={frontText} />
           </div>
-          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-3 px-6 py-2">
-            <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center whitespace-pre-wrap">{frontText}</p>
-            <CardImg filename={frontImg} collectionId={collectionId} />
+          <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2">
+            <div className="my-auto w-full flex flex-col items-center gap-3">
+              <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">{frontText}</p>
+              <CardImg filename={frontImg} collectionId={collectionId} />
+            </div>
           </div>
           <div className="shrink-0 px-6 pt-1 pb-4 text-center">
             <span className="text-xs text-gray-300 dark:text-gray-600">Click to flip</span>
@@ -123,12 +125,14 @@ export function FlashCardFace({
             <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>
             <SpeakButton text={backText} />
           </div>
-          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center gap-3 px-6 py-2">
-            <p className="text-2xl font-semibold text-white text-center whitespace-pre-wrap">{backText}</p>
-            <CardImg filename={backImg} collectionId={collectionId} dark />
-            {note && (
-              <p className="text-sm text-indigo-200 italic text-center whitespace-pre-wrap">{highlightNote(note, frontText, backText)}</p>
-            )}
+          <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2">
+            <div className="my-auto w-full flex flex-col items-center gap-3">
+              <p className="text-2xl font-semibold text-white text-center">{backText}</p>
+              <CardImg filename={backImg} collectionId={collectionId} dark />
+              {note && (
+                <p className="text-sm text-indigo-200 italic text-center">{highlightNote(note, frontText, backText)}</p>
+              )}
+            </div>
           </div>
           <div className="shrink-0 px-6 pt-1 pb-4 text-center">
             <span className="text-xs text-indigo-300">Click to flip back</span>

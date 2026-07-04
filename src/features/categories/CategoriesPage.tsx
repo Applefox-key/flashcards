@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCategories, useCreateCategory, useEditCategory, useDeleteCategory } from "@/hooks/useCategoryHooks";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/Button";
 import { MobileFab } from "@/components/MobileFab";
+import { categoriesApi, collectionsApi } from "@/api";
 
 // ── Skeleton ─────────────────────────────────────────────────────────
 
@@ -23,6 +25,7 @@ function CategorySkeleton() {
 
 export function CategoriesPage() {
   const toast = useToast();
+  const queryClient = useQueryClient();
   const { data: categories = [], isLoading } = useCategories();
   const { data: withCollections = [] } = useCategoriesWithCollections();
   const createCategory = useCreateCategory();
@@ -33,9 +36,11 @@ export function CategoriesPage() {
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
+  const [isRestoring, setIsRestoring] = useState(false);
 
   const newInputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+  const restoreInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (addingNew) newInputRef.current?.focus();
@@ -102,16 +107,73 @@ export function CategoriesPage() {
     });
   }
 
+  async function handleRestoreFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(await file.text());
+    } catch {
+      toast.error("Invalid file — could not parse JSON");
+      return;
+    }
+
+    const data = parsed as { version?: number; categoryName?: string; collections?: { name: string; note?: string; cards: { question: string; answer: string; note?: string }[] }[] };
+    if (!data.categoryName || !Array.isArray(data.collections)) {
+      toast.error("Invalid file format");
+      return;
+    }
+
+    if (!window.confirm(`Restore category "${data.categoryName}" with ${data.collections.length} collection(s)?`)) return;
+
+    setIsRestoring(true);
+    try {
+      const { id: categoryId } = await categoriesApi.create(data.categoryName);
+      for (const col of data.collections) {
+        await collectionsApi.createWithCards({
+          name: col.name,
+          note: col.note,
+          categoryid: categoryId,
+          content: col.cards ?? [],
+        });
+      }
+      await queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success(`Category "${data.categoryName}" restored with ${data.collections.length} collection(s)`);
+    } catch {
+      toast.error("Restore failed");
+    } finally {
+      setIsRestoring(false);
+    }
+  }
+
   return (
     <div className="pt-3 sm:pt-0">
       {/* Header */}
       <div className="hidden sm:flex items-center sticky sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 justify-between mb-6">
         <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
-        {!addingNew && (
-          <Button size="sm" onClick={() => setAddingNew(true)}>
-            + New category
+        <div className="flex items-center gap-2">
+          <input
+            ref={restoreInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleRestoreFile}
+          />
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => restoreInputRef.current?.click()}
+            disabled={isRestoring}>
+            {isRestoring ? "Restoring…" : "Restore"}
           </Button>
-        )}
+          {!addingNew && (
+            <Button size="sm" onClick={() => setAddingNew(true)}>
+              + New category
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Inline add form */}

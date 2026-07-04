@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
+import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/Button";
-import type { Collection, CollectionTag } from "@/types";
+import type { Collection, CollectionTag, Content } from "@/types";
+import { collectionsApi } from "@/api";
 
 // ── Skeleton ─────────────────────────────────────────────────────────
 
@@ -80,10 +82,48 @@ export function CategoryCollectionsPage() {
   const { id } = useParams<{ id: string }>();
   const categoryId = Number(id);
   const navigate = useNavigate();
+  const toast = useToast();
   const [activeFilter, setActiveFilter] = useState<FilterTag>("All");
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: categories = [], isLoading } = useCategoriesWithCollections();
   const categoryData = categories.find((c) => c.id === categoryId);
+
+  async function handleSave() {
+    if (!categoryData) return;
+    setIsSaving(true);
+    try {
+      const responses = await Promise.all(
+        categoryData.collections.map((col) => collectionsApi.getWithContent(col.id))
+      );
+      // API returns Array<{ collection: Collection, content: Content[] }>, not a flat CollectionWithContent
+      const withContent = responses.map(
+        (r) => (r as unknown as { collection: Collection; content: Content[] }[])[0]
+      );
+      const payload = {
+        version: 1,
+        categoryName: categoryData.name,
+        exportedAt: new Date().toISOString(),
+        collections: withContent.map((item) => ({
+          name: item.collection.name,
+          note: item.collection.note,
+          cards: (item.content ?? []).map((c) => ({ question: c.question, answer: c.answer, note: c.note })),
+        })),
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${categoryData.name}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("[Save category]", err);
+      toast.error("Failed to save category");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   function filterCollections(collections: Collection[]) {
     if (activeFilter === "Favorites") return collections.filter((c) => c.isFavorite);
@@ -130,12 +170,17 @@ export function CategoryCollectionsPage() {
             </span>
           )}
         </div>
-        <Link to="/collections/new" className="shrink-0 ml-3">
-          <Button size="sm">
-            <span className="hidden sm:inline">+ New Collection</span>
-            <span className="sm:hidden">+ New</span>
+        <div className="flex items-center gap-2 shrink-0 ml-3">
+          <Button size="sm" variant="secondary" onClick={handleSave} disabled={isSaving || isLoading}>
+            {isSaving ? "Saving…" : "Save"}
           </Button>
-        </Link>
+          <Link to="/collections/new">
+            <Button size="sm">
+              <span className="hidden sm:inline">+ New Collection</span>
+              <span className="sm:hidden">+ New</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <TagFilterBar active={activeFilter} onChange={setActiveFilter} />
