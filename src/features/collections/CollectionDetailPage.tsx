@@ -134,6 +134,171 @@ function ImageUploadField({
   );
 }
 
+// ── Edit card modal ─────────────────────────────────────────────────
+
+function EditCardModal({
+  card,
+  collectionId,
+  open,
+  onClose,
+}: {
+  card: Content;
+  collectionId: number;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const toast = useToast();
+  const { speechLangs } = useUserSettings();
+  const editCard = useEditCard();
+  const [question, setQuestion] = useState(card.question);
+  const [answer, setAnswer] = useState(card.answer);
+  const [note, setNote] = useState(card.note ?? "");
+  const [imgQFile, setImgQFile] = useState<File | null>(null);
+  const [imgAFile, setImgAFile] = useState<File | null>(null);
+  const [clearImgQ, setClearImgQ] = useState(false);
+  const [clearImgA, setClearImgA] = useState(false);
+  const validLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
+  const initQLang = validLangs[0]?.code ?? ("en-US" as LangCode);
+  const initALang = validLangs[1]?.code ?? validLangs[0]?.code ?? ("en-US" as LangCode);
+  const [, setQuestionLang] = useState<LangCode>(initQLang);
+  const [, setAnswerLang] = useState<LangCode>(initALang);
+
+  useEffect(() => {
+    if (open) {
+      setQuestion(card.question);
+      setAnswer(card.answer);
+      setNote(card.note ?? "");
+      setImgQFile(null);
+      setImgAFile(null);
+      setClearImgQ(false);
+      setClearImgA(false);
+    }
+  }, [open, card]);
+
+  function handleSave() {
+    const hasImageChange = imgQFile || imgAFile || clearImgQ || clearImgA;
+    if (hasImageChange) {
+      const fd = new FormData();
+      fd.append(
+        "data",
+        JSON.stringify({
+          id: card.id,
+          question,
+          answer,
+          note: note || undefined,
+          collectionid: collectionId,
+          ...(clearImgQ ? { imgQ: "" } : {}),
+          ...(clearImgA ? { imgA: "" } : {}),
+        }),
+      );
+      if (imgQFile) fd.append("imgQfile", imgQFile);
+      if (imgAFile) fd.append("imgAfile", imgAFile);
+      editCard.mutate(
+        { collectionId, data: fd as unknown as CardEditRequest },
+        {
+          onSuccess: () => {
+            toast.success("Card updated");
+            onClose();
+          },
+          onError: () => toast.error("Failed to update card"),
+        },
+      );
+    } else {
+      editCard.mutate(
+        { collectionId, data: { id: card.id, question, answer, note: note || undefined } },
+        {
+          onSuccess: () => {
+            toast.success("Card updated");
+            onClose();
+          },
+          onError: () => toast.error("Failed to update card"),
+        },
+      );
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Edit card" size="lg">
+      <div className="flex flex-col gap-3">
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-400">Question</label>
+            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2">
+            <ImageUploadField
+              label="Question image"
+              currentFilename={clearImgQ ? undefined : card.imgQ}
+              collectionId={collectionId}
+              file={imgQFile}
+              onFileChange={setImgQFile}
+              onClear={() => {
+                setClearImgQ(true);
+                setImgQFile(null);
+              }}
+            />
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              rows={2}
+              autoFocus
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-400">Answer</label>
+            <div className="flex items-center gap-1">
+              <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
+              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} />
+            </div>
+          </div>
+          <div className="flex flex-col-reverse md:flex-row gap-2">
+            <ImageUploadField
+              label="Answer image"
+              currentFilename={clearImgA ? undefined : card.imgA}
+              collectionId={collectionId}
+              file={imgAFile}
+              onFileChange={setImgAFile}
+              onClear={() => {
+                setClearImgA(true);
+                setImgAFile(null);
+              }}
+            />
+            <textarea
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              rows={2}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-gray-400 block mb-1">Note (optional)</label>
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+        <div className="flex gap-2 justify-end">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            loading={editCard.isPending}
+            disabled={!question.trim() || !answer.trim()}>
+            Save
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 // ── Add card form ───────────────────────────────────────────────────
 
 function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: () => void }) {
@@ -310,12 +475,7 @@ function CardListRow({
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
 }) {
-  const toast = useToast();
-  const editCard = useEditCard();
   const [editing, setEditing] = useState(false);
-  const [question, setQuestion] = useState(card.question);
-  const [answer, setAnswer] = useState(card.answer);
-  const [note, setNote] = useState(card.note ?? "");
   const [rowMenuOpen, setRowMenuOpen] = useState(false);
   const rowMenuRef = useRef<HTMLDivElement>(null);
 
@@ -330,78 +490,9 @@ function CardListRow({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [rowMenuOpen]);
 
-  function handleSave() {
-    editCard.mutate(
-      {
-        collectionId,
-        data: { id: card.id, question, answer, note: note || undefined },
-      },
-      {
-        onSuccess: () => {
-          toast.success("Card updated");
-          setEditing(false);
-        },
-        onError: () => toast.error("Failed to update card"),
-      },
-    );
-  }
-
   return (
     <>
-      <Modal
-        open={editing}
-        onClose={() => {
-          setEditing(false);
-          setQuestion(card.question);
-          setAnswer(card.answer);
-          setNote(card.note ?? "");
-        }}
-        title="Edit card"
-        size="md">
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
-            <input
-              className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Question"
-              autoFocus
-            />
-            <input
-              className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Answer"
-            />
-          </div>
-          <input
-            className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Note (optional)"
-          />
-          <div className="flex gap-2 justify-end">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setEditing(false);
-                setQuestion(card.question);
-                setAnswer(card.answer);
-                setNote(card.note ?? "");
-              }}>
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              loading={editCard.isPending}
-              disabled={!question.trim() || !answer.trim()}>
-              Save
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
       <div className="group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
@@ -489,75 +580,9 @@ function CardItem({
   onDelete: (id: number) => void;
 }) {
   const toast = useToast();
-  const { speechLangs } = useUserSettings();
   const editCard = useEditCard();
   const [editing, setEditing] = useState(false);
-  const [question, setQuestion] = useState(card.question);
-  const [answer, setAnswer] = useState(card.answer);
-  const [note, setNote] = useState(card.note ?? "");
-  const [imgQFile, setImgQFile] = useState<File | null>(null);
-  const [imgAFile, setImgAFile] = useState<File | null>(null);
-  const [clearImgQ, setClearImgQ] = useState(false);
-  const [clearImgA, setClearImgA] = useState(false);
   const [hoverRate, setHoverRate] = useState(0);
-  const cardValidLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
-  const cardInitQLang = cardValidLangs[0]?.code ?? ("en-US" as LangCode);
-  const cardInitALang = cardValidLangs[1]?.code ?? cardValidLangs[0]?.code ?? ("en-US" as LangCode);
-  const [, setQuestionLang] = useState<LangCode>(cardInitQLang);
-  const [, setAnswerLang] = useState<LangCode>(cardInitALang);
-
-  function handleSave() {
-    const hasImageChange = imgQFile || imgAFile || clearImgQ || clearImgA;
-    if (hasImageChange) {
-      const fd = new FormData();
-      fd.append(
-        "data",
-        JSON.stringify({
-          id: card.id,
-          question,
-          answer,
-          note: note || undefined,
-          collectionid: collectionId,
-          ...(clearImgQ ? { imgQ: "" } : {}),
-          ...(clearImgA ? { imgA: "" } : {}),
-        }),
-      );
-      if (imgQFile) fd.append("imgQfile", imgQFile);
-      if (imgAFile) fd.append("imgAfile", imgAFile);
-      editCard.mutate(
-        { collectionId, data: fd as unknown as CardEditRequest },
-        {
-          onSuccess: () => {
-            toast.success("Card updated");
-            setEditing(false);
-          },
-          onError: () => toast.error("Failed to update card"),
-        },
-      );
-    } else {
-      editCard.mutate(
-        { collectionId, data: { id: card.id, question, answer, note: note || undefined } },
-        {
-          onSuccess: () => {
-            toast.success("Card updated");
-            setEditing(false);
-          },
-          onError: () => toast.error("Failed to update card"),
-        },
-      );
-    }
-  }
-
-  function handleCancel() {
-    setQuestion(card.question);
-    setAnswer(card.answer);
-    setNote(card.note ?? "");
-    setImgQFile(null);
-    setImgAFile(null);
-    setClearImgQ(false);
-    setClearImgA(false);
-    setEditing(false);
-  }
 
   const displayRate = hoverRate || card.rate || 0;
 
@@ -574,84 +599,7 @@ function CardItem({
 
   return (
     <>
-      <Modal open={editing} onClose={handleCancel} title="Edit card" size="lg">
-        <div className="flex flex-col gap-3">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-400">Question</label>
-              <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
-            </div>
-            <div className="flex flex-col-reverse md:flex-row gap-2">
-              <ImageUploadField
-                label="Question image"
-                currentFilename={clearImgQ ? undefined : card.imgQ}
-                collectionId={collectionId}
-                file={imgQFile}
-                onFileChange={setImgQFile}
-                onClear={() => {
-                  setClearImgQ(true);
-                  setImgQFile(null);
-                }}
-              />
-              <textarea
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                rows={2}
-                autoFocus
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-400">Answer</label>
-              <div className="flex items-center gap-1">
-                <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
-                <VoiceInputButton onResult={setAnswer} defaultLang={cardInitALang} onLangChange={setAnswerLang} />
-              </div>
-            </div>
-            <div className="flex flex-col-reverse md:flex-row gap-2">
-              <ImageUploadField
-                label="Answer image"
-                currentFilename={clearImgA ? undefined : card.imgA}
-                collectionId={collectionId}
-                file={imgAFile}
-                onFileChange={setImgAFile}
-                onClear={() => {
-                  setClearImgA(true);
-                  setImgAFile(null);
-                }}
-              />
-              <textarea
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                rows={2}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 block mb-1">Note (optional)</label>
-            <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button variant="secondary" size="sm" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              loading={editCard.isPending}
-              disabled={!question.trim() || !answer.trim()}>
-              Save
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
           <p className="text-xs text-gray-400 mb-1">Question</p>
