@@ -14,6 +14,7 @@ import type { Collection, CollectionTag, CollectionStats } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
 import { SideDrawer } from "@/components/SideDrawer";
 import { IoFilter } from "react-icons/io5";
+import { BiImageAdd } from "react-icons/bi";
 
 const ALL_LIMIT = 50;
 
@@ -92,12 +93,10 @@ function CollectionCard({
       onClick={() => navigate(`/collections/${collection.id}`)}
       className="group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-1 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
       <div className="font-medium  text-gray-800 dark:text-gray-100 text-sm leading-snug">
-        <div className="flex justify-between">{highlight(collection.name, search)}</div>
+        <div className="flex justify-start uppercase truncate">{highlight(collection.name, search)}</div>
 
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 pb-0.5 pt-0.5">
-            {cardCount} cards
-          </span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 pb-0.5 pt-0.5">{cardCount} cards</span>
           {!!collection.isFavorite && <span className="text-lg text-rose-400 ">♥</span>}
           {!!collection.isPublic && <span className="text-sm pb-1">🔓</span>}
         </div>
@@ -107,8 +106,8 @@ function CollectionCard({
         <>
           <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
             {data.cards.map((card) => (
-              <div key={card.id} className="grid grid-cols-2 gap-1 text-xs text-gray-400 dark:text-gray-500">
-                <span className="truncate">{card.question}</span>
+              <div key={card.id} className="grid grid-cols-2 gap-1 text-sm text-gray-400 dark:text-gray-500">
+                <span className="truncate">{card.question ? card.question : <BiImageAdd />}</span>
                 <span className="truncate text-gray-300 dark:text-gray-600">{card.answer}</span>
               </div>
             ))}
@@ -130,7 +129,7 @@ function CollectionCard({
       <Link
         to={`/play/${collection.id}`}
         onClick={(e) => e.stopPropagation()}
-        className="flex justify-center item-center opacity-0 absolute bottom-0 text-center right-0 w-full group-hover:opacity-100 transition-opacity shrink-0 text-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-b-lg">
+        className="flex justify-center item-center opacity-0 absolute bottom-0 text-center right-0 w-[70%] group-hover:opacity-80 transition-opacity shrink-0 text-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-br-lg rounded-tl-lg">
         <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
       </Link>
     </div>
@@ -190,9 +189,7 @@ function CollectionListRow({
       <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
         {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
         {!!collection.isPublic && <span className="text-xs">🔓</span>}{" "}
-        {data?.stats
-          ? data.stats.toLearn + data.stats.inProgress + data.stats.learned
-          : (collection.cardCount ?? 0)}{" "}
+        {data?.stats ? data.stats.toLearn + data.stats.inProgress + data.stats.learned : (collection.cardCount ?? 0)}{" "}
         cards
       </span>
 
@@ -467,7 +464,7 @@ function CardsView({
   return (
     <div className="flex gap-0 min-h-0">
       {/* Left: category list — desktop only */}
-      <div className="hidden sm:flex flex-col w-44 shrink-0 gap-0.5 border-r border-gray-200 dark:border-gray-700 pr-2 mr-4">
+      <div className="hidden sm:flex flex-col w-44 shrink-0 gap-0.5 border-r border-gray-200 dark:border-gray-700 pr-2 mr-4 bg-white dark:bg-gray-800">
         <button
           onClick={switchToAll}
           className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
@@ -489,8 +486,8 @@ function CardsView({
             onClick={() => switchToCategory(category.id)}
             className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
               viewMode === "by-category" && effectiveId === category.id
-                ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium "
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 "
             }`}>
             <div className="flex items-center justify-between gap-1">
               <span className="truncate">{highlight(category.name, search)}</span>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "motion/react";
 import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
 import { Toaster } from "./Toast";
@@ -360,7 +361,15 @@ export function Layout() {
 
         {/* Main content — only this scrolls */}
         <main className={`flex-1 min-w-0 overflow-y-auto ${isGamePage ? "p-3" : "p-3 pt-0 sm:p-6 pb-20 sm:pb-6"}`}>
-          <Outlet />
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="h-full"
+          >
+            <Outlet />
+          </motion.div>
         </main>
       </div>
 

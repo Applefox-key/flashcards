@@ -6,6 +6,7 @@ interface Props {
   onResult: (text: string) => void;
   onLangChange?: (lang: LangCode) => void;
   defaultLang?: LangCode;
+  speakText?: string;
   className?: string;
 }
 
@@ -32,25 +33,29 @@ function getSpeechRecognition(): SpeechRecognitionCtor | null {
 }
 
 const supported = !!getSpeechRecognition();
+const ttsSupported = typeof window !== "undefined" && "speechSynthesis" in window;
 
-/**
- * Microphone button with an inline language selector driven by the user's profile settings.
- * Calls `onResult(transcript)` continuously while recording.
- */
-export function VoiceInputButton({ onResult, onLangChange, defaultLang, className = "" }: Props) {
+export function VoiceInputButton({ onResult, onLangChange, defaultLang, speakText, className = "" }: Props) {
   const { speechLangs } = useUserSettings();
   const langs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code));
 
   const [recording, setRecording] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const [lang, setLang] = useState<LangCode>(defaultLang ?? speechLangs[0] ?? "");
   const recognitionRef = useRef<ISpeechRecognition | null>(null);
+  const utRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // When the user's lang list changes, reset active lang to the first in the new list
   useEffect(() => {
     setLang(speechLangs[0] ?? "");
   }, [speechLangs.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => () => { recognitionRef.current?.stop(); }, []);
+  useEffect(
+    () => () => {
+      recognitionRef.current?.stop();
+      window.speechSynthesis?.cancel();
+    },
+    [],
+  );
 
   if (!supported) return null;
 
@@ -86,18 +91,43 @@ export function VoiceInputButton({ onResult, onLangChange, defaultLang, classNam
 
   function handleMicClick(e: React.MouseEvent) {
     e.stopPropagation();
-    if (recording) stop(); else start();
+    if (recording) stop();
+    else start();
+  }
+
+  function handleSpeakClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    const synth = window.speechSynthesis;
+    if (speaking) {
+      synth.cancel();
+      setSpeaking(false);
+      return;
+    }
+    if (!speakText?.trim()) return;
+    const u = new SpeechSynthesisUtterance(speakText.trim());
+    if (lang) u.lang = lang;
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    utRef.current = u;
+    synth.cancel();
+    synth.speak(u);
+    setSpeaking(true);
   }
 
   function handleLangClick(e: React.MouseEvent, code: LangCode) {
     e.stopPropagation();
     if (recording) stop();
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+    }
     setLang(code);
     onLangChange?.(code);
   }
 
   return (
-    <div className={`inline-flex items-center gap-0.5 ${className}`}>
+    <div
+      className={`inline-flex items-center gap-0.5 border border-dashed border-gray-300 dark:border-gray-600 rounded ${className}`}>
       {langs.map(({ code, label }) => (
         <button
           key={label}
@@ -108,11 +138,33 @@ export function VoiceInputButton({ onResult, onLangChange, defaultLang, classNam
             lang === code
               ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 font-semibold"
               : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-          }`}
-        >
+          }`}>
           {label}
         </button>
       ))}
+
+      {speakText !== undefined && ttsSupported && (
+        <button
+          type="button"
+          onClick={handleSpeakClick}
+          disabled={!speakText.trim()}
+          title={speaking ? "Stop" : "Read aloud"}
+          className={`inline-flex items-center justify-center w-7 h-7 rounded-full transition-colors shrink-0 disabled:opacity-30 ${
+            speaking
+              ? "text-indigo-600 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/40"
+              : "text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+          }`}>
+          {speaking ? (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12" rx="1.5" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+            </svg>
+          )}
+        </button>
+      )}
 
       <button
         type="button"
@@ -122,8 +174,7 @@ export function VoiceInputButton({ onResult, onLangChange, defaultLang, classNam
           recording
             ? "text-white bg-red-500 animate-pulse shadow-sm"
             : "text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-        }`}
-      >
+        }`}>
         {recording ? (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3 3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z" />

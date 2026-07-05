@@ -25,7 +25,12 @@ export function SpeakButton({ text, className = "" }: Props) {
   }, [speechLangs.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cancel on unmount
-  useEffect(() => () => { window.speechSynthesis?.cancel(); }, []);
+  useEffect(
+    () => () => {
+      window.speechSynthesis?.cancel();
+    },
+    [],
+  );
 
   if (!supported) return null;
 
@@ -49,12 +54,15 @@ export function SpeakButton({ text, className = "" }: Props) {
 
   function handleLang(e: React.MouseEvent, code: LangCode) {
     e.stopPropagation();
-    if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); }
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+    }
     setLang(code);
   }
 
   return (
-    <div className={`inline-flex items-center gap-0.5 ${className}`}>
+    <div className={`inline-flex items-center gap-0.5  ${className}`}>
       {langs.map(({ code, label }) => (
         <button
           key={label}
@@ -65,8 +73,7 @@ export function SpeakButton({ text, className = "" }: Props) {
             lang === code
               ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 font-semibold"
               : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-          }`}
-        >
+          }`}>
           {label}
         </button>
       ))}
@@ -79,8 +86,7 @@ export function SpeakButton({ text, className = "" }: Props) {
           speaking
             ? "text-indigo-600 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/40"
             : "text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-        }`}
-      >
+        }`}>
         {speaking ? (
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="6" width="12" height="12" rx="1.5" />

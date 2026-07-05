@@ -31,6 +31,7 @@ import { IoTrashBinOutline } from "react-icons/io5";
 import { BsGridFill } from "react-icons/bs";
 import { SideDrawer } from "@/components/SideDrawer";
 import { FaInfo } from "react-icons/fa6";
+import { BiImageAdd } from "react-icons/bi";
 
 interface CollectionContentResponse {
   collection: Collection;
@@ -107,11 +108,11 @@ function ImageUploadField({
           </button>
         </div>
       ) : hasExisting ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2  md:flex-col md:items-start">
           {existingSrc && (
             <img src={existingSrc} alt="" className="max-h-24 object-contain rounded border border-gray-100" />
           )}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 md:flex-row md:items-center">
             <button type="button" onClick={onClear} className="text-xs text-red-400 hover:text-red-600">
               × Remove
             </button>
@@ -126,8 +127,8 @@ function ImageUploadField({
       ) : (
         <div
           onClick={() => inputRef.current?.click()}
-          className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
-          Click to add image
+          className="relative border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
+          <BiImageAdd className="text-2xl absolute bottom-0 right-0 " /> Click to add image
         </div>
       )}
     </div>
@@ -160,8 +161,8 @@ function EditCardModal({
   const validLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
   const initQLang = validLangs[0]?.code ?? ("en-US" as LangCode);
   const initALang = validLangs[1]?.code ?? validLangs[0]?.code ?? ("en-US" as LangCode);
-  const [, setQuestionLang] = useState<LangCode>(initQLang);
-  const [, setAnswerLang] = useState<LangCode>(initALang);
+  const [questionLang, setQuestionLang] = useState<LangCode>(initQLang);
+  const [answerLang, setAnswerLang] = useState<LangCode>(initALang);
 
   useEffect(() => {
     if (open) {
@@ -221,9 +222,9 @@ function EditCardModal({
     <Modal open={open} onClose={onClose} title="Edit card" size="lg">
       <div className="flex flex-col gap-3">
         <div>
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
             <label className="text-xs text-gray-400">Question</label>
-            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
+            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2">
             <ImageUploadField
@@ -247,11 +248,11 @@ function EditCardModal({
           </div>
         </div>
         <div>
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
             <label className="text-xs text-gray-400">Answer</label>
             <div className="flex items-center gap-1">
-              <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
-              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} />
+              <TranslateButton sourceText={question} srcLang={questionLang} tgtLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
+              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} speakText={answer} />
             </div>
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2">
@@ -275,7 +276,7 @@ function EditCardModal({
           </div>
         </div>
         <div>
-          <label className="text-xs text-gray-400 block mb-1">Note (optional)</label>
+          <label className="text-xs text-gray-400 block mb-1 bg-gray-100 dark:bg-gray-600/30">Note (optional)</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -311,8 +312,8 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
   const addCardWithImage = useAddCardWithImage();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
-  const [, setQuestionLang] = useState<LangCode>(initQLang);
-  const [, setAnswerLang] = useState<LangCode>(initALang);
+  const [questionLang, setQuestionLang] = useState<LangCode>(initQLang);
+  const [answerLang, setAnswerLang] = useState<LangCode>(initALang);
   const [note, setNote] = useState("");
   const [imgQFile, setImgQFile] = useState<File | null>(null);
   const [imgAFile, setImgAFile] = useState<File | null>(null);
@@ -370,7 +371,7 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">Question</label>
-            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} />
+            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
           </div>
           <textarea
             value={question}
@@ -395,8 +396,8 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">Answer</label>
             <div className="flex items-center gap-1">
-              <TranslateButton sourceText={question} onResult={setAnswer} onError={(m) => toast.error(m)} />
-              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} />
+              <TranslateButton sourceText={question} srcLang={questionLang} tgtLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
+              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} speakText={answer} />
             </div>
           </div>
           <textarea
@@ -603,7 +604,9 @@ function CardItem({
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
           <p className="text-xs text-gray-400 mb-1">Question</p>
-          <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">{card.question}</p>
+          <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">
+            {card.question}
+          </p>
           <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
         </div>
         <div className="border-t border-gray-100 dark:border-gray-700" />

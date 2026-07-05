@@ -7,24 +7,39 @@ const FALLBACK_LANG_CODES: LangCode[] = ["en-US", "ru-RU", "uk-UA", "de-DE", "fr
 
 interface Props {
   sourceText: string;
+  srcLang?: LangCode;
+  tgtLang?: LangCode;
   onResult: (text: string) => void;
   onError?: (msg: string) => void;
   className?: string;
 }
 
-export function TranslateButton({ sourceText, onResult, onError, className = "" }: Props) {
+export function TranslateButton({
+  sourceText,
+  srcLang: srcLangProp,
+  tgtLang: tgtLangProp,
+  onResult,
+  onError,
+  className = "",
+}: Props) {
   const { speechLangs } = useUserSettings();
 
   const userValidLangs = ALL_SPEECH_LANGS.filter((l) => l.code !== "" && speechLangs.includes(l.code));
-  const langOptions = userValidLangs.length >= 2
-    ? userValidLangs
-    : ALL_SPEECH_LANGS.filter((l) => l.code !== "" && FALLBACK_LANG_CODES.includes(l.code as LangCode));
+  const langOptions =
+    userValidLangs.length >= 2
+      ? userValidLangs
+      : ALL_SPEECH_LANGS.filter((l) => l.code !== "" && FALLBACK_LANG_CODES.includes(l.code as LangCode));
 
-  const [srcLang, setSrcLang] = useState<LangCode>(langOptions[0]?.code ?? "en-US");
-  const [tgtLang, setTgtLang] = useState<LangCode>(
+  const controlled = !!srcLangProp && !!tgtLangProp;
+
+  const [srcLangLocal, setSrcLangLocal] = useState<LangCode>(langOptions[0]?.code ?? "en-US");
+  const [tgtLangLocal, setTgtLangLocal] = useState<LangCode>(
     langOptions.find((l) => l.code !== (langOptions[0]?.code ?? "en-US"))?.code ?? "ru-RU",
   );
   const [loading, setLoading] = useState(false);
+
+  const srcLang = controlled ? srcLangProp : srcLangLocal;
+  const tgtLang = controlled ? tgtLangProp : tgtLangLocal;
 
   const disabled = loading || !sourceText.trim() || srcLang === tgtLang;
 
@@ -42,42 +57,53 @@ export function TranslateButton({ sourceText, onResult, onError, className = "" 
   }
 
   return (
-    <div className={`inline-flex items-center gap-0.5 ${className}`}>
-      {langOptions.map(({ code, label }) => (
-        <button
-          key={`src-${code}`}
-          type="button"
-          onClick={() => { if (code !== tgtLang) setSrcLang(code); }}
-          title={`From ${code}`}
-          className={`text-[10px] px-1 py-0.5 rounded transition-colors leading-none ${
-            srcLang === code
-              ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 font-semibold"
-              : code === tgtLang
-              ? "opacity-30 cursor-not-allowed text-gray-400"
-              : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-          }`}
-        >
-          {label}
-        </button>
-      ))}
-      <span className="text-[9px] text-gray-300 dark:text-gray-600 px-0.5">→</span>
-      {langOptions.map(({ code, label }) => (
-        <button
-          key={`tgt-${code}`}
-          type="button"
-          onClick={() => { if (code !== srcLang) setTgtLang(code); }}
-          title={`To ${code}`}
-          className={`text-[10px] px-1 py-0.5 rounded transition-colors leading-none ${
-            tgtLang === code
-              ? "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-300 font-semibold"
-              : code === srcLang
-              ? "opacity-30 cursor-not-allowed text-gray-400"
-              : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-          }`}
-        >
-          {label}
-        </button>
-      ))}
+    <div
+      className={`inline-flex items-center gap-0.5 border border-dashed border-gray-300 dark:border-gray-600 rounded ${className}`}>
+      {controlled ? (
+        <span className="text-[10px] text-gray-400 dark:text-gray-500 px-1">
+          {srcLang.slice(0, 2).toUpperCase()}→{tgtLang.slice(0, 2).toUpperCase()}
+        </span>
+      ) : (
+        <>
+          {langOptions.map(({ code, label }) => (
+            <button
+              key={`src-${code}`}
+              type="button"
+              onClick={() => {
+                if (code !== tgtLangLocal) setSrcLangLocal(code);
+              }}
+              title={`From ${code}`}
+              className={`text-[10px] px-1 py-0.5 rounded transition-colors leading-none ${
+                srcLangLocal === code
+                  ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 font-semibold"
+                  : code === tgtLangLocal
+                    ? "opacity-30 cursor-not-allowed text-gray-400"
+                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              }`}>
+              {label}
+            </button>
+          ))}
+          <span className="text-[9px] text-gray-300 dark:text-gray-600 px-0.5">→</span>
+          {langOptions.map(({ code, label }) => (
+            <button
+              key={`tgt-${code}`}
+              type="button"
+              onClick={() => {
+                if (code !== srcLangLocal) setTgtLangLocal(code);
+              }}
+              title={`To ${code}`}
+              className={`text-[10px] px-1 py-0.5 rounded transition-colors leading-none ${
+                tgtLangLocal === code
+                  ? "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-300 font-semibold"
+                  : code === srcLangLocal
+                    ? "opacity-30 cursor-not-allowed text-gray-400"
+                    : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              }`}>
+              {label}
+            </button>
+          ))}
+        </>
+      )}
       <button
         type="button"
         onClick={handleTranslate}
@@ -87,8 +113,7 @@ export function TranslateButton({ sourceText, onResult, onError, className = "" 
           loading
             ? "text-violet-500"
             : "text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-        }`}
-      >
+        }`}>
         {loading ? (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" className="animate-spin">
             <path d="M12 2a10 10 0 0 1 10 10h-2a8 8 0 0 0-8-8V2z" />

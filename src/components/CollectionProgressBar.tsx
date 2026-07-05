@@ -28,7 +28,7 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
     },
     stats.inProgress > 0 && {
       width: (stats.inProgress / total) * 100,
-      color: "bg-amber-400 dark:bg-amber-500",
+      color: "bg-amber-200 dark:bg-orange-200",
       label: `${stats.inProgress} in progress`,
     },
     stats.toLearn > 0 && {
@@ -63,7 +63,7 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
           {stats.learned} learned
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-amber-400 dark:bg-amber-500 shrink-0" />
+          <span className="w-2 h-2 rounded-full bg-amber-200 dark:bg-orange-200 shrink-0" />
           {stats.inProgress} in progress
         </span>
         <span className="flex items-center gap-1">
