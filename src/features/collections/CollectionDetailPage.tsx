@@ -95,7 +95,7 @@ function ImageUploadField({
         onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
       />
       {file && previewUrl ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-row md:flex-col md:items-center">
           <img src={previewUrl} alt="" className="max-h-24 object-contain rounded border border-gray-100" />
           <button
             type="button"
@@ -108,7 +108,7 @@ function ImageUploadField({
           </button>
         </div>
       ) : hasExisting ? (
-        <div className="flex items-center gap-2  md:flex-col md:items-start">
+        <div className="flex items-center gap-2  md:flex-col md:items-start w-[103px]">
           {existingSrc && (
             <img src={existingSrc} alt="" className="max-h-24 object-contain rounded border border-gray-100" />
           )}
@@ -251,8 +251,19 @@ function EditCardModal({
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
             <label className="text-xs text-gray-400">Answer</label>
             <div className="flex items-center gap-1">
-              <TranslateButton sourceText={question} srcLang={questionLang} tgtLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
-              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} speakText={answer} />
+              <TranslateButton
+                sourceText={question}
+                srcLang={questionLang}
+                tgtLang={answerLang}
+                onResult={setAnswer}
+                onError={(m) => toast.error(m)}
+              />
+              <VoiceInputButton
+                onResult={setAnswer}
+                defaultLang={initALang}
+                onLangChange={setAnswerLang}
+                speakText={answer}
+              />
             </div>
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2">
@@ -396,8 +407,19 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">Answer</label>
             <div className="flex items-center gap-1">
-              <TranslateButton sourceText={question} srcLang={questionLang} tgtLang={answerLang} onResult={setAnswer} onError={(m) => toast.error(m)} />
-              <VoiceInputButton onResult={setAnswer} defaultLang={initALang} onLangChange={setAnswerLang} speakText={answer} />
+              <TranslateButton
+                sourceText={question}
+                srcLang={questionLang}
+                tgtLang={answerLang}
+                onResult={setAnswer}
+                onError={(m) => toast.error(m)}
+              />
+              <VoiceInputButton
+                onResult={setAnswer}
+                defaultLang={initALang}
+                onLangChange={setAnswerLang}
+                speakText={answer}
+              />
             </div>
           </div>
           <textarea

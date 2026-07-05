@@ -13,21 +13,9 @@ function CardImg({
   const src = useCardImage(filename, collectionId);
   if (!filename || filename === "null" || filename === "") return null;
   return (
-    <div
-      style={{
-        width: "100%",
-        height: 160,
-        marginTop: 16,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 12,
-        overflow: "hidden",
-        background: dark ? "rgba(255,255,255,0.1)" : "#f3f4f6",
-        flexShrink: 0,
-      }}>
+    <>
       {src ? (
-        <img src={src} alt="" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 8 }} />
+        <img src={src} alt="" style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain", borderRadius: 8 }} />
       ) : (
         <div
           style={{
@@ -39,8 +27,42 @@ function CardImg({
           }}
         />
       )}
-    </div>
+    </>
   );
+}
+
+function CardContent({
+  text,
+  imgFilename,
+  collectionId,
+  dark = false,
+  textClass,
+}: {
+  text: string;
+  imgFilename?: string;
+  collectionId: number;
+  dark?: boolean;
+  textClass: string;
+}) {
+  const hasText = text.trim() !== "";
+  const hasImg = !!imgFilename && imgFilename !== "null" && imgFilename !== "";
+
+  if (hasText && hasImg) {
+    return (
+      <div className="w-full flex flex-col md:flex-row items-center gap-4">
+        <div style={{ width: "35%", flexShrink: 0 }}>
+          <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />
+        </div>
+        <p className={`flex-1 ${textClass} text-center whitespace-pre-line`}>{text}</p>
+      </div>
+    );
+  }
+
+  if (hasImg) {
+    return <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />;
+  }
+
+  return <p className={`w-full ${textClass} text-center whitespace-pre-line`}>{text}</p>;
 }
 
 interface FlashCardFaceProps {
@@ -106,10 +128,14 @@ export function FlashCardFace({
             <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
             <SpeakButton text={frontText} />
           </div>
-          <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2">
+          <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2 pt-0">
             <div className="my-auto w-full flex flex-col items-center gap-3">
-              <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center whitespace-pre-line">{frontText}</p>
-              <CardImg filename={frontImg} collectionId={collectionId} />
+              <CardContent
+                text={frontText}
+                imgFilename={frontImg}
+                collectionId={collectionId}
+                textClass="text-2xl font-semibold text-gray-900 dark:text-gray-100"
+              />
             </div>
           </div>
           <div className="shrink-0 px-6 pt-1 pb-4 text-center">
@@ -125,10 +151,15 @@ export function FlashCardFace({
             <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>
             <SpeakButton text={backText} />
           </div>
-          <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2">
+          <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2 pt-0">
             <div className="my-auto w-full flex flex-col items-center gap-3">
-              <p className="text-2xl font-semibold text-white text-center whitespace-pre-line">{backText}</p>
-              <CardImg filename={backImg} collectionId={collectionId} dark />
+              <CardContent
+                text={backText}
+                imgFilename={backImg}
+                collectionId={collectionId}
+                dark
+                textClass="text-2xl font-semibold text-white"
+              />
               {note && (
                 <p className="text-sm text-indigo-200 italic text-center">{highlightNote(note, frontText, backText)}</p>
               )}
