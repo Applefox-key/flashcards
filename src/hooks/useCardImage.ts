@@ -40,7 +40,8 @@ export function useCardImage(filename: string | undefined, collectionId: number)
     let objectUrl: string | undefined
 
     fetch(`${API_URL}/img?col=${collectionId}&img=${encodeURIComponent(filename)}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => {
         if (!res.ok) throw new Error('image load failed')
