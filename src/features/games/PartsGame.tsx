@@ -211,21 +211,18 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {answerFirst ? current.answer : current.question}
         </p>
-        <ImageThumb
-          filename={answerFirst ? current.imgA : current.imgQ}
-          collectionId={current.collectionid}
-        />
+        <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
       </div>
 
       {/* Build area */}
-      <div className="min-h-[52px] bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center flex-wrap gap-2">
+      <div className="min-h-[52px] bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center flex-wrap gap-1">
         {clicked.length === 0 ? (
           <span className="text-sm text-gray-300 dark:text-gray-600">Click parts in the correct order…</span>
         ) : (
           clicked.map((part, i) => (
             <span
               key={i}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-lg font-medium transition-colors ${
                 wrongIndex === i
                   ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-300 dark:border-red-700"
                   : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
@@ -245,9 +242,9 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
               key={`${part}-${i}`}
               onClick={() => handlePartClick(part, i)}
               disabled={isUsed || wrongIndex !== null}
-              className={`px-5 py-3 rounded-xl border-2 text-base font-medium transition-all duration-150 ${
+              className={`px-5 py-3 rounded-xl border-2 text-lg font-medium transition-all duration-150 ${
                 isUsed
-                  ? "border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600 bg-gray-50 dark:bg-gray-800/50 cursor-default"
+                  ? "border-gray-100 dark:border-gray-700 text-gray-50 dark:text-gray-900 bg-gray-50 dark:bg-gray-900/50 cursor-default"
                   : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
               }`}>
               {part === " " ? "⎵" : part}
