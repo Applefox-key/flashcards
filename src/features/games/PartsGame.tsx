@@ -52,7 +52,6 @@ export function PartsGame({
   const remainingRef = useRef<Content[]>([]);
   const probsRef = useRef<Record<number, number>>(probs);
 
-
   useEffect(() => {
     answerFirstRef.current = answerFirst;
   }, [answerFirst]);
@@ -275,7 +274,7 @@ export function PartsGame({
           clicked.map((part, i) => (
             <span
               key={i}
-              className={`px-3 py-1.5 rounded-lg text-lg font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-2xl font-medium transition-colors ${
                 wrongIndex === i
                   ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-300 dark:border-red-700"
                   : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
@@ -295,7 +294,7 @@ export function PartsGame({
               key={`${part}-${i}`}
               onClick={() => handlePartClick(part, i)}
               disabled={isUsed || wrongIndex !== null}
-              className={`px-5 py-3 rounded-xl border-2 text-lg font-medium transition-all duration-150 ${
+              className={`px-5 py-3 rounded-xl border-2 text-3xl md:text-lg font-medium transition-all duration-150 ${
                 isUsed
                   ? "border-gray-100 dark:border-gray-700 text-gray-50 dark:text-gray-900 bg-gray-50 dark:bg-gray-900/50 cursor-default"
                   : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
