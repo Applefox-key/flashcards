@@ -33,6 +33,7 @@ export function GamePage() {
   const [answerFirst, setAnswerFirst] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [timedDelay, setTimedDelay] = useState(2);
+  const [partsMode, setPartsMode] = useState<"oneshot" | "endless">("oneshot");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const filtered = useMemo<Content[]>(() => {
@@ -109,7 +110,7 @@ export function GamePage() {
   const btnInactive =
     "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500";
 
-  const hasActiveSettings = answerFirst || isShuffled || rateFilter !== null;
+  const hasActiveSettings = answerFirst || isShuffled || rateFilter !== null || (type === "parts" && partsMode === "endless");
 
   return (
     <div className="max-w-2xl md:max-w-2lg   mx-auto">
@@ -145,6 +146,20 @@ export function GamePage() {
             <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
               ⇄ Shuffle
             </button>
+          )}
+          {type === "parts" && (
+            <div className="flex gap-1">
+              <button
+                onClick={() => { setPartsMode("oneshot"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
+                One Shot
+              </button>
+              <button
+                onClick={() => { setPartsMode("endless"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
+                Endless
+              </button>
+            </div>
           )}
           {type === "timed" && (
             <div className="flex items-center gap-2">
@@ -182,7 +197,7 @@ export function GamePage() {
       {type === "pairs" && <PairsGame key={gameKey} {...commonProps} />}
       {type === "test" && <TestGame key={gameKey} {...commonProps} answerFirst={answerFirst} />}
       {type === "write" && <WriteGame key={gameKey} {...commonProps} answerFirst={answerFirst} />}
-      {type === "parts" && <PartsGame key={gameKey} {...commonProps} answerFirst={answerFirst} />}
+      {type === "parts" && <PartsGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={partsMode} />}
 
       {/* Settings drawer */}
       <SideDrawer
@@ -214,6 +229,27 @@ export function GamePage() {
           </p>
           <DifficultyFilter selected={rateFilter} onChange={handleFilterChange} />
         </div>
+
+        {/* Mode — parts only */}
+        {type === "parts" && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              Game Mode
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setPartsMode("oneshot"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
+                One Shot
+              </button>
+              <button
+                onClick={() => { setPartsMode("endless"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
+                Endless
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Shuffle — flashcard only */}
         {type === "flashcard" && (

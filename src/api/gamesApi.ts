@@ -5,7 +5,15 @@ export const gamesApi = {
   /** POST /gamesresult/get — fetch results for given content ids + game */
   getResults: async (data: GameResultsRequest): Promise<GameResult[]> => {
     const res = await apiClient.post('/gamesresult/get', data)
-    return res.data.data as GameResult[]
+    const raw = res.data.data
+    // Server may return array [{contentid, probability}] or legacy object {"id": prob}
+    if (Array.isArray(raw)) return raw as GameResult[]
+    return Object.entries(raw as Record<string, number>).map(([id, probability]) => ({
+      id: 0,
+      userid: 0,
+      contentid: Number(id),
+      probability,
+    }))
   },
 
   /** POST /gamesresult — save updated probabilities */

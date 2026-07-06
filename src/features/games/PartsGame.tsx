@@ -11,9 +11,20 @@ interface Props {
   onRetryMistakes?: (wrongIds: Set<number>) => void;
   onBack: () => void;
   answerFirst?: boolean;
+  mode?: "oneshot" | "endless";
 }
 
-export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false }: Props) {
+/** Starting probability for a card with no history */
+const DEFAULT_PROB = 10;
+
+export function PartsGame({
+  cards: allCards,
+  onPlayAgain,
+  onRetryMistakes,
+  onBack,
+  answerFirst = false,
+  mode = "oneshot",
+}: Props) {
   const playableCards = useMemo(
     () => allCards.filter((c) => formatParts(answerFirst ? c.question : c.answer).length > 0),
     [allCards, answerFirst],
@@ -26,6 +37,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   const [remaining, setRemaining] = useState<Content[]>([]);
 
   const [current, setCurrent] = useState<Content | null>(null);
+  const currentRef = useRef<Content | null>(null);
   const [correctParts, setCorrectParts] = useState<string[]>([]);
   const [shuffledParts, setShuffledParts] = useState<string[]>([]);
   const [clicked, setClicked] = useState<string[]>([]);
@@ -40,11 +52,13 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   const remainingRef = useRef<Content[]>([]);
   const probsRef = useRef<Record<number, number>>(probs);
 
+
   useEffect(() => {
     answerFirstRef.current = answerFirst;
   }, [answerFirst]);
 
   function loadCard(card: Content) {
+    currentRef.current = card;
     const text = answerFirstRef.current ? card.question : card.answer;
     const parts = formatParts(text);
     setCurrent(card);
@@ -59,11 +73,20 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   useEffect(() => {
     if (initializedRef.current || Object.keys(probs).length === 0) return;
     initializedRef.current = true;
-    const sorted = [...deck].sort((a, b) => (probs[b.id] ?? 10) - (probs[a.id] ?? 10));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadCard(sorted[0]);
-    setRemaining(sorted.slice(1));
-    remainingRef.current = sorted.slice(1);
+    if (mode === "endless") {
+      // Endless: pick first card by the same weighted random used for subsequent cards.
+      // This way a previously-learned card (prob < 10) can appear right away.
+      const allProbs = playableCards.map((c) => probs[c.id] ?? DEFAULT_PROB);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadCard(playableCards[weightedRandom(allProbs)]);
+    } else {
+      // One-shot: show hardest cards first so the user doesn't finish on the ones they know.
+      const sorted = [...deck].sort((a, b) => (probs[b.id] ?? DEFAULT_PROB) - (probs[a.id] ?? DEFAULT_PROB));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadCard(sorted[0]);
+      setRemaining(sorted.slice(1));
+      remainingRef.current = sorted.slice(1);
+    }
   }, [probs, deck]);
 
   useEffect(() => {
@@ -74,7 +97,23 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     remainingRef.current = remaining;
   }, [remaining]);
 
-  function pickNext() {
+  function pickNext(wasCorrect: boolean) {
+    if (mode === "endless") {
+      if (!wasCorrect) {
+        // Re-show the same card immediately until the user answers without mistakes.
+        // The prob was already increased by updateProb above, so re-showing a correct
+        // retry nets to zero change — card stays at elevated difficulty in the pool.
+        if (currentRef.current) loadCard(currentRef.current);
+        return;
+      }
+      // Weighted selection from the full card pool — higher prob = appears more often
+      const allProbs = playableCards.map((c) => probsRef.current[c.id] ?? 10);
+      const nextIdx = weightedRandom(allProbs);
+      loadCard(playableCards[nextIdx]);
+      return;
+    }
+
+    // One-shot: consume the remaining queue
     const rem = remainingRef.current;
     const currentProbs = probsRef.current;
     if (rem.length === 0) {
@@ -102,7 +141,6 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       setUsedIndices((prev) => new Set([...prev, index]));
 
       if (next.length === correctParts.length) {
-        // Puzzle complete
         const correct = noMistake;
         updateProb(current.id, correct);
         setScore((s) => ({
@@ -111,7 +149,7 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
           t: s.t + 1,
         }));
         if (!correct) setWrongCardIds((prev) => new Set([...prev, current.id]));
-        setTimeout(pickNext, 600);
+        setTimeout(() => pickNext(correct), 600);
       }
     } else {
       setClicked((prev) => [...prev, part]);
@@ -133,7 +171,6 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   function handleUndo() {
     if (clicked.length === 0 || wrongIndex !== null) return;
     const lastPart = clicked[clicked.length - 1];
-    // Find the last used index for this part value
     const lastIdx = [...usedIndices].reverse().find((i) => shuffledParts[i] === lastPart);
     setClicked((prev) => prev.slice(0, -1));
     if (lastIdx !== undefined) {
@@ -152,6 +189,11 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     const idx = shuffledParts.findIndex((p, i) => p === expected && !usedIndices.has(i));
     if (idx === -1) return;
     handlePartClick(expected, idx);
+  }
+
+  function handleFinish() {
+    setDone(true);
+    saveProbs();
   }
 
   if (!current) {
@@ -191,17 +233,28 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     <div className="max-w-lg mx-auto flex flex-col gap-4">
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>
-          {score.t + 1} / {playableCards.length}
-        </span>
+        {mode === "endless" ? (
+          <span>
+            {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
+          </span>
+        ) : (
+          <span>
+            {score.t + 1} / {playableCards.length}
+          </span>
+        )}
         <span>
           ✓ {score.r} &nbsp; ✗ {score.w}
         </span>
       </div>
       <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
         <div
-          className="h-full bg-indigo-500 rounded-full transition-all"
-          style={{ width: `${(score.t / playableCards.length) * 100}%` }}
+          className={`h-full rounded-full transition-all ${mode === "endless" ? "bg-emerald-500" : "bg-indigo-500"}`}
+          style={{
+            width:
+              mode === "endless"
+                ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
+                : `${(score.t / playableCards.length) * 100}%`,
+          }}
         />
       </div>
 
@@ -267,6 +320,13 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
           className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
           💡 Hint
         </button>
+        {mode === "endless" && (
+          <button
+            onClick={handleFinish}
+            className="ml-auto text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+            Finish
+          </button>
+        )}
       </div>
 
       {current.note && <p className="text-xs text-gray-400 italic text-center">{current.note}</p>}

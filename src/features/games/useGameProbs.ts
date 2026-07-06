@@ -12,6 +12,12 @@ export function useGameProbs(cards: Content[], gameKey: string) {
   const probsRef = useRef<Record<number, number>>({})
   const savedRef = useRef(false)
 
+  // Keep probsRef in sync with probs state after every render.
+  // This is the idiomatic React way — no side effects inside state updaters.
+  useEffect(() => {
+    probsRef.current = probs
+  }, [probs])
+
   useEffect(() => {
     if (cards.length === 0) return
     const defaults: Record<number, number> = {}
@@ -25,7 +31,6 @@ export function useGameProbs(cards: Content[], gameKey: string) {
       .catch(() => {})
       .finally(() => {
         setProbs(defaults)
-        probsRef.current = defaults
       })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -33,9 +38,11 @@ export function useGameProbs(cards: Content[], gameKey: string) {
   useEffect(() => {
     return () => {
       if (savedRef.current) return
-      savedRef.current = true
       const current = probsRef.current
+      // In React 18 Strict Mode the cleanup runs before probsRef is populated —
+      // skip silently so savedRef stays false and the real save can still happen.
       if (Object.keys(current).length === 0) return
+      savedRef.current = true
       const newProb: Record<string, Record<string, number>> = {}
       Object.entries(current).forEach(([id, prob]) => {
         newProb[id] = { [gameKey]: prob }
@@ -46,19 +53,18 @@ export function useGameProbs(cards: Content[], gameKey: string) {
   }, [])
 
   function updateProb(cardId: number, correct: boolean) {
-    setProbs((prev) => {
-      const next = { ...prev, [cardId]: adjustProb(prev[cardId] ?? 10, correct) }
-      probsRef.current = next
-      return next
-    })
+    setProbs((prev) => ({
+      ...prev,
+      [cardId]: adjustProb(prev[cardId] ?? 10, correct),
+    }))
   }
 
   /** Call this to save probs immediately (e.g. on game end) without waiting for unmount */
   function saveProbs() {
     if (savedRef.current) return
-    savedRef.current = true
     const current = probsRef.current
     if (Object.keys(current).length === 0) return
+    savedRef.current = true
     const newProb: Record<string, Record<string, number>> = {}
     Object.entries(current).forEach(([id, prob]) => {
       newProb[id] = { [gameKey]: prob }
