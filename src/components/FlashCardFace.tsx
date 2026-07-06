@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useCardImage } from "@/hooks/useCardImage";
 import { SpeakButton } from "@/components/SpeakButton";
 
@@ -11,11 +12,18 @@ function CardImg({
   dark?: boolean;
 }) {
   const src = useCardImage(filename, collectionId);
+  const [open, setOpen] = useState(false);
+
   if (!filename || filename === "null" || filename === "") return null;
   return (
     <>
       {src ? (
-        <img src={src} alt="" style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain", borderRadius: 8 }} />
+        <img
+          src={src}
+          alt=""
+          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain", borderRadius: 8, cursor: "zoom-in" }}
+        />
       ) : (
         <div
           style={{
@@ -26,6 +34,19 @@ function CardImg({
             animation: "pulse 1.5s infinite",
           }}
         />
+      )}
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+          onClick={(e) => { e.stopPropagation(); setOpen(false); }}>
+          <img
+            src={src}
+            alt=""
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </>
   );
