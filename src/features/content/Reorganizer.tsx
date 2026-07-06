@@ -74,7 +74,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
     try {
       await Promise.all(
         selectedCards.map((card) =>
-          editCard.mutateAsync({ collectionId: card.collectionid, data: { id: card.id, question: card.answer, answer: card.question } }),
+          editCard.mutateAsync({ collectionId: card.collectionid, data: { id: card.id, question: card.answer, answer: card.question, imgQ: card.imgQ, imgA: card.imgA } }),
         ),
       );
       toast.success(`Swapped Q/A for ${selected.size} card${selected.size !== 1 ? "s" : ""}`);

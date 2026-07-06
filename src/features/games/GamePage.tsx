@@ -10,6 +10,7 @@ import { TestGame } from "./TestGame";
 import { WriteGame } from "./WriteGame";
 import { PartsGame } from "./PartsGame";
 import { SideDrawer } from "@/components/SideDrawer";
+import { GameModeHelp } from "./GameModeHelp";
 import type { Content } from "@/types";
 
 const GAME_LABELS: Record<string, string> = {
@@ -27,24 +28,27 @@ export function GamePage() {
   const { cards, title, isLoading, isError } = useGameCards();
   const collectionId = Number(id);
 
-  const [rateFilter, setRateFilter] = useState<number | null>(null);
+  const [rateFilter, setRateFilter] = useState<number[]>([]);
   const [mistakeIds, setMistakeIds] = useState<Set<number> | null>(null);
   const [gameKey, setGameKey] = useState(0);
   const [answerFirst, setAnswerFirst] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [timedDelay, setTimedDelay] = useState(2);
-  const [partsMode, setPartsMode] = useState<"oneshot" | "endless">("oneshot");
+  const [partsMode, setPartsMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
+  const [writeMode, setWriteMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
+  const [testMode, setTestMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const filtered = useMemo<Content[]>(() => {
     if (mistakeIds) return cards.filter((c) => mistakeIds.has(c.id));
-    if (rateFilter !== null) return cards.filter((c) => (c.rate ?? 0) === rateFilter);
+
+    if (rateFilter.length > 0) return cards.filter((c) => rateFilter.includes(c.rate ?? 0));
     return cards;
   }, [cards, rateFilter, mistakeIds]);
 
-  const activeCards = filtered.length > 0 ? filtered : cards;
+  const activeCards = filtered.length > 0 ? filtered : [];
 
-  function handleFilterChange(val: number | null) {
+  function handleFilterChange(val: number[]) {
     setRateFilter(val);
     setMistakeIds(null);
     setGameKey((k) => k + 1);
@@ -52,7 +56,14 @@ export function GamePage() {
 
   function handleToggleAnswerFirst() {
     setAnswerFirst((a) => !a);
-    setGameKey((k) => k + 1);
+    // Endless modes handle direction changes internally without a full remount
+    if (
+      !(type === "parts" && partsMode !== "oneshot") &&
+      !(type === "write" && writeMode !== "oneshot") &&
+      !(type === "test" && testMode !== "oneshot")
+    ) {
+      setGameKey((k) => k + 1);
+    }
   }
 
   function handleToggleShuffle() {
@@ -110,7 +121,13 @@ export function GamePage() {
   const btnInactive =
     "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500";
 
-  const hasActiveSettings = answerFirst || isShuffled || rateFilter !== null || (type === "parts" && partsMode === "endless");
+  const hasActiveSettings =
+    answerFirst ||
+    isShuffled ||
+    rateFilter.length > 0 ||
+    (type === "parts" && partsMode !== "oneshot") ||
+    (type === "write" && writeMode !== "oneshot") ||
+    (type === "test" && testMode !== "oneshot");
 
   return (
     <div className="max-w-2xl md:max-w-2lg   mx-auto">
@@ -123,8 +140,9 @@ export function GamePage() {
             <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
           </svg>
         </button>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
           <p className="text-xs text-gray-400 uppercase tracking-wide">{gameLabel}</p>
+          <GameModeHelp type={type} />
         </div>
         <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate">{title}</h1>
         {mistakeIds && (
@@ -150,14 +168,66 @@ export function GamePage() {
           {type === "parts" && (
             <div className="flex gap-1">
               <button
-                onClick={() => { setPartsMode("oneshot"); setGameKey((k) => k + 1); }}
+                onClick={() => {
+                  setPartsMode("oneshot");
+                  setGameKey((k) => k + 1);
+                }}
                 className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
                 One Shot
               </button>
               <button
-                onClick={() => { setPartsMode("endless"); setGameKey((k) => k + 1); }}
+                onClick={() => {
+                  setPartsMode("endless");
+                  setGameKey((k) => k + 1);
+                }}
                 className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
                 Endless
+              </button>
+              <button
+                onClick={() => {
+                  setPartsMode("endless-skip");
+                  setGameKey((k) => k + 1);
+                }}
+                className={`${btnBase} ${partsMode === "endless-skip" ? btnActive : btnInactive}`}>
+                Endless ✓
+              </button>
+            </div>
+          )}
+          {type === "write" && (
+            <div className="flex gap-1">
+              <button
+                onClick={() => { setWriteMode("oneshot"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${writeMode === "oneshot" ? btnActive : btnInactive}`}>
+                One Shot
+              </button>
+              <button
+                onClick={() => { setWriteMode("endless"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${writeMode === "endless" ? btnActive : btnInactive}`}>
+                Endless
+              </button>
+              <button
+                onClick={() => { setWriteMode("endless-skip"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${writeMode === "endless-skip" ? btnActive : btnInactive}`}>
+                Endless ✓
+              </button>
+            </div>
+          )}
+          {type === "test" && (
+            <div className="flex gap-1">
+              <button
+                onClick={() => { setTestMode("oneshot"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${testMode === "oneshot" ? btnActive : btnInactive}`}>
+                One Shot
+              </button>
+              <button
+                onClick={() => { setTestMode("endless"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${testMode === "endless" ? btnActive : btnInactive}`}>
+                Endless
+              </button>
+              <button
+                onClick={() => { setTestMode("endless-skip"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${testMode === "endless-skip" ? btnActive : btnInactive}`}>
+                Endless ✓
               </button>
             </div>
           )}
@@ -182,22 +252,29 @@ export function GamePage() {
       )}
 
       {/* Game dispatcher */}
-      {type === "flashcard" && (
-        <FlashcardGame
-          key={gameKey}
-          cards={activeCards}
-          collectionId={collectionId}
-          rateFilter={rateFilter}
-          onFilterChange={handleFilterChange}
-          answerFirst={answerFirst}
-          isShuffled={isShuffled}
-        />
+
+      {!activeCards.length ? (
+        <p className="text-gray-400 text-center py-16">No cards to show.</p>
+      ) : (
+        <>
+          {type === "flashcard" && (
+            <FlashcardGame
+              key={gameKey}
+              cards={activeCards}
+              collectionId={collectionId}
+              answerFirst={answerFirst}
+              isShuffled={isShuffled}
+            />
+          )}
+          {type === "timed" && (
+            <TimedGame key={gameKey} {...commonProps} answerFirst={answerFirst} delay={timedDelay} />
+          )}
+          {type === "pairs" && <PairsGame key={gameKey} {...commonProps} />}
+          {type === "test" && <TestGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={testMode} />}
+          {type === "write" && <WriteGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={writeMode} />}
+          {type === "parts" && <PartsGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={partsMode} />}
+        </>
       )}
-      {type === "timed" && <TimedGame key={gameKey} {...commonProps} answerFirst={answerFirst} delay={timedDelay} />}
-      {type === "pairs" && <PairsGame key={gameKey} {...commonProps} />}
-      {type === "test" && <TestGame key={gameKey} {...commonProps} answerFirst={answerFirst} />}
-      {type === "write" && <WriteGame key={gameKey} {...commonProps} answerFirst={answerFirst} />}
-      {type === "parts" && <PartsGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={partsMode} />}
 
       {/* Settings drawer */}
       <SideDrawer
@@ -230,22 +307,85 @@ export function GamePage() {
           <DifficultyFilter selected={rateFilter} onChange={handleFilterChange} />
         </div>
 
-        {/* Mode — parts only */}
+        {/* Mode — parts / write / test */}
         {type === "parts" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               Game Mode
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
-                onClick={() => { setPartsMode("oneshot"); setGameKey((k) => k + 1); }}
+                onClick={() => {
+                  setPartsMode("oneshot");
+                  setGameKey((k) => k + 1);
+                }}
                 className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
                 One Shot
               </button>
               <button
-                onClick={() => { setPartsMode("endless"); setGameKey((k) => k + 1); }}
+                onClick={() => {
+                  setPartsMode("endless");
+                  setGameKey((k) => k + 1);
+                }}
                 className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
                 Endless
+              </button>
+              <button
+                onClick={() => {
+                  setPartsMode("endless-skip");
+                  setGameKey((k) => k + 1);
+                }}
+                className={`${btnBase} ${partsMode === "endless-skip" ? btnActive : btnInactive}`}>
+                Endless ✓
+              </button>
+            </div>
+          </div>
+        )}
+
+        {type === "write" && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              Game Mode
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => { setWriteMode("oneshot"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${writeMode === "oneshot" ? btnActive : btnInactive}`}>
+                One Shot
+              </button>
+              <button
+                onClick={() => { setWriteMode("endless"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${writeMode === "endless" ? btnActive : btnInactive}`}>
+                Endless
+              </button>
+              <button
+                onClick={() => { setWriteMode("endless-skip"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${writeMode === "endless-skip" ? btnActive : btnInactive}`}>
+                Endless ✓
+              </button>
+            </div>
+          </div>
+        )}
+        {type === "test" && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              Game Mode
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => { setTestMode("oneshot"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${testMode === "oneshot" ? btnActive : btnInactive}`}>
+                One Shot
+              </button>
+              <button
+                onClick={() => { setTestMode("endless"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${testMode === "endless" ? btnActive : btnInactive}`}>
+                Endless
+              </button>
+              <button
+                onClick={() => { setTestMode("endless-skip"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${testMode === "endless-skip" ? btnActive : btnInactive}`}>
+                Endless ✓
               </button>
             </div>
           </div>

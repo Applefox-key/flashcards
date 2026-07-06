@@ -206,7 +206,7 @@ function EditCardModal({
       );
     } else {
       editCard.mutate(
-        { collectionId, data: { id: card.id, question, answer, note: note || undefined } },
+        { collectionId, data: { id: card.id, question, answer, note: note || undefined, imgQ: card.imgQ, imgA: card.imgA } },
         {
           onSuccess: () => {
             toast.success("Card updated");
@@ -614,7 +614,7 @@ function CardItem({
     editCard.mutate(
       {
         collectionId,
-        data: { id: card.id, question: card.question, answer: card.answer, note: card.note, rate: newRate },
+        data: { id: card.id, question: card.question, answer: card.answer, note: card.note, rate: newRate, imgQ: card.imgQ, imgA: card.imgA },
       },
       { onError: () => toast.error("Failed to update rating") },
     );
@@ -804,7 +804,6 @@ export function CollectionDetailPage() {
   const collectionData = parsed?.[0];
   const collection = collectionData?.collection;
   const cards: Content[] = collectionData?.content ?? [];
-  console.log(cards);
 
   const filtered = cards.filter(
     (c) =>

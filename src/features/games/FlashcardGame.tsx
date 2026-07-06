@@ -13,8 +13,6 @@ import type { Content } from "@/types";
 interface Props {
   cards: Content[];
   collectionId: number;
-  rateFilter: number | null;
-  onFilterChange: (val: number | null) => void;
   answerFirst: boolean;
   isShuffled: boolean;
 }
@@ -25,14 +23,7 @@ const FADE_IN = 300; // плавное появление
 
 // ── Main component ──────────────────────────────────────────────────
 
-export function FlashcardGame({
-  cards: initialCards,
-  collectionId,
-  rateFilter: _rateFilter,
-  onFilterChange: _onFilterChange,
-  answerFirst,
-  isShuffled,
-}: Props) {
+export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, isShuffled }: Props) {
   const isDemo = useIsDemo();
   const demoStore = useDemoStore();
   const editCard = useEditCard();
@@ -105,7 +96,8 @@ export function FlashcardGame({
     if (isDemo) {
       demoStore.updateCardRate(cardId, collectionId, newRate);
     } else {
-      contentApi.edit({ id: cardId, rate: newRate }).catch(() => {});
+      const ratedCard = cards.find((c) => c.id === cardId);
+      contentApi.edit({ id: cardId, rate: newRate, imgQ: ratedCard?.imgQ, imgA: ratedCard?.imgA }).catch(() => {});
     }
   }
 
@@ -120,7 +112,7 @@ export function FlashcardGame({
   function handleEditSave() {
     if (!card || !editQuestion.trim() || !editAnswer.trim()) return;
     editCard.mutate(
-      { collectionId, data: { id: card.id, question: editQuestion, answer: editAnswer, note: editNote || undefined } },
+      { collectionId, data: { id: card.id, question: editQuestion, answer: editAnswer, note: editNote || undefined, imgQ: card.imgQ, imgA: card.imgA } },
       {
         onSuccess: () => {
           setCards((prev) =>

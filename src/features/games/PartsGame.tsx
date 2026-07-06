@@ -4,6 +4,7 @@ import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
 import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
+import { ResultEndless } from "./ResultEndless";
 
 interface Props {
   cards: Content[];
@@ -11,7 +12,7 @@ interface Props {
   onRetryMistakes?: (wrongIds: Set<number>) => void;
   onBack: () => void;
   answerFirst?: boolean;
-  mode?: "oneshot" | "endless";
+  mode?: "oneshot" | "endless" | "endless-skip";
 }
 
 /** Starting probability for a card with no history */
@@ -30,7 +31,7 @@ export function PartsGame({
     [allCards, answerFirst],
   );
 
-  const { probs, updateProb, saveProbs } = useGameProbs(playableCards, "parts0");
+  const { probs, updateProb, resetProb, saveProbs } = useGameProbs(playableCards, "parts0");
 
   const deck = useMemo(() => shuffle(playableCards), [playableCards]);
   const initializedRef = useRef(false);
@@ -51,10 +52,11 @@ export function PartsGame({
   const answerFirstRef = useRef(answerFirst);
   const remainingRef = useRef<Content[]>([]);
   const probsRef = useRef<Record<number, number>>(probs);
+  const playableCardsRef = useRef<Content[]>(playableCards);
 
   useEffect(() => {
-    answerFirstRef.current = answerFirst;
-  }, [answerFirst]);
+    playableCardsRef.current = playableCards;
+  }, [playableCards]);
 
   function loadCard(card: Content) {
     currentRef.current = card;
@@ -69,15 +71,48 @@ export function PartsGame({
     setNoMistake(true);
   }
 
+  // In endless modes, when direction changes reload the current card in-place
+  // instead of remounting the whole game (which would change the card pool).
+  useEffect(() => {
+    answerFirstRef.current = answerFirst;
+    if (!initializedRef.current || !currentRef.current) return;
+    if (mode !== "endless" && mode !== "endless-skip") return;
+
+    const card = currentRef.current;
+    const text = answerFirst ? card.question : card.answer;
+    const pool =
+      mode === "endless-skip"
+        ? playableCardsRef.current.filter((c) => (probsRef.current[c.id] ?? DEFAULT_PROB) > 1)
+        : playableCardsRef.current;
+
+    if (formatParts(text).length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadCard(card);
+    } else if (pool.length > 0) {
+      // Current card has no parts in this direction — pick a valid one
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadCard(pool[weightedRandom(pool.map((c) => probsRef.current[c.id] ?? DEFAULT_PROB))]);
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDone(true);
+      saveProbs();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answerFirst]);
+
   useEffect(() => {
     if (initializedRef.current || Object.keys(probs).length === 0) return;
     initializedRef.current = true;
-    if (mode === "endless") {
-      // Endless: pick first card by the same weighted random used for subsequent cards.
-      // This way a previously-learned card (prob < 10) can appear right away.
-      const allProbs = playableCards.map((c) => probs[c.id] ?? DEFAULT_PROB);
+    if (mode === "endless" || mode === "endless-skip") {
+      const pool =
+        mode === "endless-skip" ? playableCards.filter((c) => (probs[c.id] ?? DEFAULT_PROB) > 1) : playableCards;
+      if (pool.length === 0) {
+        setDone(true);
+        return;
+      }
+      const allProbs = pool.map((c) => probs[c.id] ?? DEFAULT_PROB);
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadCard(playableCards[weightedRandom(allProbs)]);
+      loadCard(pool[weightedRandom(allProbs)]);
     } else {
       // One-shot: show hardest cards first so the user doesn't finish on the ones they know.
       const sorted = [...deck].sort((a, b) => (probs[b.id] ?? DEFAULT_PROB) - (probs[a.id] ?? DEFAULT_PROB));
@@ -97,18 +132,24 @@ export function PartsGame({
   }, [remaining]);
 
   function pickNext(wasCorrect: boolean) {
-    if (mode === "endless") {
+    if (mode === "endless" || mode === "endless-skip") {
       if (!wasCorrect) {
         // Re-show the same card immediately until the user answers without mistakes.
-        // The prob was already increased by updateProb above, so re-showing a correct
-        // retry nets to zero change — card stays at elevated difficulty in the pool.
         if (currentRef.current) loadCard(currentRef.current);
         return;
       }
-      // Weighted selection from the full card pool — higher prob = appears more often
-      const allProbs = playableCards.map((c) => probsRef.current[c.id] ?? 10);
+      const pool =
+        mode === "endless-skip"
+          ? playableCards.filter((c) => (probsRef.current[c.id] ?? DEFAULT_PROB) > 1)
+          : playableCards;
+      if (pool.length === 0) {
+        setDone(true);
+        saveProbs();
+        return;
+      }
+      const allProbs = pool.map((c) => probsRef.current[c.id] ?? DEFAULT_PROB);
       const nextIdx = weightedRandom(allProbs);
-      loadCard(playableCards[nextIdx]);
+      loadCard(pool[nextIdx]);
       return;
     }
 
@@ -195,6 +236,48 @@ export function PartsGame({
     saveProbs();
   }
 
+  if (playableCards.length === 0) {
+    return (
+      <div className="text-center py-16 text-gray-400">
+        <p>No cards suitable for the parts game.</p>
+        <p className="text-sm mt-2">Answers need 2–10 parts when split.</p>
+      </div>
+    );
+  }
+
+  if (done) {
+    if (score.t === 0) {
+      return (
+        <div className="text-center py-16 flex flex-col items-center gap-4 text-gray-500 dark:text-gray-400">
+          <p className="text-4xl">🎉</p>
+          <p className="text-base font-medium text-gray-700 dark:text-gray-200">All cards are at 100%!</p>
+          <p className="text-sm">There's nothing left to practice in this mode.</p>
+          <div className="flex gap-3 mt-2">
+            <button
+              onClick={onPlayAgain}
+              className="text-sm px-4 py-2 rounded-lg border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
+              Play Endless instead
+            </button>
+            <button
+              onClick={onBack}
+              className="text-sm px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              Go back
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <ResultScreen
+        score={score}
+        onPlayAgain={onPlayAgain}
+        onRetryMistakes={onRetryMistakes && wrongCardIds.size > 0 ? () => onRetryMistakes(wrongCardIds) : undefined}
+        onBack={onBack}
+      />
+    );
+  }
+
   if (!current) {
     return (
       <div className="max-w-lg mx-auto animate-pulse flex flex-col gap-4">
@@ -208,31 +291,11 @@ export function PartsGame({
     );
   }
 
-  if (playableCards.length === 0) {
-    return (
-      <div className="text-center py-16 text-gray-400">
-        <p>No cards suitable for the parts game.</p>
-        <p className="text-sm mt-2">Answers need 2–10 parts when split.</p>
-      </div>
-    );
-  }
-
-  if (done) {
-    return (
-      <ResultScreen
-        score={score}
-        onPlayAgain={onPlayAgain}
-        onRetryMistakes={onRetryMistakes && wrongCardIds.size > 0 ? () => onRetryMistakes(wrongCardIds) : undefined}
-        onBack={onBack}
-      />
-    );
-  }
-
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-4">
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        {mode === "endless" ? (
+        {mode !== "oneshot" ? (
           <span>
             {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
           </span>
@@ -247,10 +310,10 @@ export function PartsGame({
       </div>
       <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
         <div
-          className={`h-full rounded-full transition-all ${mode === "endless" ? "bg-emerald-500" : "bg-indigo-500"}`}
+          className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
           style={{
             width:
-              mode === "endless"
+              mode !== "oneshot"
                 ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
                 : `${(score.t / playableCards.length) * 100}%`,
           }}
@@ -306,26 +369,31 @@ export function PartsGame({
       </div>
 
       {/* Controls */}
-      <div className="flex gap-2">
-        <button
-          onClick={handleUndo}
-          disabled={clicked.length === 0 || wrongIndex !== null}
-          className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-          ↩ Undo
-        </button>
-        <button
-          onClick={handleHint}
-          disabled={wrongIndex !== null}
-          className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-          💡 Hint
-        </button>
-        {mode === "endless" && (
+      <div className="flex justify-between gap-2">
+        <div>
           <button
-            onClick={handleFinish}
-            className="ml-auto text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-            Finish
+            onClick={handleUndo}
+            disabled={clicked.length === 0 || wrongIndex !== null}
+            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
+            ↩ Undo
           </button>
-        )}
+          <button
+            onClick={handleHint}
+            disabled={wrongIndex !== null}
+            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
+            💡 Hint
+          </button>
+        </div>
+        <div>
+          {mode !== "oneshot" && <ResultEndless playableCards={playableCards} probs={probs} onResetCard={resetProb} />}
+          {mode !== "oneshot" && (
+            <button
+              onClick={handleFinish}
+              className="ml-auto text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+              Finish
+            </button>
+          )}
+        </div>
       </div>
 
       {current.note && <p className="text-xs text-gray-400 italic text-center">{current.note}</p>}
