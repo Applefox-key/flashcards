@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useCardImage } from "@/hooks/useCardImage";
 import { SpeakButton } from "@/components/SpeakButton";
 
@@ -36,7 +37,7 @@ function CardImg({
         />
       )}
 
-      {open && (
+      {open && createPortal(
         <div
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
           onClick={(e) => { e.stopPropagation(); setOpen(false); }}>
@@ -44,9 +45,10 @@ function CardImg({
             src={src}
             alt=""
             className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); setOpen(false); }}
           />
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
