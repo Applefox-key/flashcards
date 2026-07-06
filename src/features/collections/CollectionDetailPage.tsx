@@ -1566,7 +1566,7 @@ export function CollectionDetailPage() {
       <FileImportModal open={fileOpen} onClose={() => setFileOpen(false)} collectionId={collectionId} />
 
       {/* Card preview modal */}
-      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="lg">
+      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="xxl">
         {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} />}
       </Modal>
 

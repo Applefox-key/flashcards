@@ -3,6 +3,7 @@ import { shuffle, normalizeText, weightedRandom } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
 import { VoiceInputButton } from "@/components/VoiceInputButton";
+import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
 
 interface Props {
@@ -152,13 +153,10 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
       <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
-        {(answerFirst ? current.imgA : current.imgQ) && (
-          <img
-            src={answerFirst ? current.imgA : current.imgQ}
-            alt=""
-            className="max-h-28 mx-auto mt-3 object-contain rounded"
-          />
-        )}
+        <ImageThumb
+          filename={answerFirst ? current.imgA : current.imgQ}
+          collectionId={current.collectionid}
+        />
       </div>
 
       {/* Input phase */}
@@ -210,6 +208,10 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
             <div>
               <p className="text-xs text-gray-400 mb-0.5">Correct answer:</p>
               <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{answerFirst ? current.question : current.answer}</p>
+              <ImageThumb
+                filename={answerFirst ? current.imgQ : current.imgA}
+                collectionId={current.collectionid}
+              />
             </div>
           )}
           {current.note && <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">{current.note}</p>}

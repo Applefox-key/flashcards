@@ -112,7 +112,7 @@ export function GamePage() {
   const hasActiveSettings = answerFirst || isShuffled || rateFilter !== null;
 
   return (
-    <div className="max-w-2xl md:max-w-xl lg:max-w-2xl xl:max-w-4xl 2xl:max-w-4xl mx-auto">
+    <div className="max-w-2xl md:max-w-2lg   mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <button

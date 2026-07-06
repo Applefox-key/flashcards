@@ -5,13 +5,14 @@ const sizeClass = {
   md: "max-w-md",
   lg: "max-w-2xl",
   xl: "max-w-4xl",
+  xxl: "max-w-2xl h-[100%] overflow-hidden overflow-y-hidden",
 };
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   title?: string;
-  size?: "md" | "lg" | "xl";
+  size?: "md" | "lg" | "xl" | "xxl";
   children: ReactNode;
 }
 
@@ -30,7 +31,7 @@ export function Modal({ open, onClose, title, size = "md", children }: ModalProp
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className={`relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full ${sizeClass[size]} mx-4 p-6 max-h-[90vh] overflow-y-auto`}>
+        className={`relative ${size === "xxl" ? " bg-transparent dark:bg-transparent" : "bg-white dark:bg-gray-800 shadow-xl"} rounded-lg  w-full mx-4 p-6 max-h-[90vh] overflow-y-auto  ${sizeClass[size]}`}>
         {title && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>

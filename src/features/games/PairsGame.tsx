@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { shuffle } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
+import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
 
 interface PairCell {
   cellId: string;
   cardId: number;
   text: string;
+  img?: string;
+  collectionId: number;
   matched: boolean;
 }
 
@@ -25,6 +28,8 @@ function buildColumns(batch: Content[]): { questions: PairCell[]; answers: PairC
       cellId: `q-${c.id}`,
       cardId: c.id,
       text: c.question,
+      img: c.imgQ,
+      collectionId: c.collectionid,
       matched: false,
     })),
   );
@@ -33,6 +38,8 @@ function buildColumns(batch: Content[]): { questions: PairCell[]; answers: PairC
       cellId: `a-${c.id}`,
       cardId: c.id,
       text: c.answer,
+      img: c.imgA,
+      collectionId: c.collectionid,
       matched: false,
     })),
   );
@@ -183,6 +190,9 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
                 transition-all duration-200 leading-tight min-h-[60px]
                 ${getCellClass(cell)}
               `}>
+              {cell.img && (
+                <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />
+              )}
               {cell.text}
             </button>
           ))}
@@ -201,6 +211,9 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
                 transition-all duration-200 leading-tight min-h-[60px]
                 ${getCellClass(cell)}
               `}>
+              {cell.img && (
+                <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />
+              )}
               {cell.text}
             </button>
           ))}

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { shuffle, formatParts, weightedRandom } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
+import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
 
 interface Props {
@@ -210,6 +211,10 @@ export function PartsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {answerFirst ? current.answer : current.question}
         </p>
+        <ImageThumb
+          filename={answerFirst ? current.imgA : current.imgQ}
+          collectionId={current.collectionid}
+        />
       </div>
 
       {/* Build area */}

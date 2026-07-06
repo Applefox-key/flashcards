@@ -53,7 +53,9 @@ function CardContent({
         <div style={{ width: "35%", flexShrink: 0 }}>
           <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />
         </div>
-        <p className={`flex-1 ${textClass} text-center whitespace-pre-line`}>{text}</p>
+        <p className={`flex-1 ${textClass} ${text.length > 100 ? "text-left" : "text-center"}  whitespace-pre-line`}>
+          {text}
+        </p>
       </div>
     );
   }
@@ -62,7 +64,11 @@ function CardContent({
     return <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />;
   }
 
-  return <p className={`w-full ${textClass} text-center whitespace-pre-line`}>{text}</p>;
+  return (
+    <p className={`w-full ${textClass} ${text.length > 100 ? "text-left" : "text-center"} whitespace-pre-line`}>
+      {text}
+    </p>
+  );
 }
 
 interface FlashCardFaceProps {
@@ -129,7 +135,7 @@ export function FlashCardFace({
             <SpeakButton text={frontText} />
           </div>
           <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2 pt-0">
-            <div className="my-auto w-full flex flex-col items-center gap-3">
+            <div className="my-auto w-full flex flex-col items-center gap-3 max-h-[90%]">
               <CardContent
                 text={frontText}
                 imgFilename={frontImg}
@@ -145,7 +151,7 @@ export function FlashCardFace({
 
         {/* Back face */}
         <div
-          className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-600 dark:bg-indigo-900/20 shadow-sm flex flex-col"
+          className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-500 dark:bg-indigo-900/20 shadow-sm flex flex-col"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
           <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
             <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>

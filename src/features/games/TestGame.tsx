@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { shuffle, buildTestOptions, weightedRandom, adjustProb } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
+import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
 
 interface Props {
@@ -118,13 +119,10 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
       <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
-        {(answerFirst ? current.imgA : current.imgQ) && (
-          <img
-            src={answerFirst ? current.imgA : current.imgQ}
-            alt=""
-            className="max-h-28 mx-auto mt-3 object-contain rounded"
-          />
-        )}
+        <ImageThumb
+          filename={answerFirst ? current.imgA : current.imgQ}
+          collectionId={current.collectionid}
+        />
       </div>
 
       {/* Options */}
@@ -139,12 +137,16 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
             else if (isChosen) cls = "bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600 text-red-800 dark:text-red-400";
             else cls = "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 opacity-60";
           }
+          const optImg = answerFirst ? opt.imgQ : opt.imgA;
           return (
             <button
               key={opt.id}
               onClick={() => handleAnswer(opt)}
               disabled={answerState !== "idle"}
-              className={`w-full rounded-xl px-4 py-3 text-sm font-medium text-left transition-all duration-200 ${cls}`}>
+              className={`w-full rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${optImg ? "flex flex-col items-center gap-1 text-center" : "text-left"} ${cls}`}>
+              {optImg && (
+                <ImageThumb filename={optImg} collectionId={opt.collectionid} />
+              )}
               {answerFirst ? opt.question : opt.answer}
             </button>
           );

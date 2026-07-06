@@ -14,7 +14,7 @@ import type { Collection, CollectionTag, CollectionStats } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
 import { SideDrawer } from "@/components/SideDrawer";
 import { IoFilter } from "react-icons/io5";
-import { BiImageAdd } from "react-icons/bi";
+import { CiImageOn } from "react-icons/ci";
 
 const ALL_LIMIT = 50;
 
@@ -107,8 +107,10 @@ function CollectionCard({
           <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
             {data.cards.map((card) => (
               <div key={card.id} className="grid grid-cols-2 gap-1 text-sm text-gray-400 dark:text-gray-500">
-                <span className="truncate">{card.question ? card.question : <BiImageAdd />}</span>
-                <span className="truncate text-gray-300 dark:text-gray-600">{card.answer}</span>
+                <span className="truncate">{card.question ? card.question : <CiImageOn />}</span>
+                <span className="truncate text-gray-300 dark:text-gray-600">
+                  {card.answer ? card.answer : <CiImageOn />}
+                </span>
               </div>
             ))}
           </div>{" "}

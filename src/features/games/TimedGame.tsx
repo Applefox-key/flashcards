@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { shuffle } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
+import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
 
 interface Props {
@@ -127,6 +128,10 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
                 <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">
                   {answerFirst ? card.answer : card.question}
                 </p>
+                <ImageThumb
+                  filename={answerFirst ? card.imgA : card.imgQ}
+                  collectionId={card.collectionid}
+                />
               </div>
             </div>
 
@@ -141,6 +146,10 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
                 <p className="text-2xl font-semibold text-white text-center">
                   {answerFirst ? card.question : card.answer}
                 </p>
+                <ImageThumb
+                  filename={answerFirst ? card.imgQ : card.imgA}
+                  collectionId={card.collectionid}
+                />
                 {card.note && <p className="text-sm text-indigo-200 mt-2 italic text-center">{card.note}</p>}
               </div>
             </div>
