@@ -723,12 +723,15 @@ export function CollectionDetailPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [addCardDropdownOpen, setAddCardDropdownOpen] = useState(false);
   const [editDropdownOpen, setEditDropdownOpen] = useState(false);
+  const [rateFilter, setRateFilter] = useState<null | 0 | 1 | 2 | 3 | 4 | 5 | "not5">(null);
+  const [rateFilterOpen, setRateFilterOpen] = useState(false);
   const tagPopoverMobileRef = useRef<HTMLDivElement>(null);
   const tagPopoverDesktopRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
   const addCardDropdownRef = useRef<HTMLDivElement>(null);
   const editDropdownRef = useRef<HTMLDivElement>(null);
+  const rateFilterRef = useRef<HTMLDivElement>(null);
 
   const setCollectionTags = useSetCollectionTags();
   const { data: collectionTags = [] } = useQuery({
@@ -800,16 +803,32 @@ export function CollectionDetailPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [editDropdownOpen]);
 
+  useEffect(() => {
+    if (!rateFilterOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (rateFilterRef.current && !rateFilterRef.current.contains(e.target as Node)) {
+        setRateFilterOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [rateFilterOpen]);
+
   const parsed = rawData as unknown as CollectionContentResponse[] | undefined;
   const collectionData = parsed?.[0];
   const collection = collectionData?.collection;
   const cards: Content[] = collectionData?.content ?? [];
 
-  const filtered = cards.filter(
-    (c) =>
+  const filtered = cards.filter((c) => {
+    const matchesSearch =
       c.question?.toLowerCase().includes(search.toLowerCase()) ||
-      c.answer?.toLowerCase().includes(search.toLowerCase()),
-  );
+      c.answer?.toLowerCase().includes(search.toLowerCase());
+    const matchesRate =
+      rateFilter === null ? true :
+      rateFilter === "not5" ? (c.rate ?? 0) < 5 :
+      (c.rate ?? 0) === rateFilter;
+    return matchesSearch && matchesRate;
+  });
 
   const sorted = sortField
     ? [...filtered].sort((a, b) => {
@@ -1330,6 +1349,59 @@ export function CollectionDetailPage() {
                     </div>
                   )}
                 </div>
+                {/* Rate filter button */}
+                <div className="relative" ref={rateFilterRef}>
+                  <button
+                    onClick={() => setRateFilterOpen((v) => !v)}
+                    title="Filter by rating"
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs transition-colors ${
+                      rateFilter !== null
+                        ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
+                        : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}>
+                    <span className="text-sm leading-none">★</span>
+                    {rateFilter === null && <span className="hidden sm:inline">Filter</span>}
+                    {rateFilter === 0 && <span>—</span>}
+                    {rateFilter === "not5" && <span>≠5</span>}
+                    {typeof rateFilter === "number" && rateFilter > 0 && <span>{rateFilter}★</span>}
+                  </button>
+                  {rateFilterOpen && (
+                    <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[170px] py-1">
+                      {([null, "not5", 0, 5, 4, 3, 2, 1] as const).map((opt, i) => (
+                        <div key={String(opt)}>
+                          {i === 2 && <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />}
+                          {i === 3 && <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />}
+                          <button
+                            onClick={() => {
+                              setRateFilter(opt);
+                              setRateFilterOpen(false);
+                            }}
+                            className={`flex items-center gap-1.5 w-full px-3 py-2 text-sm transition-colors ${
+                              rateFilter === opt
+                                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                                : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            }`}>
+                            {opt === null && "All cards"}
+                            {opt === "not5" && (
+                              <>
+                                <span className="text-yellow-400">★★★★</span>
+                                <span className="text-gray-300 dark:text-gray-600">★</span>
+                                <span className="ml-1">Not mastered</span>
+                              </>
+                            )}
+                            {opt === 0 && <><span className="text-gray-300 dark:text-gray-600">★★★★★</span><span className="ml-1">Not rated</span></>}
+                            {typeof opt === "number" && opt > 0 && (
+                              <>
+                                <span className="text-yellow-400">{"★".repeat(opt)}</span>
+                                <span className="text-gray-300 dark:text-gray-600">{"★".repeat(5 - opt)}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 {/* View toggle */}
                 <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
                   <button
@@ -1425,9 +1497,18 @@ export function CollectionDetailPage() {
         </div>
       )}
 
-      {/* No search results */}
+      {/* No search/filter results */}
       {!isLoading && cards.length > 0 && filtered.length === 0 && (
-        <p className="text-center text-gray-400 py-8">No cards match your search.</p>
+        <div className="text-center text-gray-400 py-8">
+          <p>No cards match your {search && rateFilter !== null ? "search and filter" : search ? "search" : "filter"}.</p>
+          {rateFilter !== null && (
+            <button
+              onClick={() => setRateFilter(null)}
+              className="mt-2 text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
+              Clear filter
+            </button>
+          )}
+        </div>
       )}
 
       {/* Collection info drawer — mobile only */}
