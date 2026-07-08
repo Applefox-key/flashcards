@@ -28,7 +28,7 @@ import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import type { Content, Collection, CardEditRequest, Category } from "@/types";
 import { PiListBold, PiShootingStarThin } from "react-icons/pi";
 import { IoTrashBinOutline } from "react-icons/io5";
-import { BsGridFill } from "react-icons/bs";
+import { BsGridFill, BsGrid } from "react-icons/bs";
 import { SideDrawer } from "@/components/SideDrawer";
 import { FaInfo } from "react-icons/fa6";
 import { BiImageAdd } from "react-icons/bi";
@@ -678,6 +678,83 @@ function CardItem({
   );
 }
 
+// ── Compact card item ───────────────────────────────────────────────
+
+function CardItemCompact({
+  card,
+  collectionId,
+  onView,
+  onDelete,
+}: {
+  card: Content;
+  collectionId: number;
+  onView: (card: Content) => void;
+  onDelete: (id: number) => void;
+}) {
+  const toast = useToast();
+  const editCard = useEditCard();
+  const [editing, setEditing] = useState(false);
+  const [hoverRate, setHoverRate] = useState(0);
+
+  const displayRate = hoverRate || card.rate || 0;
+
+  function handleRate(star: number) {
+    const newRate = card.rate === star ? 0 : star;
+    editCard.mutate(
+      { collectionId, data: { id: card.id, question: card.question, answer: card.answer, note: card.note, rate: newRate, imgQ: card.imgQ, imgA: card.imgA } },
+      { onError: () => toast.error("Failed to update rating") },
+    );
+  }
+
+  return (
+    <>
+      <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
+      <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
+        <div>
+          <p className="text-xs text-gray-400 mb-0.5">Question</p>
+          <p className="font-medium text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
+            {card.question}
+          </p>
+        </div>
+        <div className="border-t border-gray-100 dark:border-gray-700" />
+        <div>
+          <p className="text-xs text-gray-400 mb-0.5">Answer</p>
+          <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
+            {card.answer}
+          </p>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => handleRate(star)}
+                onMouseEnter={() => setHoverRate(star)}
+                disabled={editCard.isPending}
+                className={`text-base leading-none transition-colors disabled:opacity-40 ${
+                  star <= displayRate ? "text-yellow-400" : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
+                }`}>
+                ★
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={() => onView(card)} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+              View
+            </button>
+            <button onClick={() => setEditing(true)} className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
+              Edit
+            </button>
+            <button onClick={() => onDelete(card.id)} className="text-xs text-red-400 hover:text-red-600 transition-colors">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ── Skeleton ────────────────────────────────────────────────────────
 
 function CardSkeleton() {
@@ -708,7 +785,7 @@ export function CollectionDetailPage() {
   const deleteAllCards = useDeleteAllCards();
 
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "compact" | "list">("grid");
   const [sortField, setSortField] = useState<"question" | "answer" | "note" | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
@@ -1415,6 +1492,17 @@ export function CollectionDetailPage() {
                     <PiListBold className="text-[18px]" /> <span className="hidden sm:inline">List</span>
                   </button>
                   <button
+                    onClick={() => setViewMode("compact")}
+                    title="Compact cards view"
+                    className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                      viewMode === "compact"
+                        ? "bg-indigo-600 text-white border-l-indigo-600"
+                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}>
+                    <BsGrid className="text-[15px]" />
+                    <span className="hidden sm:inline">Compact</span>
+                  </button>
+                  <button
                     onClick={() => setViewMode("grid")}
                     title="Cards view"
                     className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
@@ -1473,6 +1561,19 @@ export function CollectionDetailPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-36 sm:pb-0">
           {sorted.map((card) => (
             <CardItem
+              key={card.id}
+              card={card}
+              collectionId={collectionId}
+              onView={setViewCard}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
+      {!isLoading && sorted.length > 0 && viewMode === "compact" && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-36 sm:pb-0">
+          {sorted.map((card) => (
+            <CardItemCompact
               key={card.id}
               card={card}
               collectionId={collectionId}
