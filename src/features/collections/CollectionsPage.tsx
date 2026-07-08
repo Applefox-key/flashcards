@@ -54,6 +54,19 @@ function CollectionCardSkeleton() {
   );
 }
 
+function getStudyDot(stats?: CollectionStats): { color: string; label: string } | null {
+  if (!stats) return null;
+  const total = stats.toLearn + stats.inProgress + stats.learned;
+  if (total === 0) return null;
+  if (stats.learned === total)
+    return { color: "bg-green-400", label: "Fully learned" };
+  if (stats.learned > 0 || stats.inProgress > 0)
+    return { color: "bg-amber-400", label: `In progress — ${stats.learned} of ${total} learned` };
+  return { color: "bg-gray-300 dark:bg-gray-500", label: "Not studied yet" };
+}
+
+const NO_STATS_DOT = { color: "bg-gray-200 dark:bg-gray-600", label: "No progress data" };
+
 function CollectionCard({
   collection,
   search,
@@ -88,10 +101,18 @@ function CollectionCard({
     ? data.stats.toLearn + data.stats.inProgress + data.stats.learned
     : (collection.cardCount ?? 0);
 
+  const studyDot = getStudyDot(data?.stats);
+
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
       className="group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-1 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
+      {studyDot && (
+        <span
+          title={studyDot.label}
+          className={`absolute top-2 right-2 w-2.5 h-2.5 rounded-full ${studyDot.color} shadow-sm`}
+        />
+      )}
       <div className="font-medium  text-gray-800 dark:text-gray-100 text-sm leading-snug">
         <div className="flex justify-start uppercase truncate">{highlight(collection.name, search)}</div>
 
@@ -164,10 +185,18 @@ function CollectionListRow({
     },
   });
 
+  const listDot = data?.stats != null ? (getStudyDot(data.stats) ?? null) : NO_STATS_DOT;
+
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
       className="group relative flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors first:rounded-t-xl last:rounded-b-xl border-b border-gray-100 dark:border-gray-700/60 last:border-b-0">
+      {listDot && (
+        <span
+          title={listDot.label}
+          className={`shrink-0 w-2 h-2 rounded-full ${listDot.color}`}
+        />
+      )}
       <span className="flex-1 min-w-0 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
         {highlight(collection.name, search)}
       </span>
