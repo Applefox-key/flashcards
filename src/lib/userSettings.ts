@@ -17,12 +17,22 @@ export type LangCode = (typeof ALL_SPEECH_LANGS)[number]["code"];
 /** Shown in SpeakButton / VoiceInputButton when the user hasn't configured anything */
 export const DEFAULT_SPEECH_LANGS: LangCode[] = ["en-US", ""];
 
-export interface UserSettings {
-  colorBack?: string;
+/** Settings specific to the Flashcards project */
+export interface FlashcardsSettings {
+  onboarded?: boolean;
   listView?: boolean;
-  dailyQueueLimit?: number;
-  lastQueueUpdate?: string;
+  colorBack?: string;
+}
+
+/**
+ * Top-level user settings stored in the `settings` JSON column.
+ * Global keys (langUI, speechLangs) are shared across all projects.
+ * Per-project keys are nested under their project name.
+ */
+export interface UserSettings {
+  langUI?: string;
   speechLangs?: LangCode[];
+  flashcards?: FlashcardsSettings;
 }
 
 /**

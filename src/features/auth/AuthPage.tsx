@@ -88,10 +88,27 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
 
 // ── Main auth page ───────────────────────────────────────────────────────────
 
+function EyeIcon({ visible }: { visible: boolean }) {
+  return visible ? (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  ) : (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
 export function AuthPage() {
   const location = useLocation();
   const initialTab: AuthTab = (location.state as { tab?: AuthTab } | null)?.tab ?? "login";
   const [tab, setTab] = useState<AuthTab>(initialTab);
+  const [showLoginPwd, setShowLoginPwd] = useState(false);
+  const [showRegisterPwd, setShowRegisterPwd] = useState(false);
   const navigate = useNavigate();
   const loginMutation = useLogin();
   const registerMutation = useRegister();
@@ -168,7 +185,12 @@ export function AuthPage() {
           {tab === "login" && (
             <form onSubmit={handleLogin} className="flex flex-col gap-4">
               <input name="email" type="email" placeholder="Email" required className={INPUT_CLS} />
-              <input name="password" type="password" placeholder="Password" required className={INPUT_CLS} />
+              <div className="relative">
+                <input name="password" type={showLoginPwd ? "text" : "password"} placeholder="Password" required className={INPUT_CLS + " w-full pr-9"} />
+                <button type="button" onClick={() => setShowLoginPwd((v) => !v)} className="absolute inset-y-0 right-2.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <EyeIcon visible={showLoginPwd} />
+                </button>
+              </div>
               {loginMutation.isError && <p className="text-sm text-red-600">Login failed. Check your credentials.</p>}
               <Button type="submit" loading={loginMutation.isPending}>
                 Login
@@ -189,7 +211,12 @@ export function AuthPage() {
             <form onSubmit={handleRegister} className="flex flex-col gap-4">
               <input name="name" type="text" placeholder="Name" required className={INPUT_CLS} />
               <input name="email" type="email" placeholder="Email" required className={INPUT_CLS} />
-              <input name="password" type="password" placeholder="Password" required className={INPUT_CLS} />
+              <div className="relative">
+                <input name="password" type={showRegisterPwd ? "text" : "password"} placeholder="Password" required className={INPUT_CLS + " w-full pr-9"} />
+                <button type="button" onClick={() => setShowRegisterPwd((v) => !v)} className="absolute inset-y-0 right-2.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <EyeIcon visible={showRegisterPwd} />
+                </button>
+              </div>
               {registerMutation.isError && (
                 <p className="text-sm text-red-600">Registration failed. Please try again.</p>
               )}

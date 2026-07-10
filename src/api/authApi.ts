@@ -1,5 +1,6 @@
 import apiClient from './axios'
 import type { LoginRequest, LoginResponse, RegisterRequest, User } from '@/types'
+import type { UserSettings } from '@/lib/userSettings'
 
 export const authApi = {
   /** POST /users/login — returns token + role */
@@ -36,6 +37,16 @@ export const authApi = {
       validateStatus: (s) => (s >= 200 && s < 300) || s === 304,
     })
     return (res.data?.data as User) ?? null
+  },
+
+  /**
+   * PATCH /users/settings — json_patch merge of a partial settings object.
+   * Only top-level keys in `partial` are merged; nested objects replace the whole key.
+   * Callers must spread the existing nested value before passing it.
+   */
+  updateSettings: async (partial: Partial<UserSettings>): Promise<UserSettings> => {
+    const res = await apiClient.patch('/users/settings', { data: partial })
+    return res.data.settings as UserSettings
   },
 
   /** POST /resetpassword — send reset link to email */
