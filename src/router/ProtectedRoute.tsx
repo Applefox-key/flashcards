@@ -9,7 +9,7 @@ export function ProtectedRoute({ requiredRole }: ProtectedRouteProps) {
   const { isAuthenticated, isInitializing, user } = useAuthStore()
 
   if (isInitializing) {
-    return null
+    return <div className="flex h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>
   }
 
   if (!isAuthenticated) {
