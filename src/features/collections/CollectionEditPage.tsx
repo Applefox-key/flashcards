@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/Button";
@@ -21,6 +22,7 @@ interface CollectionContentResponse {
 }
 
 export function CollectionEditPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const colId = Number(id);
   const navigate = useNavigate();
@@ -67,34 +69,34 @@ export function CollectionEditPage() {
             { collectionId: colId, tagIds },
             {
               onSuccess: () => {
-                toast.success("Collection saved");
+                toast.success(t("edit_collection.toast_saved"));
                 navigate(`/collections/${colId}`, { replace: true });
               },
-              onError: () => toast.error("Failed to save tags"),
+              onError: () => toast.error(t("edit_collection.toast_tags_error")),
             },
           );
         },
-        onError: () => toast.error("Failed to save collection"),
+        onError: () => toast.error(t("edit_collection.toast_save_error")),
       },
     );
   };
 
   const handleDeleteAllCards = () => {
-    if (!window.confirm("Delete all cards in this collection? This cannot be undone.")) return;
+    if (!window.confirm(t("edit_collection.confirm_clear_cards"))) return;
     deleteAllCards.mutate(colId, {
-      onSuccess: () => toast.success("All cards deleted"),
-      onError: () => toast.error("Failed to delete cards"),
+      onSuccess: () => toast.success(t("edit_collection.toast_cards_cleared")),
+      onError: () => toast.error(t("edit_collection.toast_cards_error")),
     });
   };
 
   const handleDeleteCollection = () => {
-    if (!window.confirm("Delete this collection and all its cards? This cannot be undone.")) return;
+    if (!window.confirm(t("edit_collection.confirm_delete_collection"))) return;
     deleteCollection.mutate(colId, {
       onSuccess: () => {
-        toast.success("Collection deleted");
+        toast.success(t("edit_collection.toast_collection_deleted"));
         navigate("/library");
       },
-      onError: () => toast.error("Failed to delete collection"),
+      onError: () => toast.error(t("edit_collection.toast_delete_error")),
     });
   };
 
@@ -112,7 +114,7 @@ export function CollectionEditPage() {
   }
 
   if (!collection) {
-    return <p className="text-gray-500 dark:text-gray-400">Collection not found.</p>;
+    return <p className="text-gray-500 dark:text-gray-400">{t("edit_collection.not_found")}</p>;
   }
 
   return (
@@ -121,9 +123,9 @@ export function CollectionEditPage() {
         <button
           onClick={() => navigate(-1)}
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-          ← Back
+          {t("edit_collection.back")}
         </button>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Collection</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("edit_collection.title")}</h1>
       </div>
 
       {/* Edit form */}
@@ -132,7 +134,7 @@ export function CollectionEditPage() {
         className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Title <span className="text-red-500">*</span>
+            {t("edit_collection.title_label")} <span className="text-red-500">*</span>
           </label>
           <input
             autoFocus
@@ -145,11 +147,11 @@ export function CollectionEditPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Note</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("edit_collection.note_label")}</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Optional description"
+            placeholder={t("edit_collection.note_placeholder")}
             className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                        focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -157,33 +159,33 @@ export function CollectionEditPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("edit_collection.category_label")}</label>
           <CategorySelect value={categoryid} onChange={setCategoryid} />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("edit_collection.tags_label")}</label>
           <TagSelect value={tagIds} onChange={setTagIds} />
         </div>
 
         <div className="flex gap-3 pt-2">
           <Button type="submit" loading={editCollection.isPending} disabled={!name.trim()}>
-            Save changes
+            {t("edit_collection.save_btn")}
           </Button>
           <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
-            Cancel
+            {t("edit_collection.cancel_btn")}
           </Button>
         </div>
       </form>
 
       {/* Danger zone */}
       <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-900/50 p-5">
-        <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-4">Danger zone</h2>
+        <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-4">{t("edit_collection.danger_zone")}</h2>
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Delete all cards</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Removes all cards but keeps the collection</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{t("edit_collection.delete_cards_title")}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("edit_collection.delete_cards_desc")}</p>
             </div>
             <Button
               variant="danger"
@@ -191,14 +193,14 @@ export function CollectionEditPage() {
               onClick={handleDeleteAllCards}
               loading={deleteAllCards.isPending}
               type="button">
-              Delete cards
+              {t("edit_collection.delete_cards_btn")}
             </Button>
           </div>
           <div className="border-t border-red-100 dark:border-red-900/40 pt-4 flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Delete collection</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{t("edit_collection.delete_collection_title")}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Permanently removes the collection and all its cards
+                {t("edit_collection.delete_collection_desc")}
               </p>
             </div>
             <Button
@@ -207,7 +209,7 @@ export function CollectionEditPage() {
               onClick={handleDeleteCollection}
               loading={deleteCollection.isPending}
               type="button">
-              Delete
+              {t("edit_collection.delete_btn")}
             </Button>
           </div>
         </div>

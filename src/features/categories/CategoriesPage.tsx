@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useCategories, useCreateCategory, useEditCategory, useDeleteCategory } from "@/hooks/useCategoryHooks";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useToast } from "@/hooks/useToast";
@@ -24,6 +25,7 @@ function CategorySkeleton() {
 // ── Main page ─────────────────────────────────────────────────────────
 
 export function CategoriesPage() {
+  const { t } = useTranslation();
   const toast = useToast();
   const queryClient = useQueryClient();
   const { data: categories = [], isLoading } = useCategories();
@@ -99,11 +101,11 @@ export function CategoriesPage() {
     const count = getCollectionCount(id);
     const msg =
       count === 0
-        ? `Delete category "${name}"?`
-        : `Delete "${name}"?\nIts ${count} collection(s) will become uncategorized.`;
+        ? t('categories_page.confirm_delete_no_collections', { name })
+        : t('categories_page.confirm_delete_with_collections', { name, count });
     if (!window.confirm(msg)) return;
     deleteCategory.mutate(id, {
-      onSuccess: () => toast.success("Category deleted"),
+      onSuccess: () => toast.success(t('categories_page.toast_deleted')),
     });
   }
 
@@ -116,17 +118,17 @@ export function CategoriesPage() {
     try {
       parsed = JSON.parse(await file.text());
     } catch {
-      toast.error("Invalid file — could not parse JSON");
+      toast.error(t('categories_page.toast_invalid_json'));
       return;
     }
 
     const data = parsed as { version?: number; categoryName?: string; collections?: { name: string; note?: string; cards: { question: string; answer: string; note?: string }[] }[] };
     if (!data.categoryName || !Array.isArray(data.collections)) {
-      toast.error("Invalid file format");
+      toast.error(t('categories_page.toast_invalid_format'));
       return;
     }
 
-    if (!window.confirm(`Restore category "${data.categoryName}" with ${data.collections.length} collection(s)?`)) return;
+    if (!window.confirm(t('categories_page.confirm_restore', { name: data.categoryName, count: data.collections.length }))) return;
 
     setIsRestoring(true);
     try {
@@ -140,9 +142,9 @@ export function CategoriesPage() {
         });
       }
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success(`Category "${data.categoryName}" restored with ${data.collections.length} collection(s)`);
+      toast.success(t('categories_page.toast_restored', { name: data.categoryName, count: data.collections.length }));
     } catch {
-      toast.error("Restore failed");
+      toast.error(t('categories_page.toast_restore_failed'));
     } finally {
       setIsRestoring(false);
     }
@@ -152,7 +154,7 @@ export function CategoriesPage() {
     <div className="pt-3 sm:pt-0">
       {/* Header */}
       <div className="hidden sm:flex items-center sticky sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 justify-between mb-6">
-        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
+        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">{t('categories_page.title')}</h1>
         <div className="flex items-center gap-2">
           <input
             ref={restoreInputRef}
@@ -166,11 +168,11 @@ export function CategoriesPage() {
             variant="secondary"
             onClick={() => restoreInputRef.current?.click()}
             disabled={isRestoring}>
-            {isRestoring ? "Restoring…" : "Restore"}
+            {isRestoring ? t('categories_page.restoring') : t('categories_page.restore_btn')}
           </Button>
           {!addingNew && (
             <Button size="sm" onClick={() => setAddingNew(true)}>
-              + New category
+              {t('categories_page.new_btn')}
             </Button>
           )}
         </div>
@@ -185,11 +187,11 @@ export function CategoriesPage() {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={handleAddKeyDown}
-            placeholder="Category name"
+            placeholder={t('categories_page.name_placeholder')}
             className="flex-1 text-sm outline-none bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
           <Button size="sm" onClick={handleAdd} disabled={createCategory.isPending || !newName.trim()}>
-            Add
+            {t('categories_page.add_btn')}
           </Button>
           <button
             onClick={() => {
@@ -197,7 +199,7 @@ export function CategoriesPage() {
               setNewName("");
             }}
             className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            Cancel
+            {t('categories_page.cancel_btn')}
           </button>
         </div>
       )}
@@ -214,8 +216,8 @@ export function CategoriesPage() {
       {/* Empty state */}
       {!isLoading && categories.length === 0 && !addingNew && (
         <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-          <p className="text-lg mb-2">No categories yet.</p>
-          <p className="text-sm">Create your first one.</p>
+          <p className="text-lg mb-2">{t('categories_page.empty_title')}</p>
+          <p className="text-sm">{t('categories_page.empty_subtitle')}</p>
         </div>
       )}
 
@@ -244,12 +246,12 @@ export function CategoriesPage() {
                       onClick={handleSaveEdit}
                       disabled={editCategory.isPending || !editName.trim()}
                       className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors disabled:opacity-50">
-                      Save
+                      {t('categories_page.save_btn')}
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
                       className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                      Cancel
+                      {t('categories_page.cancel_btn')}
                     </button>
                   </>
                 ) : (
@@ -259,16 +261,18 @@ export function CategoriesPage() {
                       className="flex-1 font-medium text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                       {cat.name}
                     </Link>
-                    <span className="text-xs text-gray-400 dark:text-gray-500">{count} collections</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      {t('categories_page.count_collections', { count })}
+                    </span>
                     <button
                       onClick={() => startEdit(cat.id, cat.name)}
                       className="text-xs text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors opacity-0 group-hover:opacity-100">
-                      Edit
+                      {t('categories_page.edit_btn')}
                     </button>
                     <button
                       onClick={() => handleDelete(cat.id, cat.name)}
                       className="text-xs text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                      Delete
+                      {t('categories_page.delete_btn')}
                     </button>
                   </>
                 )}
@@ -277,7 +281,7 @@ export function CategoriesPage() {
           })}
         </div>
       )}
-      <MobileFab onClick={() => setAddingNew(true)} label="Add category" />
+      <MobileFab onClick={() => setAddingNew(true)} label={t('categories_page.fab_label')} />
     </div>
   );
 }

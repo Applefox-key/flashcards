@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/Button";
 
 export interface GameScore {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function ResultScreen({ score, onPlayAgain, onRetryMistakes, onBack }: Props) {
+  const { t } = useTranslation();
   const pct = score.t > 0 ? Math.round((score.r / score.t) * 100) : 0;
 
   return (
@@ -21,7 +23,7 @@ export function ResultScreen({ score, onPlayAgain, onRetryMistakes, onBack }: Pr
       <div>
         <p className="text-5xl font-bold text-gray-900 dark:text-white">{pct}%</p>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
-          {score.r} correct · {score.w} wrong · {score.t} total
+          {t('result_screen.stats', { correct: score.r, wrong: score.w, total: score.t })}
         </p>
       </div>
 
@@ -33,14 +35,14 @@ export function ResultScreen({ score, onPlayAgain, onRetryMistakes, onBack }: Pr
       <div className="flex flex-col gap-2 w-full max-w-xs">
         {onRetryMistakes && score.w > 0 && (
           <Button onClick={onRetryMistakes}>
-            Retry {score.w} mistake{score.w !== 1 ? "s" : ""}
+            {t(score.w === 1 ? 'result_screen.retry_mistakes_singular' : 'result_screen.retry_mistakes_plural', { count: score.w })}
           </Button>
         )}
         <Button variant="secondary" onClick={onPlayAgain}>
-          Play again
+          {t('result_screen.play_again')}
         </Button>
         <button onClick={onBack} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors py-1">
-          ← Back
+          {t('result_screen.back')}
         </button>
       </div>
     </div>

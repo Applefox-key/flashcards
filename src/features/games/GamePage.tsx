@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FiSettings } from "react-icons/fi";
 import { useGameCards } from "./useGameCards";
 import { DifficultyFilter } from "./DifficultyFilter";
@@ -13,16 +14,8 @@ import { SideDrawer } from "@/components/SideDrawer";
 import { GameModeHelp } from "./GameModeHelp";
 import type { Content } from "@/types";
 
-const GAME_LABELS: Record<string, string> = {
-  flashcard: "Flashcard",
-  timed: "Timed",
-  pairs: "Pairs",
-  test: "Multiple Choice",
-  write: "Write",
-  parts: "Word Puzzle",
-};
-
 export function GamePage() {
+  const { t } = useTranslation();
   const { type = "flashcard", id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
   const { cards, title, isLoading, isError } = useGameCards();
@@ -98,15 +91,15 @@ export function GamePage() {
   if (isError || cards.length === 0) {
     return (
       <div className="text-center py-16 text-gray-400">
-        <p className="text-lg mb-2">{isError ? "Failed to load cards." : "No cards to play."}</p>
+        <p className="text-lg mb-2">{isError ? t("game_page.failed_to_load") : t("game_page.no_cards_to_play")}</p>
         <button onClick={handleBack} className="text-sm text-indigo-600 hover:underline">
-          ← Go back
+          ← {t("game_hub.go_back")}
         </button>
       </div>
     );
   }
 
-  const gameLabel = GAME_LABELS[type] ?? type;
+  const gameLabel = t(`game_page.label_${type}`, { defaultValue: type });
 
   const commonProps = {
     cards: activeCards,
@@ -129,6 +122,8 @@ export function GamePage() {
     (type === "write" && writeMode !== "oneshot") ||
     (type === "test" && testMode !== "oneshot");
 
+  const directionLabel = answerFirst ? t("game_page.direction_a_to_q") : t("game_page.direction_q_to_a");
+
   return (
     <div className="max-w-2xl md:max-w-2lg   mx-auto">
       {/* Header */}
@@ -147,7 +142,9 @@ export function GamePage() {
         <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate">{title}</h1>
         {mistakeIds && (
           <span className="text-xs bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full">
-            Retrying {mistakeIds.size} mistake{mistakeIds.size !== 1 ? "s" : ""}
+            {mistakeIds.size === 1
+              ? t("game_page.retrying_singular", { count: mistakeIds.size })
+              : t("game_page.retrying_plural", { count: mistakeIds.size })}
           </span>
         )}
       </div>
@@ -157,12 +154,12 @@ export function GamePage() {
         <div className="hidden sm:flex mb-5 items-center gap-3 flex-wrap">
           {type !== "pairs" && (
             <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive}`}>
-              {answerFirst ? "A → Q" : "Q → A"}
+              {directionLabel}
             </button>
           )}
           {type === "flashcard" && (
             <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
-              ⇄ Shuffle
+              {t("game_page.shuffle")}
             </button>
           )}
           {type === "parts" && (
@@ -173,7 +170,7 @@ export function GamePage() {
                   setGameKey((k) => k + 1);
                 }}
                 className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
-                One Shot
+                {t("game_page.one_shot")}
               </button>
               <button
                 onClick={() => {
@@ -181,7 +178,7 @@ export function GamePage() {
                   setGameKey((k) => k + 1);
                 }}
                 className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
-                Endless
+                {t("game_page.endless")}
               </button>
               <button
                 onClick={() => {
@@ -189,7 +186,7 @@ export function GamePage() {
                   setGameKey((k) => k + 1);
                 }}
                 className={`${btnBase} ${partsMode === "endless-skip" ? btnActive : btnInactive}`}>
-                Endless ✓
+                {t("game_page.endless_skip")}
               </button>
             </div>
           )}
@@ -198,17 +195,17 @@ export function GamePage() {
               <button
                 onClick={() => { setWriteMode("oneshot"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${writeMode === "oneshot" ? btnActive : btnInactive}`}>
-                One Shot
+                {t("game_page.one_shot")}
               </button>
               <button
                 onClick={() => { setWriteMode("endless"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${writeMode === "endless" ? btnActive : btnInactive}`}>
-                Endless
+                {t("game_page.endless")}
               </button>
               <button
                 onClick={() => { setWriteMode("endless-skip"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${writeMode === "endless-skip" ? btnActive : btnInactive}`}>
-                Endless ✓
+                {t("game_page.endless_skip")}
               </button>
             </div>
           )}
@@ -217,23 +214,25 @@ export function GamePage() {
               <button
                 onClick={() => { setTestMode("oneshot"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${testMode === "oneshot" ? btnActive : btnInactive}`}>
-                One Shot
+                {t("game_page.one_shot")}
               </button>
               <button
                 onClick={() => { setTestMode("endless"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${testMode === "endless" ? btnActive : btnInactive}`}>
-                Endless
+                {t("game_page.endless")}
               </button>
               <button
                 onClick={() => { setTestMode("endless-skip"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${testMode === "endless-skip" ? btnActive : btnInactive}`}>
-                Endless ✓
+                {t("game_page.endless_skip")}
               </button>
             </div>
           )}
           {type === "timed" && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Delay: {timedDelay}s</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                {t("game_page.delay", { value: timedDelay })}
+              </span>
               <input
                 type="range"
                 min={0.5}
@@ -254,7 +253,7 @@ export function GamePage() {
       {/* Game dispatcher */}
 
       {!activeCards.length ? (
-        <p className="text-gray-400 text-center py-16">No cards to show.</p>
+        <p className="text-gray-400 text-center py-16">{t("flashcard_game.no_cards")}</p>
       ) : (
         <>
           {type === "flashcard" && (
@@ -283,18 +282,18 @@ export function GamePage() {
         onOpen={() => setSettingsOpen(true)}
         side="right"
         topValue="bottom-0"
-        tabLabel="SETTINGS"
+        tabLabel={t("game_page.settings_tab")}
         tabIcon={<FiSettings size={14} />}
-        title="Game Settings"
+        title={t("game_page.settings_title")}
         hasActiveIndicator={hasActiveSettings}>
         {/* Direction */}
         {type !== "pairs" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              Direction
+              {t("game_page.section_direction")}
             </p>
             <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive}`}>
-              {answerFirst ? "A → Q" : "Q → A"}
+              {directionLabel}
             </button>
           </div>
         )}
@@ -302,7 +301,7 @@ export function GamePage() {
         {/* Difficulty */}
         <div>
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-            Difficulty
+            {t("game_page.section_difficulty")}
           </p>
           <DifficultyFilter selected={rateFilter} onChange={handleFilterChange} />
         </div>
@@ -311,7 +310,7 @@ export function GamePage() {
         {type === "parts" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              Game Mode
+              {t("game_page.section_mode")}
             </p>
             <div className="flex gap-2 flex-wrap">
               <button
@@ -320,7 +319,7 @@ export function GamePage() {
                   setGameKey((k) => k + 1);
                 }}
                 className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
-                One Shot
+                {t("game_page.one_shot")}
               </button>
               <button
                 onClick={() => {
@@ -328,7 +327,7 @@ export function GamePage() {
                   setGameKey((k) => k + 1);
                 }}
                 className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
-                Endless
+                {t("game_page.endless")}
               </button>
               <button
                 onClick={() => {
@@ -336,7 +335,7 @@ export function GamePage() {
                   setGameKey((k) => k + 1);
                 }}
                 className={`${btnBase} ${partsMode === "endless-skip" ? btnActive : btnInactive}`}>
-                Endless ✓
+                {t("game_page.endless_skip")}
               </button>
             </div>
           </div>
@@ -345,23 +344,23 @@ export function GamePage() {
         {type === "write" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              Game Mode
+              {t("game_page.section_mode")}
             </p>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => { setWriteMode("oneshot"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${writeMode === "oneshot" ? btnActive : btnInactive}`}>
-                One Shot
+                {t("game_page.one_shot")}
               </button>
               <button
                 onClick={() => { setWriteMode("endless"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${writeMode === "endless" ? btnActive : btnInactive}`}>
-                Endless
+                {t("game_page.endless")}
               </button>
               <button
                 onClick={() => { setWriteMode("endless-skip"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${writeMode === "endless-skip" ? btnActive : btnInactive}`}>
-                Endless ✓
+                {t("game_page.endless_skip")}
               </button>
             </div>
           </div>
@@ -369,23 +368,23 @@ export function GamePage() {
         {type === "test" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              Game Mode
+              {t("game_page.section_mode")}
             </p>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => { setTestMode("oneshot"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${testMode === "oneshot" ? btnActive : btnInactive}`}>
-                One Shot
+                {t("game_page.one_shot")}
               </button>
               <button
                 onClick={() => { setTestMode("endless"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${testMode === "endless" ? btnActive : btnInactive}`}>
-                Endless
+                {t("game_page.endless")}
               </button>
               <button
                 onClick={() => { setTestMode("endless-skip"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${testMode === "endless-skip" ? btnActive : btnInactive}`}>
-                Endless ✓
+                {t("game_page.endless_skip")}
               </button>
             </div>
           </div>
@@ -395,10 +394,10 @@ export function GamePage() {
         {type === "flashcard" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              Card Order
+              {t("game_page.section_card_order")}
             </p>
             <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
-              ⇄ Shuffle
+              {t("game_page.shuffle")}
             </button>
           </div>
         )}
@@ -406,7 +405,9 @@ export function GamePage() {
         {/* Speed — timed only */}
         {type === "timed" && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Speed</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              {t("game_page.section_speed")}
+            </p>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap w-12">{timedDelay}s</span>
               <input

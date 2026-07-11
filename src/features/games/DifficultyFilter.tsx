@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface Props {
   selected: number[];
   onChange: (val: number[]) => void;
@@ -6,6 +8,8 @@ interface Props {
 const STARS = ["★", "★★", "★★★", "★★★★"];
 
 export function DifficultyFilter({ selected, onChange }: Props) {
+  const { t } = useTranslation();
+
   function toggle(val: number) {
     if (selected.includes(val)) {
       const next = selected.filter((v) => v !== val);
@@ -17,7 +21,7 @@ export function DifficultyFilter({ selected, onChange }: Props) {
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
-      <span className="text-xs text-gray-400 mr-1">Filter:</span>
+      <span className="text-xs text-gray-400 mr-1">{t("difficulty_filter.label")}</span>
       <button
         onClick={() => onChange([])}
         className={`px-2 py-0.5 rounded text-xs border transition-colors ${
@@ -25,7 +29,7 @@ export function DifficultyFilter({ selected, onChange }: Props) {
             ? "bg-indigo-100 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-400"
             : "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500"
         }`}>
-        All
+        {t("collections.filter_all")}
       </button>
       {STARS.map((stars, i) => (
         <button

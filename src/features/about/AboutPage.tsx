@@ -1,29 +1,31 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
 
-const ACTIVITIES = [
-  { icon: "🃏", name: "Flashcards", description: "Flip through cards at your own pace" },
-  { icon: "✓", name: "Multiple choice", description: "Pick the right answer from 4 options" },
-  { icon: "✏️", name: "Write", description: "Type the answer from memory" },
-  { icon: "⇄", name: "Match pairs", description: "Connect questions with their answers" },
-  { icon: "⏱", name: "Timed", description: "Auto-advancing flashcards for quick review" },
-  { icon: "🔤", name: "Word puzzle", description: "Reconstruct the answer word by word" },
-];
-
-const FEATURES = [
-  "Create and organize collections by category",
-  "Add images to cards (question and answer)",
-  "Import cards from .txt or .xlsx files",
-  "Share collections publicly with other users",
-  "Copy public collections to your own library",
-  "Group collections into sets for combined practice",
-  "Track your memory progress with star ratings",
-  "Filter practice by difficulty (star rating)",
-];
-
 export function AboutPage() {
+  const { t } = useTranslation();
   const { isAuthenticated, isDemo } = useAuthStore();
   const navigate = useNavigate();
+
+  const ACTIVITIES = [
+    { icon: "🃏", name: t("about.activity_flashcards_name"), description: t("about.activity_flashcards_desc") },
+    { icon: "✓", name: t("about.activity_choice_name"), description: t("about.activity_choice_desc") },
+    { icon: "✏️", name: t("about.activity_write_name"), description: t("about.activity_write_desc") },
+    { icon: "⇄", name: t("about.activity_match_name"), description: t("about.activity_match_desc") },
+    { icon: "⏱", name: t("about.activity_timed_name"), description: t("about.activity_timed_desc") },
+    { icon: "🔤", name: t("about.activity_parts_name"), description: t("about.activity_parts_desc") },
+  ];
+
+  const FEATURES = [
+    t("about.feature_organize"),
+    t("about.feature_images"),
+    t("about.feature_import"),
+    t("about.feature_share"),
+    t("about.feature_copy"),
+    t("about.feature_playlists"),
+    t("about.feature_ratings"),
+    t("about.feature_filter"),
+  ];
 
   function handleDemo() {
     useAuthStore.getState().enterDemo();
@@ -36,29 +38,27 @@ export function AboutPage() {
         <div className="flex flex-col items-center text-center gap-3">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-indigo-600">FlashMinds</h1>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
-            A flashcard learning app to help you memorize anything
+            {t("about.hero_subtitle")}
           </p>
         </div>
 
         {/* What is this */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">What is FlashMinds?</h2>
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t("about.what_title")}</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            FlashMinds is a personal flashcard learning tool. Create collections of cards on any topic, organize them
-            into categories, group collections into sets (playlists), and practice with different activities designed to
-            strengthen memory.
+            {t("about.what_desc")}
           </p>
         </div>
 
         {/* Activities */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Activities</h2>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{t("about.activities_title")}</h2>
             {!isAuthenticated && !isDemo && (
               <button
                 onClick={handleDemo}
                 className="text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors px-3 py-1 rounded-full font-medium">
-                ▶ Try Demo
+                {t("about.try_demo")}
               </button>
             )}
           </div>
@@ -77,7 +77,7 @@ export function AboutPage() {
 
         {/* Features */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Features</h2>
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t("about.features_title")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {FEATURES.map((f) => (
               <div key={f} className="flex gap-2">
@@ -90,7 +90,7 @@ export function AboutPage() {
 
         {/* Footer */}
         <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-4">
-          Made with ♥ as a personal learning project
+          {t("about.footer")}
         </p>
     </div>
   );

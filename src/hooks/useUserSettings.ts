@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/store/authStore";
 import { authApi } from "@/api";
+import i18n from "@/i18n";
 import {
   parseUserSettings,
   DEFAULT_SPEECH_LANGS,
@@ -40,5 +41,17 @@ export function useUserSettings() {
     }
   }
 
-  return { settings, speechLangs, flashcardsSettings, saveSpeechLangs, saveFlashcardsSettings };
+  async function saveLangUI(lang: string): Promise<void> {
+    if (!user) return;
+    localStorage.setItem('fm_lang_ui', lang);
+    i18n.changeLanguage(lang);
+    const next: UserSettings = { ...settings, langUI: lang };
+    setUser({ ...user, settings: next as Record<string, unknown> });
+    const updated = await authApi.updateSettings({ langUI: lang });
+    if (updated) {
+      setUser({ ...user, settings: updated as Record<string, unknown> });
+    }
+  }
+
+  return { settings, speechLangs, flashcardsSettings, saveSpeechLangs, saveFlashcardsSettings, saveLangUI };
 }

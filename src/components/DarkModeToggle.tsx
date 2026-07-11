@@ -1,29 +1,30 @@
-import { useEffect, useState } from 'react'
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 
 export function DarkModeToggle() {
   const [dark, setDark] = useState(() => {
     try {
-      return localStorage.getItem('flashminds_theme') === 'dark'
+      return localStorage.getItem("flashminds_theme") === "dark";
     } catch {
-      return false
+      return false;
     }
-  })
+  });
 
   useEffect(() => {
     if (dark) {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('flashminds_theme', 'dark')
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("flashminds_theme", "dark");
     } else {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('flashminds_theme', 'light')
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("flashminds_theme", "light");
     }
-  }, [dark])
-
+  }, [dark]);
+  const { t } = useTranslation();
   return (
     <button
       onClick={() => setDark((v) => !v)}
       className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
-      title={dark ? 'Switch to light mode' : 'Switch to dark mode'}>
+      title={dark ? t("theme_toggle.switch_to_light") : t("theme_toggle.switch_to_dark")}>
       {dark ? (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -44,5 +45,5 @@ export function DarkModeToggle() {
         </svg>
       )}
     </button>
-  )
+  );
 }

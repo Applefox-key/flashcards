@@ -6,6 +6,7 @@ import { useUserSettings } from "@/hooks/useUserSettings";
 import { ALL_SPEECH_LANGS, serializeSettings, type LangCode } from "@/lib/userSettings";
 import { Button } from "@/components/Button";
 import { getAvatarUrl } from "@/utils";
+import { useTranslation } from "react-i18next";
 
 function AvatarPlaceholder({ name }: { name: string }) {
   const initials = name
@@ -28,6 +29,7 @@ interface AvatarPickerProps {
 }
 
 function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
+  const { t } = useTranslation();
   const [preview, setPreview] = useState<string>(currentUrl);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -53,7 +55,7 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Change avatar</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{t("profile.avatar_picker_title")}</h3>
           <button
             onClick={onClose}
             className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">
@@ -71,7 +73,7 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
             />
           ) : (
             <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
-              No image
+              {t("profile.avatar_no_image")}
             </div>
           )}
         </div>
@@ -89,10 +91,10 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
 
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" onClick={handleClear}>
-            Clear
+            {t("profile.avatar_clear")}
           </Button>
           <Button size="sm" onClick={handleSelect} className="flex-1">
-            Use this photo
+            {t("profile.avatar_use_photo")}
           </Button>
         </div>
       </div>
@@ -105,7 +107,7 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
 export function ProfilePage() {
   const toast = useToast();
   const { user, setUser } = useAuthStore();
-  const { settings, speechLangs } = useUserSettings();
+  const { settings, speechLangs, flashcardsSettings } = useUserSettings();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -118,11 +120,16 @@ export function ProfilePage() {
   const [saving, setSaving] = useState(false);
 
   const [selectedLangs, setSelectedLangs] = useState<LangCode[]>(speechLangs);
-
+  const [onboarded, setOnboarded] = useState(flashcardsSettings.onboarded ?? false);
+  const { t } = useTranslation();
   // Sync when settings load from store
   useEffect(() => {
     setSelectedLangs(speechLangs);
   }, [JSON.stringify(speechLangs)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setOnboarded(flashcardsSettings.onboarded ?? false);
+  }, [flashcardsSettings.onboarded]);
 
   const avatarUrl = avatarPreview || getAvatarUrl(user?.img, user?.id);
 
@@ -142,16 +149,16 @@ export function ProfilePage() {
     e.preventDefault();
 
     if (password && password !== confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error(t("profile.toast_passwords_mismatch"));
       return;
     }
     if (password && password.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+      toast.error(t("profile.toast_password_too_short"));
       return;
     }
 
     if (selectedLangs.length === 0) {
-      toast.error("Select at least one language");
+      toast.error(t("profile.speech_langs_min_error"));
       return;
     }
 
@@ -164,7 +171,14 @@ export function ProfilePage() {
       fd.append("data[img]", avatarPreview && !avatarFile ? avatarPreview : (user?.img ?? ""));
       fd.append("data[id]", String(user?.id ?? ""));
       if (password) fd.append("data[password]", password);
-      fd.append("data[settings]", serializeSettings({ ...settings, speechLangs: selectedLangs }));
+      fd.append(
+        "data[settings]",
+        serializeSettings({
+          ...settings,
+          speechLangs: selectedLangs,
+          flashcards: { ...settings.flashcards, onboarded },
+        }),
+      );
 
       let updated = await authApi.updateProfile(fd);
       if (!updated?.id) updated = await authApi.getMe();
@@ -173,9 +187,9 @@ export function ProfilePage() {
       setConfirmPassword("");
       setAvatarFile(null);
       setAvatarPreview(getAvatarUrl(updated.img, updated.id));
-      toast.success("Profile saved");
+      toast.success(t("profile.toast_saved"));
     } catch {
-      toast.error("Failed to save profile");
+      toast.error(t("profile.toast_save_error"));
     } finally {
       setSaving(false);
     }
@@ -194,7 +208,7 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-lg m-auto">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Profile</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t("profile.title")}</h1>
 
       <form onSubmit={handleSave} className="flex flex-col gap-6">
         {/* Avatar */}
@@ -210,28 +224,28 @@ export function ProfilePage() {
               <AvatarPlaceholder name={name || user.name} />
             )}
             <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-              <span className="text-white text-xs font-medium">Change</span>
+              <span className="text-white text-xs font-medium">{t("profile.avatar_change")}</span>
             </div>
           </div>
         </div>
 
         {/* Profile fields */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-4">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Account info</h2>
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("profile.subtitle")}</h2>
 
           <div>
-            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Name</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t("profile.name_label")}</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="Your name"
+              placeholder={t("profile.name_placeholder")}
               className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Email</label>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">{t("profile.email_label")}</label>
             <div className={` text-slate-300 dark:text-slate-600  ${inputClass} `}>{email}</div>
             {/* <input
               value={email}
@@ -284,9 +298,9 @@ export function ProfilePage() {
         {/* Speech languages */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Speech languages</h2>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("profile.speech_langs_title")}</h2>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-              Selected languages will appear in the read-aloud and voice input buttons.
+              {t("profile.speech_langs_desc")}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -309,11 +323,38 @@ export function ProfilePage() {
               );
             })}
           </div>
-          {selectedLangs.length === 0 && <p className="text-xs text-red-400">Select at least one language</p>}
+          {selectedLangs.length === 0 && <p className="text-xs text-red-400">{t("profile.speech_langs_min_error")}</p>}
+        </div>
+
+        {/* Onboarding */}
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t("profile.onboarding_section_title")}</h2>
+          <label className="flex items-center justify-between gap-4 cursor-pointer">
+            <div>
+              <p className="text-sm text-gray-700 dark:text-gray-200">{t("profile.onboarding_completed")}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                {t("profile.onboarding_desc")}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={onboarded}
+              onClick={() => setOnboarded((v) => !v)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                onboarded ? "bg-indigo-500" : "bg-gray-200 dark:bg-gray-600"
+              }`}>
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  onboarded ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </label>
         </div>
 
         <Button type="submit" loading={saving}>
-          Save changes
+          {t("profile.save_btn")}
         </Button>
       </form>
 

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { shuffle, normalizeText, weightedRandom } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
@@ -21,6 +22,7 @@ type Phase = "input" | "revealed";
 const DEFAULT_PROB = 10;
 
 export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false, mode = "oneshot" }: Props) {
+  const { t } = useTranslation();
   const { probs, updateProb, resetProb, saveProbs } = useGameProbs(cards, "write0");
 
   const deck = useMemo(() => shuffle(cards), [cards]);
@@ -169,18 +171,18 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
       return (
         <div className="text-center py-16 flex flex-col items-center gap-4 text-gray-500 dark:text-gray-400">
           <p className="text-4xl">🎉</p>
-          <p className="text-base font-medium text-gray-700 dark:text-gray-200">All cards are at 100%!</p>
-          <p className="text-sm">There's nothing left to practice in this mode.</p>
+          <p className="text-base font-medium text-gray-700 dark:text-gray-200">{t("write_game.all_learned_title")}</p>
+          <p className="text-sm">{t("write_game.all_learned_desc")}</p>
           <div className="flex gap-3 mt-2">
             <button
               onClick={onPlayAgain}
               className="text-sm px-4 py-2 rounded-lg border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
-              Play Endless instead
+              {t("write_game.play_endless_btn")}
             </button>
             <button
               onClick={onBack}
               className="text-sm px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              Go back
+              {t("write_game.go_back_btn")}
             </button>
           </div>
         </div>
@@ -227,7 +229,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
 
       {/* Prompt card */}
       <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
+        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("write_game.label_answer") : t("write_game.label_question")}</p>
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
         <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
       </div>
@@ -240,7 +242,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your answer…"
+            placeholder={t("write_game.input_placeholder")}
             rows={3}
             className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
@@ -248,7 +250,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
             <button
               onClick={handleHint}
               className="text-sm px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-              💡 Hint
+              {t("write_game.hint_btn")}
             </button>
             <VoiceInputButton
               onResult={setInput}
@@ -258,7 +260,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
               onClick={handleCheck}
               disabled={!input.trim()}
               className="flex-1 bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-40 transition-colors">
-              Check ↵
+              {t("write_game.check_btn")}
             </button>
           </div>
         </div>
@@ -269,17 +271,17 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
         <div
           className={`border-2 rounded-xl p-5 flex flex-col gap-2 ${isCorrect ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700" : "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"}`}>
           <p className={`font-semibold text-sm ${isCorrect ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
-            {isCorrect ? "✓ Correct!" : "✗ Wrong"}
+            {isCorrect ? t("write_game.result_correct") : t("write_game.result_wrong")}
           </p>
           <div>
-            <p className="text-xs text-gray-400 mb-0.5">Your answer:</p>
+            <p className="text-xs text-gray-400 mb-0.5">{t("write_game.your_answer")}</p>
             <p className={`text-sm ${isCorrect ? "text-green-800 dark:text-green-300" : "text-red-700 dark:text-red-400 line-through"}`}>
-              {input || "(empty)"}
+              {input || t("write_game.empty")}
             </p>
           </div>
           {!isCorrect && (
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">Correct answer:</p>
+              <p className="text-xs text-gray-400 mb-0.5">{t("write_game.correct_answer")}</p>
               <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{answerFirst ? current.question : current.answer}</p>
               <ImageThumb filename={answerFirst ? current.imgQ : current.imgA} collectionId={current.collectionid} />
             </div>
@@ -289,7 +291,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
             ref={nextRef}
             onClick={pickNext}
             className="mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-            Next ↵
+            {t("write_game.next_btn")}
           </button>
         </div>
       )}
@@ -301,7 +303,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
           <button
             onClick={handleFinish}
             className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-            Finish
+            {t("write_game.finish_btn")}
           </button>
         </div>
       )}

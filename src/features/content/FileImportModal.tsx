@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
 import { CardPreviewTable } from "./CardPreviewTable";
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function FileImportModal({ open, onClose, collectionId }: Props) {
+  const { t } = useTranslation();
   const toast = useToast();
   const bulkAdd = useBulkAddCards();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -41,16 +43,15 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
         setColMap({ question: 0, answer: 1, note: null });
         setStep("map");
       } else {
-        // .txt / .csv — auto-parse with default mapping
         rows = await parseTxtFile(file);
         if (rows.length === 0) {
-          toast.error("No data found in file.");
+          toast.error(t("file_import.toast_no_data"));
           setLoading(false);
           return;
         }
         const parsed = mapColumns(rows, { question: 0, answer: 1, note: rows[0].length > 2 ? 2 : null });
         if (parsed.length === 0) {
-          toast.error("Could not parse cards. Each line needs at least two columns.");
+          toast.error(t("file_import.toast_parse_error"));
           setLoading(false);
           return;
         }
@@ -58,7 +59,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
         setStep("preview");
       }
     } catch {
-      toast.error("Failed to read file.");
+      toast.error(t("file_import.toast_read_error"));
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
   function handleApplyMap() {
     const parsed = mapColumns(rawRows, colMap);
     if (parsed.length === 0) {
-      toast.error("No valid cards with current column mapping.");
+      toast.error(t("file_import.toast_no_mapping"));
       return;
     }
     setCards(parsed);
@@ -80,7 +81,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
       .map(({ question, answer, note }) => ({ question, answer, note: note || undefined }));
 
     if (list.length === 0) {
-      toast.error("No valid cards to save.");
+      toast.error(t("file_import.toast_nothing_to_save"));
       return;
     }
 
@@ -88,10 +89,14 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
       { collectionId, list },
       {
         onSuccess: () => {
-          toast.success(`${list.length} card${list.length !== 1 ? "s" : ""} added`);
+          toast.success(
+            list.length === 1
+              ? t("file_import.toast_added_singular", { count: list.length })
+              : t("file_import.toast_added_plural", { count: list.length }),
+          );
           handleClose();
         },
-        onError: () => toast.error("Failed to add cards"),
+        onError: () => toast.error(t("file_import.toast_error")),
       },
     );
   }
@@ -106,28 +111,26 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  // Header row for column selector (first row of file)
   const headerRow = rawRows[0] ?? [];
 
   return (
-    <Modal open={open} onClose={handleClose} title="Import from file" size="xl">
+    <Modal open={open} onClose={handleClose} title={t("file_import.title")} size="xl">
       {step === "upload" && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Supported: <strong>.txt</strong>, <strong>.csv</strong> (tab/semicolon separated), <strong>.xlsx</strong> /{" "}
-            <strong>.xls</strong>
-          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{t("file_import.supported_formats")}</p>
           <div
             className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors"
             onClick={() => fileRef.current?.click()}>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Click to select a file</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">or drag and drop</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">{t("file_import.click_to_select")}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("file_import.drag_drop")}</p>
           </div>
           <input ref={fileRef} type="file" accept=".txt,.csv,.xlsx,.xls" onChange={handleFile} className="hidden" />
-          {loading && <p className="text-sm text-indigo-600 dark:text-indigo-400 text-center">Reading file…</p>}
+          {loading && (
+            <p className="text-sm text-indigo-600 dark:text-indigo-400 text-center">{t("file_import.reading_file")}</p>
+          )}
           <div className="flex justify-end">
             <Button variant="secondary" onClick={handleClose}>
-              Cancel
+              {t("file_import.cancel_btn")}
             </Button>
           </div>
         </div>
@@ -136,7 +139,8 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
       {step === "map" && (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            <strong>{fileName}</strong> — {rawRows.length} rows detected. Map columns:
+            <strong>{fileName}</strong>{" "}
+            {t("file_import.rows_detected", { count: rawRows.length })}
           </p>
 
           {/* Preview of first 3 rows */}
@@ -147,7 +151,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
                   <tr>
                     {headerRow.map((_, i) => (
                       <th key={i} className="px-3 py-1.5 text-left text-gray-500 dark:text-gray-400 font-medium">
-                        Col {i + 1}
+                        {t("file_import.col_header", { num: i + 1 })}
                       </th>
                     ))}
                   </tr>
@@ -172,7 +176,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
             {(["question", "answer", "note"] as const).map((field) => (
               <div key={field}>
                 <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 capitalize">
-                  {field} column{field === "note" ? " (optional)" : ""}
+                  {t(`file_import.col_label_${field}`)}
                 </label>
                 <select
                   value={colMap[field] ?? ""}
@@ -185,10 +189,13 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm
                              bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                              focus:outline-none focus:ring-1 focus:ring-indigo-400">
-                  {field === "note" && <option value="">— none —</option>}
+                  {field === "note" && <option value="">{t("file_import.col_none")}</option>}
                   {headerRow.map((_, i) => (
                     <option key={i} value={i}>
-                      Col {i + 1} — "{String(rawRows[0]?.[i] ?? "").slice(0, 20)}"
+                      {t("file_import.col_option", {
+                        num: i + 1,
+                        preview: String(rawRows[0]?.[i] ?? "").slice(0, 20),
+                      })}
                     </option>
                   ))}
                 </select>
@@ -200,14 +207,14 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
             <button
               onClick={() => setStep("upload")}
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-              ← Choose different file
+              {t("file_import.choose_different")}
             </button>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={handleClose}>
-                Cancel
+                {t("file_import.cancel_btn")}
               </Button>
               <Button onClick={handleApplyMap} disabled={colMap.question === null || colMap.answer === null}>
-                Preview →
+                {t("file_import.preview_btn")}
               </Button>
             </div>
           </div>
@@ -216,20 +223,22 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
 
       {step === "preview" && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300">Review and edit cards before saving:</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{t("file_import.review_heading")}</p>
           <CardPreviewTable cards={cards} onChange={setCards} />
           <div className="flex justify-between items-center">
             <button
               onClick={() => setStep(rawRows.length > 0 ? "map" : "upload")}
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-              ← Back
+              {t("file_import.back_btn")}
             </button>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={handleClose}>
-                Cancel
+                {t("file_import.cancel_btn")}
               </Button>
               <Button onClick={handleSave} loading={bulkAdd.isPending} disabled={cards.length === 0}>
-                Save {cards.length} card{cards.length !== 1 ? "s" : ""}
+                {cards.length === 1
+                  ? t("file_import.save_btn_singular", { count: cards.length })
+                  : t("file_import.save_btn_plural", { count: cards.length })}
               </Button>
             </div>
           </div>

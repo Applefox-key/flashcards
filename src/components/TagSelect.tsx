@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   useCollectionTags,
   useCreateCollectionTag,
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function TagSelect({ value, onChange }: Props) {
+  const { t } = useTranslation()
   const [creatingNew, setCreatingNew] = useState(false)
   const [newName, setNewName] = useState('')
 
@@ -40,7 +42,7 @@ export function TagSelect({ value, onChange }: Props) {
       {/* Selected tags */}
       <div className="flex flex-wrap gap-1.5 min-h-[1.75rem]">
         {selectedTags.length === 0 && (
-          <span className="text-xs text-gray-400 dark:text-gray-500 py-0.5">No tags selected</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 py-0.5">{t('tag_select.no_tags_selected')}</span>
         )}
         {selectedTags.map((tag) => (
           <span
@@ -79,7 +81,7 @@ export function TagSelect({ value, onChange }: Props) {
                 if (e.key === 'Enter') { e.preventDefault(); handleCreate() }
                 if (e.key === 'Escape') { setCreatingNew(false); setNewName('') }
               }}
-              placeholder="Tag name"
+              placeholder={t('tag_select.name_placeholder')}
               className="border border-gray-300 dark:border-gray-600 rounded px-2 py-0.5 text-xs w-24
                          bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                          focus:outline-none focus:ring-1 focus:ring-violet-400"
@@ -89,7 +91,7 @@ export function TagSelect({ value, onChange }: Props) {
               onClick={handleCreate}
               disabled={!newName.trim() || createTag.isPending}
               className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 disabled:opacity-40 transition-colors">
-              Add
+              {t('tag_select.add_btn')}
             </button>
             <button
               type="button"
@@ -103,7 +105,7 @@ export function TagSelect({ value, onChange }: Props) {
             type="button"
             onClick={() => setCreatingNew(true)}
             className="text-xs border border-dashed border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 px-2 py-0.5 rounded-full hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-500 dark:hover:text-violet-400 transition-colors">
-            + New tag
+            {t('tag_select.new_tag_btn')}
           </button>
         )}
       </div>

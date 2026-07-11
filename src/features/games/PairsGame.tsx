@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { shuffle } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
 import { ImageThumb } from "@/components/ImageThumb";
@@ -47,6 +48,7 @@ function buildColumns(batch: Content[]): { questions: PairCell[]; answers: PairC
 }
 
 export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBack }: Props) {
+  const { t } = useTranslation();
   const [deck] = useState(() => shuffle(allCards));
   const [batchIndex, setBatchIndex] = useState(0);
   const [questions, setQuestions] = useState<PairCell[]>(() => buildColumns(deck.slice(0, BATCH_SIZE)).questions);
@@ -167,9 +169,7 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     <div className="max-w-2xl mx-auto flex flex-col gap-4">
       {/* Score */}
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>
-          Batch {batchIndex + 1} / {totalBatches}
-        </span>
+        <span>{t("pairs_game.batch", { current: batchIndex + 1, total: totalBatches })}</span>
         <span>
           ✓ {score.r} &nbsp; ✗ {score.w}
         </span>
@@ -179,7 +179,7 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       <div className="grid grid-cols-2 gap-3">
         {/* Questions column */}
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">Questions</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">{t("pairs_game.col_questions")}</p>
           {questions.map((cell) => (
             <button
               key={cell.cellId}
@@ -200,7 +200,7 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
 
         {/* Answers column */}
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">Answers</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">{t("pairs_game.col_answers")}</p>
           {answers.map((cell) => (
             <button
               key={cell.cellId}
@@ -220,9 +220,7 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 text-center">
-        Select a question on the left, then its matching answer on the right
-      </p>
+      <p className="text-xs text-gray-400 text-center">{t("pairs_game.hint")}</p>
     </div>
   );
 }

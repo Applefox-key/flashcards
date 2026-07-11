@@ -1,55 +1,14 @@
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useGameCards } from "./useGameCards";
 
 const ACTIVITIES = [
-  {
-    type: "flashcard",
-    label: "Flashcards",
-    description: "Flip through cards at your own pace. Rate how well you know each one.",
-    icon: "🃏",
-    minCards: 1,
-    color: "indigo",
-  },
-  {
-    type: "test",
-    label: "Multiple choice",
-    description: "Pick the correct answer from 4 options. Harder cards appear more often.",
-    icon: "✓",
-    minCards: 4,
-    color: "green",
-  },
-  {
-    type: "write",
-    label: "Write the answer",
-    description: "Type the answer from memory. Use the hint button if you get stuck.",
-    icon: "✏️",
-    minCards: 1,
-    color: "blue",
-  },
-  {
-    type: "pairs",
-    label: "Match pairs",
-    description: "Find matching question and answer cards. Works in batches of 6.",
-    icon: "⇄",
-    minCards: 2,
-    color: "purple",
-  },
-  {
-    type: "timed",
-    label: "Timed cards",
-    description: "Flashcards that auto-advance. Great for quick review.",
-    icon: "⏱",
-    minCards: 1,
-    color: "amber",
-  },
-  {
-    type: "parts",
-    label: "Word puzzle",
-    description: "Reconstruct the answer by tapping words in the correct order.",
-    icon: "🔤",
-    minCards: 1,
-    color: "coral",
-  },
+  { type: "flashcard", icon: "🃏", minCards: 1, color: "indigo" },
+  { type: "test",      icon: "✓",  minCards: 4, color: "green"  },
+  { type: "write",     icon: "✏️", minCards: 1, color: "blue"   },
+  { type: "pairs",     icon: "⇄",  minCards: 2, color: "purple" },
+  { type: "timed",     icon: "⏱", minCards: 1, color: "amber"  },
+  { type: "parts",     icon: "🔤", minCards: 1, color: "coral"  },
 ];
 
 const COLOR_MAP: Record<string, { bg: string; border: string; icon: string; text: string }> = {
@@ -62,6 +21,7 @@ const COLOR_MAP: Record<string, { bg: string; border: string; icon: string; text
 };
 
 export function GameHubPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -76,9 +36,9 @@ export function GameHubPage() {
   if (isError) {
     return (
       <div className="text-center py-16 text-red-500">
-        <p>Failed to load.</p>
+        <p>{t("game_hub.load_error")}</p>
         <button onClick={() => navigate(-1)} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mt-2 underline">
-          Go back
+          {t("game_hub.go_back")}
         </button>
       </div>
     );
@@ -87,9 +47,9 @@ export function GameHubPage() {
   if (!isLoading && cards.length === 0) {
     return (
       <div className="text-center py-16 text-gray-400">
-        <p>No cards in this collection.</p>
+        <p>{t("game_hub.no_cards")}</p>
         <button onClick={() => navigate(-1)} className="text-sm text-indigo-500 hover:text-indigo-700 mt-2 underline">
-          Go back
+          {t("game_hub.go_back")}
         </button>
       </div>
     );
@@ -109,10 +69,14 @@ export function GameHubPage() {
         ) : (
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title || `Set #${id}`}</h1>
         )}
-        {!isLoading && <span className="text-xs text-gray-400 ml-1">{cards.length} cards</span>}
+        {!isLoading && (
+          <span className="text-xs text-gray-400 ml-1">
+            {t("collections.card_count", { count: cards.length })}
+          </span>
+        )}
       </div>
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 ml-8 mb-6">Choose an activity</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 ml-8 mb-6">{t("game_hub.choose_activity")}</p>
 
       {/* Activity grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -136,11 +100,15 @@ export function GameHubPage() {
                     <span className="text-2xl">{activity.icon}</span>
                     <div className="flex flex-col gap-1 flex-1">
                       <span className={`font-semibold text-sm ${enough ? c.text : "text-gray-600 dark:text-gray-400"}`}>
-                        {activity.label}
+                        {t(`game_hub.activities.${activity.type}.label`)}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{activity.description}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        {t(`game_hub.activities.${activity.type}.desc`)}
+                      </span>
                       {!enough && (
-                        <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">Needs at least {activity.minCards} cards</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          {t("game_hub.needs_cards", { count: activity.minCards })}
+                        </span>
                       )}
                     </div>
                   </div>

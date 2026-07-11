@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { contentApi } from "@/api";
 import { shuffle } from "@/utils/gameUtils";
 import { FlashCardFace } from "@/components/FlashCardFace";
@@ -24,6 +25,7 @@ const FADE_IN = 300; // плавное появление
 // ── Main component ──────────────────────────────────────────────────
 
 export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, isShuffled }: Props) {
+  const { t } = useTranslation();
   const isDemo = useIsDemo();
   const demoStore = useDemoStore();
   const editCard = useEditCard();
@@ -120,18 +122,20 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
               c.id === card.id ? { ...c, question: editQuestion, answer: editAnswer, note: editNote || undefined } : c,
             ),
           );
-          toast.success("Card updated");
+          toast.success(t("collection_detail.card_updated"));
           setEditOpen(false);
         },
-        onError: () => toast.error("Failed to update card"),
+        onError: () => toast.error(t("collection_detail.card_update_error")),
       },
     );
   }
 
-  if (!card) return <p className="text-gray-400 text-center py-16">No cards to show.</p>;
+  if (!card) return <p className="text-gray-400 text-center py-16">{t("flashcard_game.no_cards")}</p>;
 
-  const frontLabel = answerFirst ? "Answer" : "Question";
-  const backLabel = answerFirst ? "Question" : "Answer";
+  const questionLabel = t("collection_detail.question_label");
+  const answerLabel = t("collection_detail.answer_label");
+  const frontLabel = answerFirst ? answerLabel : questionLabel;
+  const backLabel = answerFirst ? questionLabel : answerLabel;
   const frontText = answerFirst ? card.answer : card.question;
   const backText = answerFirst ? card.question : card.answer;
   const frontImg = answerFirst ? card.imgA : card.imgQ;
@@ -191,7 +195,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           onClick={goPrev}
           disabled={index === 0 || isNavigating}
           className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-          ← Prev
+          {t("flashcard_game.prev_btn")}
         </button>
 
         <div className="flex items-center gap-2 flex-1">
@@ -210,7 +214,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           onClick={goNext}
           disabled={index === cards.length - 1 || isNavigating}
           className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-          Next →
+          {t("flashcard_game.next_btn")}
         </button>
       </div>
 
@@ -222,15 +226,15 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
             <path d="M11.5 1.5a1.5 1.5 0 0 1 2.121 2.121l-8.5 8.5a.5.5 0 0 1-.192.121l-3 1a.5.5 0 0 1-.636-.636l1-3a.5.5 0 0 1 .121-.192l8.5-8.5z" />
           </svg>
-          Edit card
+          {t("collection_detail.edit_card_title")}
         </button>
       </div>
 
       {/* Edit modal */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit card" size="lg">
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title={t("collection_detail.edit_card_title")} size="lg">
         <div className="flex flex-col gap-4">
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Question</label>
+            <label className="text-xs text-gray-400 block mb-1">{t("collection_detail.question_label")}</label>
             <textarea
               value={editQuestion}
               onChange={(e) => setEditQuestion(e.target.value)}
@@ -239,7 +243,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             />
           </div>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Answer</label>
+            <label className="text-xs text-gray-400 block mb-1">{t("collection_detail.answer_label")}</label>
             <textarea
               value={editAnswer}
               onChange={(e) => setEditAnswer(e.target.value)}
@@ -248,7 +252,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             />
           </div>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Note (optional)</label>
+            <label className="text-xs text-gray-400 block mb-1">{t("collection_detail.note_label")}</label>
             <input
               value={editNote}
               onChange={(e) => setEditNote(e.target.value)}
@@ -257,14 +261,14 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="secondary" size="sm" onClick={() => setEditOpen(false)}>
-              Cancel
+              {t("collection_detail.cancel_btn")}
             </Button>
             <Button
               size="sm"
               onClick={handleEditSave}
               loading={editCard.isPending}
               disabled={!editQuestion.trim() || !editAnswer.trim()}>
-              Save
+              {t("collection_detail.save_btn")}
             </Button>
           </div>
         </div>

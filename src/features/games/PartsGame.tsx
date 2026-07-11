@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { shuffle, formatParts, weightedRandom } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
@@ -26,6 +27,7 @@ export function PartsGame({
   answerFirst = false,
   mode = "oneshot",
 }: Props) {
+  const { t } = useTranslation();
   const playableCards = useMemo(
     () => allCards.filter((c) => formatParts(answerFirst ? c.question : c.answer).length > 0),
     [allCards, answerFirst],
@@ -239,8 +241,8 @@ export function PartsGame({
   if (playableCards.length === 0) {
     return (
       <div className="text-center py-16 text-gray-400">
-        <p>No cards suitable for the parts game.</p>
-        <p className="text-sm mt-2">Answers need 2–10 parts when split.</p>
+        <p>{t("parts_game.no_cards")}</p>
+        <p className="text-sm mt-2">{t("parts_game.no_cards_hint")}</p>
       </div>
     );
   }
@@ -250,18 +252,18 @@ export function PartsGame({
       return (
         <div className="text-center py-16 flex flex-col items-center gap-4 text-gray-500 dark:text-gray-400">
           <p className="text-4xl">🎉</p>
-          <p className="text-base font-medium text-gray-700 dark:text-gray-200">All cards are at 100%!</p>
-          <p className="text-sm">There's nothing left to practice in this mode.</p>
+          <p className="text-base font-medium text-gray-700 dark:text-gray-200">{t("parts_game.all_learned_title")}</p>
+          <p className="text-sm">{t("parts_game.all_learned_desc")}</p>
           <div className="flex gap-3 mt-2">
             <button
               onClick={onPlayAgain}
               className="text-sm px-4 py-2 rounded-lg border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
-              Play Endless instead
+              {t("parts_game.play_endless_btn")}
             </button>
             <button
               onClick={onBack}
               className="text-sm px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              Go back
+              {t("parts_game.go_back_btn")}
             </button>
           </div>
         </div>
@@ -322,7 +324,7 @@ export function PartsGame({
 
       {/* Prompt */}
       <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
+        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("parts_game.label_answer") : t("parts_game.label_question")}</p>
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {answerFirst ? current.answer : current.question}
         </p>
@@ -332,7 +334,7 @@ export function PartsGame({
       {/* Build area */}
       <div className="min-h-[52px] bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center flex-wrap gap-1">
         {clicked.length === 0 ? (
-          <span className="text-sm text-gray-300 dark:text-gray-600">Click parts in the correct order…</span>
+          <span className="text-sm text-gray-300 dark:text-gray-600">{t("parts_game.build_placeholder")}</span>
         ) : (
           clicked.map((part, i) => (
             <span
@@ -375,13 +377,13 @@ export function PartsGame({
             onClick={handleUndo}
             disabled={clicked.length === 0 || wrongIndex !== null}
             className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            ↩ Undo
+            {t("parts_game.undo_btn")}
           </button>
           <button
             onClick={handleHint}
             disabled={wrongIndex !== null}
             className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            💡 Hint
+            {t("parts_game.hint_btn")}
           </button>
         </div>
         <div>
@@ -390,7 +392,7 @@ export function PartsGame({
             <button
               onClick={handleFinish}
               className="ml-auto text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-              Finish
+              {t("parts_game.finish_btn")}
             </button>
           )}
         </div>

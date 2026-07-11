@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FiHelpCircle } from "react-icons/fi";
 import { Modal } from "@/components/Modal";
 
@@ -12,92 +13,81 @@ interface GameHelpContent {
   modes: ModeInfo[];
 }
 
-const GAME_HELP: Record<string, GameHelpContent> = {
-  flashcard: {
-    modes: [
-      { name: "Q → A", description: "See the question first, then flip to reveal the answer." },
-      { name: "A → Q", description: "See the answer first and try to recall the question." },
-      { name: "Shuffle", description: "Cards are presented in a randomised order each session." },
-    ],
-  },
-  timed: {
-    modes: [
-      { name: "Q → A", description: "See the question first, then the answer is revealed automatically." },
-      { name: "A → Q", description: "See the answer first and recall the question before it is revealed." },
-      {
-        name: "Delay",
-        description: "Controls how long the answer stays visible before the next card appears (0.5 – 5 seconds).",
-      },
-    ],
-  },
-  pairs: {
-    modes: [
-      {
-        name: "Match",
-        description: "Flip tiles to find matching question-answer pairs. Clear the board to finish.",
-      },
-    ],
-  },
-  test: {
-    modes: [
-      { name: "Q → A", description: "Choose the correct answer from four options given a question." },
-      { name: "A → Q", description: "Choose the correct question from four options given an answer." },
-      { name: "One Shot", description: "Every card appears exactly once. Harder cards (based on your history) come first." },
-      { name: "Endless", description: "Cards repeat without limit. Cards you struggle with appear more often; cards you know well appear less often." },
-      { name: "Endless ✓", description: "Same as Endless, but cards you have fully mastered (100%) are removed from the pool. The session ends automatically once all remaining cards reach 100%." },
-    ],
-  },
-  write: {
-    modes: [
-      { name: "Q → A", description: "Type the answer from memory when shown a question." },
-      { name: "A → Q", description: "Type the question from memory when shown an answer." },
-      { name: "One Shot", description: "Every card appears exactly once. Harder cards (based on your history) come first." },
-      { name: "Endless", description: "Cards repeat without limit. Cards you struggle with appear more often; cards you know well appear less often." },
-      { name: "Endless ✓", description: "Same as Endless, but cards you have fully mastered (100%) are removed from the pool. The session ends automatically once all remaining cards reach 100%." },
-    ],
-  },
-  parts: {
-    intro: "Assemble the correct answer by tapping word parts in order.",
-    modes: [
-      {
-        name: "One Shot",
-        description:
-          "Every card appears exactly once. Harder cards (based on your history) come first.",
-      },
-      {
-        name: "Endless",
-        description:
-          "Cards repeat without limit. Cards you struggle with appear more often; cards you know well appear less often.",
-      },
-      {
-        name: "Endless ✓",
-        description:
-          "Same as Endless, but cards you have fully mastered (100%) are removed from the pool. The session ends automatically once all remaining cards reach 100%.",
-      },
-    ],
-  },
-};
-
 interface Props {
   type: string;
 }
 
 export function GameModeHelp({ type }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const help = GAME_HELP[type];
 
+  const dirQA = t("game_page.direction_q_to_a");
+  const dirAQ = t("game_page.direction_a_to_q");
+  const oneShot = t("game_page.one_shot");
+  const endless = t("game_page.endless");
+  const endlessSkip = t("game_page.endless_skip");
+
+  const GAME_HELP: Record<string, GameHelpContent> = {
+    flashcard: {
+      modes: [
+        { name: dirQA, description: t("game_mode_help.flashcard_q_to_a") },
+        { name: dirAQ, description: t("game_mode_help.flashcard_a_to_q") },
+        { name: t("game_mode_help.shuffle_name"), description: t("game_mode_help.shuffle_desc") },
+      ],
+    },
+    timed: {
+      modes: [
+        { name: dirQA, description: t("game_mode_help.timed_q_to_a") },
+        { name: dirAQ, description: t("game_mode_help.timed_a_to_q") },
+        { name: t("game_mode_help.delay_name"), description: t("game_mode_help.delay_desc") },
+      ],
+    },
+    pairs: {
+      modes: [
+        { name: t("game_mode_help.match_name"), description: t("game_mode_help.match_desc") },
+      ],
+    },
+    test: {
+      modes: [
+        { name: dirQA, description: t("game_mode_help.test_q_to_a") },
+        { name: dirAQ, description: t("game_mode_help.test_a_to_q") },
+        { name: oneShot, description: t("game_mode_help.oneshot_desc") },
+        { name: endless, description: t("game_mode_help.endless_desc") },
+        { name: endlessSkip, description: t("game_mode_help.endless_skip_desc") },
+      ],
+    },
+    write: {
+      modes: [
+        { name: dirQA, description: t("game_mode_help.write_q_to_a") },
+        { name: dirAQ, description: t("game_mode_help.write_a_to_q") },
+        { name: oneShot, description: t("game_mode_help.oneshot_desc") },
+        { name: endless, description: t("game_mode_help.endless_desc") },
+        { name: endlessSkip, description: t("game_mode_help.endless_skip_desc") },
+      ],
+    },
+    parts: {
+      intro: t("game_mode_help.parts_intro"),
+      modes: [
+        { name: oneShot, description: t("game_mode_help.oneshot_desc") },
+        { name: endless, description: t("game_mode_help.endless_desc") },
+        { name: endlessSkip, description: t("game_mode_help.endless_skip_desc") },
+      ],
+    },
+  };
+
+  const help = GAME_HELP[type];
   if (!help) return null;
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        title="How modes work"
+        title={t("game_mode_help.button_title")}
         className="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
         <FiHelpCircle size={15} />
       </button>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Game Modes" size="md">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("game_mode_help.modal_title")} size="md">
         <div className="flex flex-col gap-1">
           {help.intro && <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{help.intro}</p>}
           {help.modes.map((m) => (

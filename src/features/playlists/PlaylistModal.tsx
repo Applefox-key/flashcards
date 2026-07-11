@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { collectionsApi } from "@/api";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [selectedIds, setSelectedIds] = useState<(number | undefined)[]>([]);
   const [search, setSearch] = useState("");
@@ -62,10 +64,10 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
         { id: editPlaylist.id, data: { name: name.trim(), listIds } },
         {
           onSuccess: () => {
-            toast.success("Playlist saved");
+            toast.success(t('playlists.modal_toast_saved'));
             onClose();
           },
-          onError: () => toast.error("Failed to save playlist"),
+          onError: () => toast.error(t('playlists.modal_toast_save_error')),
         },
       );
     } else {
@@ -73,10 +75,10 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
         { name: name.trim(), listIds },
         {
           onSuccess: () => {
-            toast.success("Playlist created");
+            toast.success(t('playlists.modal_toast_created'));
             onClose();
           },
-          onError: () => toast.error("Failed to create playlist"),
+          onError: () => toast.error(t('playlists.modal_toast_create_error')),
         },
       );
     }
@@ -167,7 +169,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
             : "flex items-center gap-3 px-3 py-2 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 text-sm cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
         }>
         <span className="text-xs text-gray-400 w-5 shrink-0">{i + 1}</span>
-        <span className="text-sm text-gray-400 dark:text-gray-500 italic">add collection</span>
+        <span className="text-sm text-gray-400 dark:text-gray-500 italic">{t('playlists.modal_slot_add')}</span>
       </div>
     );
   });
@@ -176,7 +178,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
     <>
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          Slot {activeSlot !== null ? activeSlot + 1 : ""}
+          {t('playlists.modal_picker_slot', { n: activeSlot !== null ? activeSlot + 1 : '' })}
         </span>
         <button
           onClick={closePicker}
@@ -188,7 +190,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
         ref={searchRef}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search by name..."
+        placeholder={t('playlists.modal_picker_search')}
         className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                    focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -213,7 +215,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
       <div className={listClassName}>
         {pickerCollections.length === 0 ? (
           <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
-            {search || tagFilter ? "No matches" : "No collections available"}
+            {search || tagFilter ? t('playlists.modal_picker_no_matches') : t('playlists.modal_picker_no_collections')}
           </p>
         ) : (
           pickerCollections.map((col) => (
@@ -234,13 +236,13 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
     <Modal
       open={open}
       onClose={onClose}
-      title={editPlaylist ? "Edit Playlist" : "New Playlist"}
+      title={editPlaylist ? t('playlists.modal_title_edit') : t('playlists.modal_title_create')}
       size={activeSlot !== null ? "xl" : "lg"}>
       <div className="flex flex-col gap-4">
         {/* Name */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Name <span className="text-red-500">*</span>
+            {t('playlists.modal_name_label')} <span className="text-red-500">*</span>
           </label>
           <input
             autoFocus
@@ -249,7 +251,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSave();
             }}
-            placeholder="e.g. Morning review"
+            placeholder={t('playlists.modal_name_placeholder')}
             className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                        focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -259,7 +261,9 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
         {/* Collections */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Collections</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('playlists.modal_collections_label')}
+            </label>
             <span
               className={
                 filledCount === MAX_SLOTS
@@ -280,7 +284,7 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
 
               {/* Right column: picker panel — desktop only */}
               {activeSlot !== null && (
-                <div className="hidden sm:block border border-indigo-200 dark:border-indigo-700 rounded-lg p-3 bg-indigo-50 dark:bg-indigo-900/20 sticky top-0  ">
+                <div className="hidden sm:block border border-indigo-200 dark:border-indigo-700 rounded-lg p-3 bg-indigo-50 dark:bg-indigo-900/20 sticky top-0">
                   {pickerContent("max-h-64 overflow-y-auto mt-2")}
                 </div>
               )}
@@ -295,16 +299,16 @@ export function PlaylistModal({ open, onClose, editPlaylist }: Props) {
           </div>
 
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-            Sets can contain up to {MAX_SLOTS} collections.
+            {t('playlists.modal_max_hint', { max: MAX_SLOTS })}
           </p>
         </div>
 
         <div className="flex gap-3 pt-1">
           <Button onClick={handleSave} loading={isPending} disabled={!name.trim()}>
-            {editPlaylist ? "Save changes" : "Create"}
+            {editPlaylist ? t('playlists.modal_save_btn') : t('playlists.modal_create_btn')}
           </Button>
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            {t('playlists.modal_cancel_btn')}
           </Button>
         </div>
       </div>

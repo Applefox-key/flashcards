@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { useCardImage } from "@/hooks/useCardImage";
 import { SpeakButton } from "@/components/SpeakButton";
 
@@ -139,6 +140,8 @@ export function FlashCardFace({
   flipped,
   animated = true,
 }: FlashCardFaceProps) {
+  const { t } = useTranslation();
+
   return (
     <div style={{ perspective: "1200px" }}>
       <div
@@ -168,7 +171,7 @@ export function FlashCardFace({
             </div>
           </div>
           <div className="shrink-0 px-6 pt-1 pb-4 text-center">
-            <span className="text-xs text-gray-300 dark:text-gray-600">Click to flip</span>
+            <span className="text-xs text-gray-300 dark:text-gray-600">{t("collection_detail.flip_hint")}</span>
           </div>
         </div>
 
@@ -195,7 +198,7 @@ export function FlashCardFace({
             </div>
           </div>
           <div className="shrink-0 px-6 pt-1 pb-4 text-center">
-            <span className="text-xs text-indigo-300">Click to flip back</span>
+            <span className="text-xs text-indigo-300">{t("collection_detail.flip_back_hint")}</span>
           </div>
         </div>
       </div>

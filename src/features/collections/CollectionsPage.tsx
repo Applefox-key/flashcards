@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { IoIosArrowForward } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -54,18 +56,16 @@ function CollectionCardSkeleton() {
   );
 }
 
-function getStudyDot(stats?: CollectionStats): { color: string; label: string } | null {
+function getStudyDot(stats: CollectionStats | undefined, t: TFunction): { color: string; label: string } | null {
   if (!stats) return null;
   const total = stats.toLearn + stats.inProgress + stats.learned;
   if (total === 0) return null;
   if (stats.learned === total)
-    return { color: "bg-green-400", label: "Fully learned" };
+    return { color: "bg-green-400", label: t("collections.dot_fully_learned") };
   if (stats.learned > 0 || stats.inProgress > 0)
-    return { color: "bg-amber-400", label: `In progress — ${stats.learned} of ${total} learned` };
-  return { color: "bg-gray-300 dark:bg-gray-500", label: "Not studied yet" };
+    return { color: "bg-amber-400", label: t("collections.dot_in_progress", { learned: stats.learned, total }) };
+  return { color: "bg-gray-300 dark:bg-gray-500", label: t("collections.dot_not_studied") };
 }
-
-const NO_STATS_DOT = { color: "bg-gray-200 dark:bg-gray-600", label: "No progress data" };
 
 function CollectionCard({
   collection,
@@ -79,6 +79,7 @@ function CollectionCard({
   compact: boolean;
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["collections", collection.id, "preview"],
     queryFn: () => collectionsApi.getPreview(collection.id, 3),
@@ -101,7 +102,7 @@ function CollectionCard({
     ? data.stats.toLearn + data.stats.inProgress + data.stats.learned
     : (collection.cardCount ?? 0);
 
-  const studyDot = getStudyDot(data?.stats);
+  const studyDot = getStudyDot(data?.stats, t);
 
   return (
     <div
@@ -117,7 +118,7 @@ function CollectionCard({
         <div className="flex justify-start uppercase truncate">{highlight(collection.name, search)}</div>
 
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 pb-0.5 pt-0.5">{cardCount} cards</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 pb-0.5 pt-0.5">{t("collections.card_count", { count: cardCount })}</span>
           {!!collection.isFavorite && <span className="text-lg text-rose-400 ">♥</span>}
           {!!collection.isPublic && <span className="text-sm pb-1">🔓</span>}
         </div>
@@ -153,7 +154,7 @@ function CollectionCard({
         to={`/play/${collection.id}`}
         onClick={(e) => e.stopPropagation()}
         className="flex justify-center item-center opacity-0 absolute bottom-0 text-center right-0 w-[70%] group-hover:opacity-80 transition-opacity shrink-0 text-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-br-lg rounded-tl-lg">
-        <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+        <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
       </Link>
     </div>
   );
@@ -169,6 +170,7 @@ function CollectionListRow({
   tags: CollectionTag[];
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data } = useQuery({
     queryKey: ["collections", collection.id, "preview"],
     queryFn: () => collectionsApi.getPreview(collection.id, 3),
@@ -185,7 +187,7 @@ function CollectionListRow({
     },
   });
 
-  const listDot = data?.stats != null ? (getStudyDot(data.stats) ?? null) : NO_STATS_DOT;
+  const listDot = data?.stats != null ? (getStudyDot(data.stats, t) ?? null) : { color: "bg-gray-200 dark:bg-gray-600", label: t("collections.dot_no_data") };
 
   return (
     <div
@@ -220,15 +222,14 @@ function CollectionListRow({
       <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
         {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
         {!!collection.isPublic && <span className="text-xs">🔓</span>}{" "}
-        {data?.stats ? data.stats.toLearn + data.stats.inProgress + data.stats.learned : (collection.cardCount ?? 0)}{" "}
-        cards
+        {t("collections.card_count", { count: data?.stats ? data.stats.toLearn + data.stats.inProgress + data.stats.learned : (collection.cardCount ?? 0) })}
       </span>
 
       <Link
         to={`/play/${collection.id}`}
         onClick={(e) => e.stopPropagation()}
         className="absolute right-0 inset-y-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-r-md whitespace-nowrap">
-        <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+        <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
       </Link>
 
       {data && data.cards.length > 0 && (
@@ -252,10 +253,11 @@ function CollectionListRow({
 type VisibleEntry = { category: { id: number; name: string }; collections: Collection[] };
 
 function CompactToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: () => void }) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onToggle}
-      title={compact ? "Show preview" : "Compact view"}
+      title={compact ? t("collections.show_preview") : t("collections.compact_view")}
       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors shrink-0 ${
         compact
           ? "bg-indigo-600 border-indigo-600 text-white"
@@ -271,7 +273,7 @@ function CompactToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: (
           </>
         )}
       </svg>
-      Compact
+      {t("collections.compact_btn")}
     </button>
   );
 }
@@ -333,6 +335,7 @@ function Pagination({
   totalPages: number;
   onChange: (p: number) => void;
 }) {
+  const { t } = useTranslation();
   if (totalPages <= 1) return null;
   const pages = getPageNumbers(page, totalPages);
   const btnBase = "h-8 min-w-8 px-2 text-sm rounded-lg border transition-colors";
@@ -347,7 +350,7 @@ function Pagination({
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         className={`${btnBase} ${btnInactive} ${page === 1 ? btnDisabled : ""} px-3`}>
-        ← Prev
+        {t("public_library.prev")}
       </button>
 
       {pages.map((p, i) =>
@@ -369,21 +372,22 @@ function Pagination({
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
         className={`${btnBase} ${btnInactive} ${page === totalPages ? btnDisabled : ""} px-3`}>
-        Next →
+        {t("public_library.next")}
       </button>
     </div>
   );
 }
 
 function AllCollectionsView({ search }: { search: string }) {
+  const { t } = useTranslation();
   const { myLibrary, setMyLibrary } = useLibraryUiStore();
   const page = myLibrary.allPage ?? 1;
   const compact = myLibrary.compactCards ?? false;
 
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
   }, [search]);
 
   const isFavoriteFilter = myLibrary.activeFilter === "Favorites";
@@ -433,7 +437,7 @@ function AllCollectionsView({ search }: { search: string }) {
             <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
           ))}
           {visible.length === 0 && (
-            <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">{t("collections.no_collections")}</p>
           )}
         </div>
       )}
@@ -444,7 +448,7 @@ function AllCollectionsView({ search }: { search: string }) {
           <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={compact} />
         ))}
         {visible.length === 0 && (
-          <p className="col-span-full text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
+          <p className="col-span-full text-sm text-gray-400 dark:text-gray-500 py-8 text-center">{t("collections.no_collections")}</p>
         )}
       </div>
 
@@ -475,6 +479,7 @@ function CardsView({
   effectiveId: number | null;
   totalCollections: number;
 }) {
+  const { t } = useTranslation();
   const { myLibrary, setMyLibrary } = useLibraryUiStore();
   const compact = myLibrary.compactCards ?? false;
   const viewMode = myLibrary.viewMode ?? "by-category";
@@ -504,7 +509,7 @@ function CardsView({
               : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
           }`}>
           <div className="flex items-center justify-between gap-1">
-            <span className="truncate">All collections</span>
+            <span className="truncate">{t("collections.all_collections")}</span>
             <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({totalCollections})</span>
           </div>
         </button>
@@ -544,7 +549,7 @@ function CardsView({
                   <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
                 ))}
                 {selectedCollections.length === 0 && (
-                  <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No collections</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">{t("collections.no_collections")}</p>
                 )}
               </div>
             )}
@@ -556,7 +561,7 @@ function CardsView({
               ))}
               {selectedCollections.length === 0 && (
                 <p className="col-span-full text-sm text-gray-400 dark:text-gray-500 py-8 text-center">
-                  No collections
+                  {t("collections.no_collections")}
                 </p>
               )}
             </div>
@@ -587,16 +592,17 @@ function LibraryTabsBar({
   active: FilterTag;
   onChange: (tag: FilterTag) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-0">
       <div className="hidden sm:flex items-center sm:w-auto shrink-0">
         <span className="px-5 py-2.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 -mb-px cursor-default select-none">
-          My Library
+          {t("collections.my_library")}
         </span>
         <Link
           to="/library/public"
           className="px-5 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent transition-colors">
-          Public Library
+          {t("collections.public_library")}
         </Link>
         <Link to="/collections/new" className="ml-auto pb-1 sm:hidden shrink-0">
           <Button size="sm">+</Button>
@@ -608,7 +614,7 @@ function LibraryTabsBar({
           type="search"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
-          placeholder="Search..."
+          placeholder={t("collections.search_placeholder")}
           className="flex-1 min-w-0 sm:w-52 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -624,12 +630,12 @@ function LibraryTabsBar({
                   : "text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
               }`}>
               {FILTER_TAG_ICONS[tag]}
-              {tag}
+              {t(`collections.filter_${tag.toLowerCase()}`)}
             </button>
           ))}
         </div>
         <Link to="/collections/new" className="shrink-0 hidden sm:block">
-          <Button size="sm">+ New Collection</Button>
+          <Button size="sm">{t("collections.new_collection_btn")}</Button>
         </Link>
       </div>
     </div>
@@ -637,6 +643,7 @@ function LibraryTabsBar({
 }
 
 export function CollectionsPage() {
+  const { t } = useTranslation();
   const [filterOpen, setFilterOpen] = useState(false);
   const [categoriesCollapsed, setCategoriesCollapsed] = useState(false);
   const [tagsCollapsed, setTagsCollapsed] = useState(false);
@@ -665,7 +672,7 @@ export function CollectionsPage() {
   const uncategorized = allCollections.filter((col) => !categorizedIds.has(col.id));
   const categories =
     uncategorized.length > 0
-      ? [...categoriesRaw, { id: 0, name: "Uncategorized", userid: 0, collections: uncategorized }]
+      ? [...categoriesRaw, { id: 0, name: t("collections.uncategorized"), userid: 0, collections: uncategorized }]
       : categoriesRaw;
 
   const totalCollections = categories.reduce((sum, c) => sum + c.collections.length, 0);
@@ -718,7 +725,7 @@ export function CollectionsPage() {
 
         {allTags.length > 0 && (
           <div className="hidden sm:flex gap-2 overflow-x-auto items-center border-b border-slate-200/80 dark:border-slate-700/80 py-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">Tags:</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">{t("collections.tags_label")}</span>
             {allTags.map((tag) => (
               <button
                 key={tag.id}
@@ -742,7 +749,7 @@ export function CollectionsPage() {
               className="flex-1 min-w-0 flex items-center gap-1 px-1 text-left active:opacity-70 transition-opacity">
               <span className="truncate text-sm font-medium text-indigo-700 dark:text-indigo-300">
                 {viewMode === "all"
-                  ? `All collections (${totalCollections})`
+                  ? t("collections.all_collections_count", { count: totalCollections })
                   : (visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? "")}
               </span>
               <IoIosArrowForward size={14} className="shrink-0 text-indigo-400 dark:text-indigo-500" />
@@ -765,20 +772,20 @@ export function CollectionsPage() {
 
         {!isLoading && totalCollections === 0 && (
           <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-            <p className="text-lg mb-2">No collections yet</p>
+            <p className="text-lg mb-2">{t("collections.empty_title")}</p>
             <Link to="/collections/new">
-              <Button size="sm">Create your first collection</Button>
+              <Button size="sm">{t("collections.create_first_btn")}</Button>
             </Link>
           </div>
         )}
 
         {hasNoResults && (
           <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-            <p className="text-lg mb-2">No collections match "{search}"</p>
+            <p className="text-lg mb-2">{t("collections.no_results", { search })}</p>
             <button
               onClick={() => setSearch("")}
               className="text-sm text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
-              Clear search
+              {t("collections.clear_search")}
             </button>
           </div>
         )}
@@ -793,26 +800,26 @@ export function CollectionsPage() {
         )}
       </div>
 
-      <MobileFab to="/collections/new" label="Add collection" />
+      <MobileFab to="/collections/new" label={t("collections.add_collection_fab")} />
       <SideDrawer
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         onOpen={() => setFilterOpen(true)}
         tabLabel={
           viewMode === "all"
-            ? `All collections (${totalCollections}) ❯`
+            ? `${t("collections.all_collections_count", { count: totalCollections })} ❯`
             : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} ❯`
         }
         tabIcon={<IoFilter />}
         topValue="top-[130px] w-full flex flex-row nowrap"
-        title="Filters"
+        title={t("collections.filters_title")}
         hasActiveIndicator={
           activeFilter !== "All" ||
           activeTagId !== null ||
           (viewMode === "by-category" && myLibrary.selectedCategoryId !== null)
         }>
         <div>
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Show</p>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("collections.show_label")}</p>
           <div className="flex w-fit m-auto items-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-xs self-start">
             {FILTER_TAGS.map((tag) => (
               <button
@@ -824,14 +831,14 @@ export function CollectionsPage() {
                     : "text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                 }`}>
                 {FILTER_TAG_ICONS[tag]}
-                {tag}
+                {t(`collections.filter_${tag.toLowerCase()}`)}
               </button>
             ))}
           </div>
         </div>
         {showContent && (
           <CollapsibleSection
-            title="Categories"
+            title={t("collections.categories_section")}
             count={visibleCategories.length}
             collapsed={categoriesCollapsed}
             onToggle={() => setCategoriesCollapsed((v) => !v)}>
@@ -847,7 +854,7 @@ export function CollectionsPage() {
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
                 <div className="flex items-center justify-between gap-1">
-                  <span className="truncate">All collections</span>
+                  <span className="truncate">{t("collections.all_collections")}</span>
                   <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({totalCollections})</span>
                 </div>
               </button>
@@ -874,7 +881,7 @@ export function CollectionsPage() {
         )}
         {allTags.length > 0 && (
           <CollapsibleSection
-            title="Tags"
+            title={t("collections.tags_section")}
             count={allTags.length}
             collapsed={tagsCollapsed}
             onToggle={() => setTagsCollapsed((v) => !v)}>
@@ -906,7 +913,7 @@ export function CollectionsPage() {
           (viewMode === "by-category" && myLibrary.selectedCategoryId !== null)
         }>
         <div>
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Show</p>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("collections.show_label")}</p>
           <div className="flex w-fit m-auto items-center rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden text-xs self-start">
             {FILTER_TAGS.map((tag) => (
               <button
@@ -918,7 +925,7 @@ export function CollectionsPage() {
                     : "text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                 }`}>
                 {FILTER_TAG_ICONS[tag]}
-                {tag}
+                {t(`collections.filter_${tag.toLowerCase()}`)}
               </button>
             ))}
           </div>
@@ -926,7 +933,7 @@ export function CollectionsPage() {
 
         {showContent && (
           <CollapsibleSection
-            title="Categories"
+            title={t("collections.categories_section")}
             count={visibleCategories.length}
             collapsed={categoriesCollapsed}
             onToggle={() => setCategoriesCollapsed((v) => !v)}>
@@ -942,7 +949,7 @@ export function CollectionsPage() {
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
                 <div className="flex items-center justify-between gap-1">
-                  <span className="truncate">All collections</span>
+                  <span className="truncate">{t("collections.all_collections")}</span>
                   <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({totalCollections})</span>
                 </div>
               </button>
@@ -970,7 +977,7 @@ export function CollectionsPage() {
 
         {allTags.length > 0 && (
           <CollapsibleSection
-            title="Tags"
+            title={t("collections.tags_section")}
             count={allTags.length}
             collapsed={tagsCollapsed}
             onToggle={() => setTagsCollapsed((v) => !v)}>

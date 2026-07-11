@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/Button";
@@ -21,6 +22,7 @@ function CollectionSkeleton() {
 // ── Collection row (same style as CollectionsPage) ────────────────────
 
 function CollectionRow({ collection }: { collection: Collection }) {
+  const { t } = useTranslation();
   const tags: CollectionTag[] = collection.tags ?? [];
   return (
     <Link
@@ -37,7 +39,7 @@ function CollectionRow({ collection }: { collection: Collection }) {
         ))}
       </div>
       {!!collection.isFavorite && (
-        <span className="text-rose-400" title="Favorite">
+        <span className="text-rose-400" title={t('category_collections.fav_title')}>
           ♥
         </span>
       )}
@@ -46,7 +48,9 @@ function CollectionRow({ collection }: { collection: Collection }) {
           🔓public
         </span>
       )}
-      <span className="text-xs text-gray-400 dark:text-gray-500">{collection.cardCount ?? 0} cards</span>
+      <span className="text-xs text-gray-400 dark:text-gray-500">
+        {t('category_collections.card_count', { count: collection.cardCount ?? 0 })}
+      </span>
     </Link>
   );
 }
@@ -57,9 +61,15 @@ const FILTER_TAGS = ["All", "Favorites", "Public"] as const;
 type FilterTag = (typeof FILTER_TAGS)[number];
 
 function TagFilterBar({ active, onChange }: { active: FilterTag; onChange: (t: FilterTag) => void }) {
+  const { t } = useTranslation();
+  const labels: Record<FilterTag, string> = {
+    All: t('category_collections.filter_all'),
+    Favorites: t('category_collections.filter_favorites'),
+    Public: t('category_collections.filter_public'),
+  };
   return (
     <div className="flex gap-2 mb-6 flex-wrap items-center">
-      <span className="text-xs text-gray-500">Filter:</span>
+      <span className="text-xs text-gray-500">{t('category_collections.filter_label')}</span>
       {FILTER_TAGS.map((tag) => (
         <button
           key={tag}
@@ -69,7 +79,7 @@ function TagFilterBar({ active, onChange }: { active: FilterTag; onChange: (t: F
               ? "bg-indigo-600 border-indigo-600 text-white"
               : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-600"
           }`}>
-          {tag}
+          {labels[tag]}
         </button>
       ))}
     </div>
@@ -79,6 +89,7 @@ function TagFilterBar({ active, onChange }: { active: FilterTag; onChange: (t: F
 // ── Main page ─────────────────────────────────────────────────────────
 
 export function CategoryCollectionsPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const categoryId = Number(id);
   const navigate = useNavigate();
@@ -119,7 +130,7 @@ export function CategoryCollectionsPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("[Save category]", err);
-      toast.error("Failed to save category");
+      toast.error(t('category_collections.toast_save_error'));
     } finally {
       setIsSaving(false);
     }
@@ -156,28 +167,30 @@ export function CategoryCollectionsPage() {
             </span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white min-w-0 truncate">
-            Category:{" "}
+            {t('category_collections.category_label')}{" "}
             {isLoading ? (
               <span className="inline-block h-7 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             ) : (
-              (categoryData?.name ?? "Category")
+              (categoryData?.name ?? "")
             )}
           </h1>
           {!isLoading && (
             <span className="text-sm text-gray-400 dark:text-gray-500 shrink-0">
-              <span className="hidden sm:inline">{collections.length} collections</span>
+              <span className="hidden sm:inline">
+                {t('category_collections.count_collections', { count: collections.length })}
+              </span>
               <span className="sm:hidden">{collections.length}</span>
             </span>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-3">
           <Button size="sm" variant="secondary" onClick={handleSave} disabled={isSaving || isLoading}>
-            {isSaving ? "Saving…" : "Save"}
+            {isSaving ? t('category_collections.saving') : t('category_collections.save_btn')}
           </Button>
           <Link to="/collections/new">
             <Button size="sm">
-              <span className="hidden sm:inline">+ New Collection</span>
-              <span className="sm:hidden">+ New</span>
+              <span className="hidden sm:inline">{t('category_collections.new_collection_btn')}</span>
+              <span className="sm:hidden">{t('category_collections.new_collection_short')}</span>
             </Button>
           </Link>
         </div>
@@ -198,7 +211,9 @@ export function CategoryCollectionsPage() {
       {!isLoading && visible.length === 0 && (
         <div className="text-center py-16 text-gray-400">
           <p className="text-lg">
-            {collections.length === 0 ? "No collections in this category." : "No collections match the current filter."}
+            {collections.length === 0
+              ? t('category_collections.empty_no_collections')
+              : t('category_collections.empty_no_match')}
           </p>
         </div>
       )}

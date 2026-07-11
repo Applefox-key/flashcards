@@ -38,12 +38,14 @@ export interface UserSettings {
 /**
  * Parse the `settings` field returned by the server.
  * The server stores it as a JSON string; sometimes without an opening brace.
+ * Also tolerates trailing commas produced by other projects sharing the same column.
  */
 export function parseUserSettings(raw: unknown): UserSettings {
   if (!raw) return {};
   if (typeof raw === "object") return raw as UserSettings;
   const str = String(raw).trim();
-  const attempts = [str, `{${str}}`];
+  const cleaned = str.replace(/,\s*([}\]])/g, '$1');
+  const attempts = [cleaned, `{${cleaned}}`];
   for (const s of attempts) {
     try { return JSON.parse(s) as UserSettings; } catch { /* next */ }
   }

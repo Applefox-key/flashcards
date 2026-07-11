@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { categoriesApi } from "@/api";
 import { Button } from "./Button";
 import { useToast } from "@/hooks/useToast";
@@ -14,6 +15,7 @@ export function CategorySelect({ value, onChange }: Props) {
   const [newName, setNewName] = useState("");
   const queryClient = useQueryClient();
   const toast = useToast();
+  const { t } = useTranslation();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -28,9 +30,9 @@ export function CategorySelect({ value, onChange }: Props) {
       onChange(result.id);
       setAddingNew(false);
       setNewName("");
-      toast.success(`Category "${name}" added`);
+      toast.success(t("category_select.toast_added", { name }));
     },
-    onError: () => toast.error("Failed to create category"),
+    onError: () => toast.error(t("category_select.toast_error")),
   });
 
   if (addingNew) {
@@ -47,7 +49,7 @@ export function CategorySelect({ value, onChange }: Props) {
             }
             if (e.key === "Escape") setAddingNew(false);
           }}
-          placeholder="Category name"
+          placeholder={t("category_select.name_placeholder")}
           className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm flex-1
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -60,7 +62,7 @@ export function CategorySelect({ value, onChange }: Props) {
           onClick={() => {
             if (newName.trim()) createMutation.mutate(newName.trim());
           }}>
-          Add
+          {t("category_select.add_btn")}
         </Button>
         <Button
           type="button"
@@ -70,7 +72,7 @@ export function CategorySelect({ value, onChange }: Props) {
             setAddingNew(false);
             setNewName("");
           }}>
-          Cancel
+          {t("category_select.cancel_btn")}
         </Button>
       </div>
     );
@@ -84,7 +86,7 @@ export function CategorySelect({ value, onChange }: Props) {
         className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm flex-1
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                    focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <option value="">No category</option>
+        <option value="">{t("category_select.no_category")}</option>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
@@ -96,7 +98,7 @@ export function CategorySelect({ value, onChange }: Props) {
         onClick={() => setAddingNew(true)}
         className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300
                    px-2 py-1 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/20 whitespace-nowrap">
-        + New
+        {t("category_select.new_btn")}
       </button>
     </div>
   );

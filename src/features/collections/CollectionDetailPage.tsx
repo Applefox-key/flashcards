@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -68,6 +69,7 @@ function ImageUploadField({
   onFileChange: (f: File | null) => void;
   onClear: () => void;
 }) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const existingSrc = useCardImage(!file && currentFilename ? currentFilename : undefined, collectionId);
@@ -104,7 +106,7 @@ function ImageUploadField({
               if (inputRef.current) inputRef.current.value = "";
             }}
             className="text-xs text-red-400 hover:text-red-600">
-            × Cancel
+            {t("collection_detail.img_cancel")}
           </button>
         </div>
       ) : hasExisting ? (
@@ -114,13 +116,13 @@ function ImageUploadField({
           )}
           <div className="flex flex-col gap-1 md:flex-row md:items-center">
             <button type="button" onClick={onClear} className="text-xs text-red-400 hover:text-red-600">
-              × Remove
+              {t("collection_detail.img_remove")}
             </button>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
               className="text-xs text-indigo-400 hover:text-indigo-600">
-              Replace
+              {t("collection_detail.img_replace")}
             </button>
           </div>
         </div>
@@ -128,7 +130,7 @@ function ImageUploadField({
         <div
           onClick={() => inputRef.current?.click()}
           className="relative border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
-          <BiImageAdd className="text-2xl absolute bottom-0 right-0 " /> Click to add image
+          <BiImageAdd className="text-2xl absolute bottom-0 right-0 " /> {t("collection_detail.img_click_to_add")}
         </div>
       )}
     </div>
@@ -148,6 +150,7 @@ function EditCardModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const { speechLangs } = useUserSettings();
   const editCard = useEditCard();
@@ -198,37 +201,40 @@ function EditCardModal({
         { collectionId, data: fd as unknown as CardEditRequest },
         {
           onSuccess: () => {
-            toast.success("Card updated");
+            toast.success(t("collection_detail.card_updated"));
             onClose();
           },
-          onError: () => toast.error("Failed to update card"),
+          onError: () => toast.error(t("collection_detail.card_update_error")),
         },
       );
     } else {
       editCard.mutate(
-        { collectionId, data: { id: card.id, question, answer, note: note || undefined, imgQ: card.imgQ, imgA: card.imgA } },
+        {
+          collectionId,
+          data: { id: card.id, question, answer, note: note || undefined, imgQ: card.imgQ, imgA: card.imgA },
+        },
         {
           onSuccess: () => {
-            toast.success("Card updated");
+            toast.success(t("collection_detail.card_updated"));
             onClose();
           },
-          onError: () => toast.error("Failed to update card"),
+          onError: () => toast.error(t("collection_detail.card_update_error")),
         },
       );
     }
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Edit card" size="lg">
+    <Modal open={open} onClose={onClose} title={t("collection_detail.edit_card_title")} size="lg">
       <div className="flex flex-col gap-3">
         <div>
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
-            <label className="text-xs text-gray-400">Question</label>
+            <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
             <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2">
             <ImageUploadField
-              label="Question image"
+              label={t("collection_detail.question_img_label")}
               currentFilename={clearImgQ ? undefined : card.imgQ}
               collectionId={collectionId}
               file={imgQFile}
@@ -249,7 +255,7 @@ function EditCardModal({
         </div>
         <div>
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
-            <label className="text-xs text-gray-400">Answer</label>
+            <label className="text-xs text-gray-400">{t("collection_detail.answer_label")}</label>
             <div className="flex items-center gap-1">
               <TranslateButton
                 sourceText={question}
@@ -268,7 +274,7 @@ function EditCardModal({
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2">
             <ImageUploadField
-              label="Answer image"
+              label={t("collection_detail.answer_img_label")}
               currentFilename={clearImgA ? undefined : card.imgA}
               collectionId={collectionId}
               file={imgAFile}
@@ -287,7 +293,9 @@ function EditCardModal({
           </div>
         </div>
         <div>
-          <label className="text-xs text-gray-400 block mb-1 bg-gray-100 dark:bg-gray-600/30">Note (optional)</label>
+          <label className="text-xs text-gray-400 block mb-1 bg-gray-100 dark:bg-gray-600/30">
+            {t("collection_detail.note_label")}
+          </label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -296,14 +304,14 @@ function EditCardModal({
         </div>
         <div className="flex gap-2 justify-end">
           <Button variant="secondary" size="sm" onClick={onClose}>
-            Cancel
+            {t("collection_detail.cancel_btn")}
           </Button>
           <Button
             size="sm"
             onClick={handleSave}
             loading={editCard.isPending}
             disabled={!question.trim() || !answer.trim()}>
-            Save
+            {t("collection_detail.save_btn")}
           </Button>
         </div>
       </div>
@@ -314,6 +322,7 @@ function EditCardModal({
 // ── Add card form ───────────────────────────────────────────────────
 
 function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: () => void }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const { speechLangs } = useUserSettings();
   const validLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
@@ -347,14 +356,14 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         { collectionId, formData: fd },
         {
           onSuccess: () => {
-            toast.success("Card added");
+            toast.success(t("collection_detail.card_added"));
             setQuestion("");
             setAnswer("");
             setNote("");
             setImgQFile(null);
             setImgAFile(null);
           },
-          onError: () => toast.error("Failed to add card"),
+          onError: () => toast.error(t("collection_detail.card_add_error")),
         },
       );
     } else {
@@ -362,12 +371,12 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         { collectionId, card: { question: question.trim(), answer: answer.trim(), note: note.trim() || undefined } },
         {
           onSuccess: () => {
-            toast.success("Card added");
+            toast.success(t("collection_detail.card_added"));
             setQuestion("");
             setAnswer("");
             setNote("");
           },
-          onError: () => toast.error("Failed to add card"),
+          onError: () => toast.error(t("collection_detail.card_add_error")),
         },
       );
     }
@@ -377,11 +386,13 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
 
   return (
     <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-4 flex flex-col gap-3 mb-4">
-      <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">New card</p>
+      <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
+        {t("collection_detail.new_card_heading")}
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-500 dark:text-gray-400">Question</label>
+            <label className="text-xs text-gray-500 dark:text-gray-400">{t("collection_detail.question_label")}</label>
             <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
           </div>
           <textarea
@@ -390,13 +401,13 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
             }}
-            placeholder="Enter question..."
+            placeholder={t("collection_detail.question_placeholder")}
             rows={2}
             autoFocus
             className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
-            label="Question image"
+            label={t("collection_detail.question_img_label")}
             collectionId={collectionId}
             file={imgQFile}
             onFileChange={setImgQFile}
@@ -405,7 +416,7 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-500 dark:text-gray-400">Answer</label>
+            <label className="text-xs text-gray-500 dark:text-gray-400">{t("collection_detail.answer_label")}</label>
             <div className="flex items-center gap-1">
               <TranslateButton
                 sourceText={question}
@@ -428,12 +439,12 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
             }}
-            placeholder="Enter answer..."
+            placeholder={t("collection_detail.answer_placeholder")}
             rows={2}
             className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
-            label="Answer image"
+            label={t("collection_detail.answer_img_label")}
             collectionId={collectionId}
             file={imgAFile}
             onFileChange={setImgAFile}
@@ -442,21 +453,23 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
         </div>
       </div>
       <div>
-        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Note (optional)</label>
+        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+          {t("collection_detail.note_label")}
+        </label>
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Optional note..."
+          placeholder={t("collection_detail.note_placeholder")}
           className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
       </div>
       <div className="flex gap-2 justify-end items-center">
-        <span className="text-xs text-gray-400 mr-auto">Ctrl+Enter to save</span>
+        <span className="text-xs text-gray-400 mr-auto">{t("collection_detail.ctrl_enter_hint")}</span>
         <Button variant="ghost" size="sm" onClick={onDone}>
-          Cancel
+          {t("collection_detail.cancel_btn")}
         </Button>
         <Button size="sm" onClick={handleSave} loading={isPending} disabled={!question.trim() || !answer.trim()}>
-          Add card
+          {t("collection_detail.add_card_btn")}
         </Button>
       </div>
     </div>
@@ -498,6 +511,7 @@ function CardListRow({
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [rowMenuOpen, setRowMenuOpen] = useState(false);
   const rowMenuRef = useRef<HTMLDivElement>(null);
@@ -536,17 +550,17 @@ function CardListRow({
           <button
             onClick={() => onView(card)}
             className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-            View
+            {t("collection_detail.view_btn")}
           </button>
           <button
             onClick={() => setEditing(true)}
             className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-            Edit
+            {t("collection_detail.edit_btn")}
           </button>
           <button
             onClick={() => onDelete(card.id)}
             className="text-xs text-gray-400 hover:text-red-500 transition-colors">
-            Delete
+            {t("collection_detail.delete_btn")}
           </button>
         </div>
         {/* Mobile: ··· kebab menu */}
@@ -564,7 +578,7 @@ function CardListRow({
                   onView(card);
                 }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                View
+                {t("collection_detail.view_btn")}
               </button>
               <button
                 onClick={() => {
@@ -572,7 +586,7 @@ function CardListRow({
                   setEditing(true);
                 }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Edit
+                {t("collection_detail.edit_btn")}
               </button>
               <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
               <button
@@ -581,7 +595,7 @@ function CardListRow({
                   onDelete(card.id);
                 }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                Delete
+                {t("collection_detail.delete_btn")}
               </button>
             </div>
           )}
@@ -602,6 +616,7 @@ function CardItem({
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
 }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const editCard = useEditCard();
   const [editing, setEditing] = useState(false);
@@ -614,9 +629,17 @@ function CardItem({
     editCard.mutate(
       {
         collectionId,
-        data: { id: card.id, question: card.question, answer: card.answer, note: card.note, rate: newRate, imgQ: card.imgQ, imgA: card.imgA },
+        data: {
+          id: card.id,
+          question: card.question,
+          answer: card.answer,
+          note: card.note,
+          rate: newRate,
+          imgQ: card.imgQ,
+          imgA: card.imgA,
+        },
       },
-      { onError: () => toast.error("Failed to update rating") },
+      { onError: () => toast.error(t("collection_detail.rating_update_error")) },
     );
   }
 
@@ -625,7 +648,7 @@ function CardItem({
       <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
-          <p className="text-xs text-gray-400 mb-1">Question</p>
+          <p className="text-xs text-gray-400 mb-1">{t("collection_detail.question_label")}</p>
           <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">
             {card.question}
           </p>
@@ -633,7 +656,7 @@ function CardItem({
         </div>
         <div className="border-t border-gray-100 dark:border-gray-700" />
         <div>
-          <p className="text-xs text-gray-400 mb-1">Answer</p>
+          <p className="text-xs text-gray-400 mb-1">{t("collection_detail.answer_label")}</p>
           <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{card.answer}</p>
           <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
           {card.note && (
@@ -659,17 +682,17 @@ function CardItem({
             <button
               onClick={() => onView(card)}
               className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-              View
+              {t("collection_detail.view_btn")}
             </button>
             <button
               onClick={() => setEditing(true)}
               className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
-              Edit
+              {t("collection_detail.edit_btn")}
             </button>
             <button
               onClick={() => onDelete(card.id)}
               className="text-xs text-red-400 hover:text-red-600 transition-colors">
-              Delete
+              {t("collection_detail.delete_btn")}
             </button>
           </div>
         </div>
@@ -691,6 +714,7 @@ function CardItemCompact({
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
 }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const editCard = useEditCard();
   const [editing, setEditing] = useState(false);
@@ -701,8 +725,19 @@ function CardItemCompact({
   function handleRate(star: number) {
     const newRate = card.rate === star ? 0 : star;
     editCard.mutate(
-      { collectionId, data: { id: card.id, question: card.question, answer: card.answer, note: card.note, rate: newRate, imgQ: card.imgQ, imgA: card.imgA } },
-      { onError: () => toast.error("Failed to update rating") },
+      {
+        collectionId,
+        data: {
+          id: card.id,
+          question: card.question,
+          answer: card.answer,
+          note: card.note,
+          rate: newRate,
+          imgQ: card.imgQ,
+          imgA: card.imgA,
+        },
+      },
+      { onError: () => toast.error(t("collection_detail.rating_update_error")) },
     );
   }
 
@@ -711,14 +746,14 @@ function CardItemCompact({
       <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">Question</p>
+          <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
           <p className="font-medium text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
             {card.question}
           </p>
         </div>
         <div className="border-t border-gray-100 dark:border-gray-700" />
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">Answer</p>
+          <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.answer_label")}</p>
           <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
             {card.answer}
           </p>
@@ -739,14 +774,20 @@ function CardItemCompact({
             ))}
           </div>
           <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => onView(card)} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-              View
+            <button
+              onClick={() => onView(card)}
+              className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+              {t("collection_detail.view_btn")}
             </button>
-            <button onClick={() => setEditing(true)} className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
-              Edit
+            <button
+              onClick={() => setEditing(true)}
+              className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
+              {t("collection_detail.edit_btn")}
             </button>
-            <button onClick={() => onDelete(card.id)} className="text-xs text-red-400 hover:text-red-600 transition-colors">
-              Delete
+            <button
+              onClick={() => onDelete(card.id)}
+              className="text-xs text-red-400 hover:text-red-600 transition-colors">
+              {t("collection_detail.delete_btn")}
             </button>
           </div>
         </div>
@@ -772,6 +813,7 @@ function CardSkeleton() {
 // ── Main page ───────────────────────────────────────────────────────
 
 export function CollectionDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const collectionId = Number(id);
@@ -901,9 +943,7 @@ export function CollectionDetailPage() {
       c.question?.toLowerCase().includes(search.toLowerCase()) ||
       c.answer?.toLowerCase().includes(search.toLowerCase());
     const matchesRate =
-      rateFilter === null ? true :
-      rateFilter === "not5" ? (c.rate ?? 0) < 5 :
-      (c.rate ?? 0) === rateFilter;
+      rateFilter === null ? true : rateFilter === "not5" ? (c.rate ?? 0) < 5 : (c.rate ?? 0) === rateFilter;
     return matchesSearch && matchesRate;
   });
 
@@ -916,35 +956,38 @@ export function CollectionDetailPage() {
     : filtered;
 
   function handleDelete(cardId: number) {
-    if (!confirm("Delete this card?")) return;
-    deleteCard.mutate({ cardId, collectionId }, { onError: () => toast.error("Failed to delete card") });
+    if (!confirm(t("collection_detail.confirm_delete_card"))) return;
+    deleteCard.mutate(
+      { cardId, collectionId },
+      { onError: () => toast.error(t("collection_detail.toast_delete_card_error")) },
+    );
   }
 
   function handleDeleteAllCards() {
-    if (!confirm(`Delete all ${cards.length} card(s) from "${collection?.name}"? This cannot be undone.`)) return;
+    if (!confirm(t("collection_detail.confirm_clear_cards", { count: cards.length, name: collection?.name }))) return;
     deleteAllCards.mutate(collectionId, {
-      onSuccess: () => toast.success("All cards deleted"),
-      onError: () => toast.error("Failed to delete cards"),
+      onSuccess: () => toast.success(t("collection_detail.toast_cards_cleared")),
+      onError: () => toast.error(t("collection_detail.toast_cards_clear_error")),
     });
   }
 
   function handleDeleteCollection() {
-    if (!confirm(`Delete collection "${collection?.name}"? All its cards will be permanently removed.`)) return;
+    if (!confirm(t("collection_detail.confirm_delete_collection", { name: collection?.name }))) return;
     deleteCollection.mutate(collectionId, {
       onSuccess: () => {
-        toast.success("Collection deleted");
+        toast.success(t("collection_detail.toast_collection_deleted"));
         navigate("/library");
       },
-      onError: () => toast.error("Failed to delete collection"),
+      onError: () => toast.error(t("collection_detail.toast_collection_delete_error")),
     });
   }
 
   if (isError) {
     return (
       <div className="text-center py-16 text-red-500">
-        <p>Failed to load collection.</p>
+        <p>{t("collection_detail.load_error")}</p>
         <Button variant="secondary" size="sm" onClick={() => navigate(-1)} className="mt-4">
-          Go back
+          {t("collection_detail.go_back")}
         </Button>
       </div>
     );
@@ -997,7 +1040,7 @@ export function CollectionDetailPage() {
               {cards.length > 4 && (
                 <input
                   type="search"
-                  placeholder="Search cards..."
+                  placeholder={t("collection_detail.search_placeholder")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="hidden sm:block flex-1 min-w-[300px] border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -1019,7 +1062,7 @@ export function CollectionDetailPage() {
                       navigate(`/collections/${id}/edit`);
                     }}
                     className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <span className="text-xs text-gray-400">✏</span> Edit collection
+                    <span className="text-xs text-gray-400">✏</span> {t("collection_detail.edit_collection_btn")}
                   </button>
                   {cards.length > 1 && (
                     <button
@@ -1028,7 +1071,7 @@ export function CollectionDetailPage() {
                         setReorgMode(true);
                       }}
                       className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      <span className="text-xs text-gray-400">⇅</span> Reorganize
+                      <span className="text-xs text-gray-400">⇅</span> {t("collection_detail.reorganize_btn")}
                     </button>
                   )}
                   <button
@@ -1037,7 +1080,7 @@ export function CollectionDetailPage() {
                       setPasteOpen(true);
                     }}
                     className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <span className="text-xs text-gray-400">⎘</span> Paste list
+                    <span className="text-xs text-gray-400">⎘</span> {t("collection_detail.paste_list_btn")}
                   </button>
                   <button
                     onClick={() => {
@@ -1045,7 +1088,7 @@ export function CollectionDetailPage() {
                       setFileOpen(true);
                     }}
                     className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <span className="text-xs text-gray-400">↑</span> Import file
+                    <span className="text-xs text-gray-400">↑</span> {t("collection_detail.import_file_btn")}
                   </button>
                   {cards.length > 0 && (
                     <button
@@ -1054,7 +1097,7 @@ export function CollectionDetailPage() {
                         handleExport();
                       }}
                       className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      <span className="text-xs text-gray-400">↓</span> Export cards
+                      <span className="text-xs text-gray-400">↓</span> {t("collection_detail.export_cards_btn")}
                     </button>
                   )}
                   <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
@@ -1066,7 +1109,7 @@ export function CollectionDetailPage() {
                       }}
                       disabled={deleteAllCards.isPending}
                       className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-50 transition-colors disabled:opacity-40">
-                      <span className="text-xs text-red-300">✕</span> Clear cards
+                      <span className="text-xs text-red-300">✕</span> {t("collection_detail.clear_cards_btn")}
                     </button>
                   )}
                   <button
@@ -1079,7 +1122,7 @@ export function CollectionDetailPage() {
                     <span className="text-xs text-red-300">
                       <IoTrashBinOutline />
                     </span>{" "}
-                    Delete collection
+                    {t("collection_detail.delete_collection_btn")}
                   </button>
                 </div>
               )}
@@ -1092,7 +1135,8 @@ export function CollectionDetailPage() {
               <div className="hidden sm:flex gap-3 ml-8 mb-2 text-sm text-gray-400">
                 <div className="flex items-center flex-rows gap-1.5 justify-center">
                   <span>
-                    {cards.length} {cards.length === 1 ? "card" : "cards"}
+                    {cards.length}{" "}
+                    {cards.length === 1 ? t("collection_detail.card_singular") : t("collection_detail.card_plural")}
                   </span>
                   {collection?.category && (
                     <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
@@ -1107,33 +1151,43 @@ export function CollectionDetailPage() {
                     onClick={() =>
                       toggleFavorite.mutate(
                         { id: collectionId, isFavorite: !collection?.isFavorite },
-                        { onError: () => toast.error("Failed to update favorite") },
+                        { onError: () => toast.error(t("collection_detail.toast_fav_error")) },
                       )
                     }
                     disabled={toggleFavorite.isPending}
-                    title={collection?.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    title={
+                      collection?.isFavorite
+                        ? t("collection_detail.fav_remove_title")
+                        : t("collection_detail.fav_add_title")
+                    }
                     className={`border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
                       collection?.isFavorite
                         ? "text-rose-400 hover:text-rose-300"
                         : "text-gray-300 dark:text-gray-600 hover:text-rose-400"
                     }`}>
-                    ♥ {collection?.isFavorite ? "favorite" : "add to favorites"}
+                    ♥ {collection?.isFavorite ? t("collection_detail.fav_label") : t("collection_detail.fav_add_label")}
                   </button>
                   <button
                     onClick={() =>
                       togglePublic.mutate(
                         { id: collectionId, isPublic: !collection?.isPublic },
-                        { onError: () => toast.error("Failed to update visibility") },
+                        { onError: () => toast.error(t("collection_detail.toast_visibility_error")) },
                       )
                     }
                     disabled={togglePublic.isPending}
-                    title={collection?.isPublic ? "Make private" : "Make public"}
+                    title={
+                      collection?.isPublic
+                        ? t("collection_detail.make_private_title")
+                        : t("collection_detail.make_public_title")
+                    }
                     className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
                       collection?.isPublic
                         ? "text-green-500 hover:text-red-400"
                         : "text-gray-300 dark:text-gray-600 hover:text-green-500"
                     }`}>
-                    {collection?.isPublic ? "🔓 public" : "🔒 private"}
+                    {collection?.isPublic
+                      ? `🔓 ${t("collection_detail.public_label")}`
+                      : `🔒 ${t("collection_detail.private_label")}`}
                   </button>
                 </div>
                 {/* Tags */}
@@ -1150,11 +1204,11 @@ export function CollectionDetailPage() {
                         </span>
                       ))
                     ) : (
-                      <span className="text-gray-300 dark:text-gray-600 text-xs">no tags</span>
+                      <span className="text-gray-300 dark:text-gray-600 text-xs">{t("collection_detail.no_tags")}</span>
                     )}
                     <button
                       onClick={() => setEditingTags(true)}
-                      title="Edit tags"
+                      title={t("collection_detail.edit_tags_title")}
                       className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
                       ✏️
                     </button>
@@ -1163,7 +1217,7 @@ export function CollectionDetailPage() {
                     <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                          Edit tags
+                          {t("collection_detail.edit_tags_heading")}
                         </span>
                         <button
                           onClick={() => {
@@ -1182,16 +1236,16 @@ export function CollectionDetailPage() {
                               { collectionId, tagIds: pendingTagIds },
                               {
                                 onSuccess: () => {
-                                  toast.success("Tags updated");
+                                  toast.success(t("collection_detail.toast_tags_updated"));
                                   setEditingTags(false);
                                 },
-                                onError: () => toast.error("Failed to update tags"),
+                                onError: () => toast.error(t("collection_detail.toast_tags_error")),
                               },
                             )
                           }
                           disabled={setCollectionTags.isPending}
                           className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-                          Save
+                          {t("collection_detail.save_btn")}
                         </button>
                       </div>
                     </div>
@@ -1209,7 +1263,7 @@ export function CollectionDetailPage() {
               {/* ── DESKTOP Practice──*/}
               <Link to={`/play/${id}`}>
                 <Button className="rounded-lg" size="sm">
-                  <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+                  <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collection_detail.practice_btn")}
                 </Button>
               </Link>
               {!addingCard && (
@@ -1220,7 +1274,7 @@ export function CollectionDetailPage() {
                       <button
                         onClick={() => setAddingCard(true)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors rounded-l-lg border border-indigo-600">
-                        + Add card
+                        {t("collection_detail.add_card_btn_short")}
                       </button>
                       <button
                         onClick={() => setAddCardDropdownOpen((v) => !v)}
@@ -1245,7 +1299,7 @@ export function CollectionDetailPage() {
                             setPasteOpen(true);
                           }}
                           className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                          <span className="text-gray-400">⎘</span> Paste list
+                          <span className="text-gray-400">⎘</span> {t("collection_detail.paste_list_btn")}
                         </button>
                         <button
                           onClick={() => {
@@ -1253,7 +1307,7 @@ export function CollectionDetailPage() {
                             setFileOpen(true);
                           }}
                           className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                          <span className="text-gray-400">↑</span> Import file
+                          <span className="text-gray-400">↑</span> {t("collection_detail.import_file_btn")}
                         </button>
                       </div>
                     )}
@@ -1266,7 +1320,7 @@ export function CollectionDetailPage() {
                   <button
                     onClick={() => navigate(`/collections/${id}/edit`)}
                     className="inline-flex items-center px-3 py-1.5 text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-l-lg">
-                    Edit collection
+                    {t("collection_detail.edit_collection_btn")}
                   </button>
                   <button
                     onClick={() => setEditDropdownOpen((v) => !v)}
@@ -1292,7 +1346,7 @@ export function CollectionDetailPage() {
                           setReorgMode(true);
                         }}
                         className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <span className="text-gray-400">⇅</span> Reorganize
+                        <span className="text-gray-400">⇅</span> {t("collection_detail.reorganize_btn")}
                       </button>
                     )}
                     {cards.length > 0 && (
@@ -1302,7 +1356,7 @@ export function CollectionDetailPage() {
                           handleExport();
                         }}
                         className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <span className="text-gray-400">↓</span> Export
+                        <span className="text-gray-400">↓</span> {t("collection_detail.export_btn")}
                       </button>
                     )}
                     <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
@@ -1314,7 +1368,7 @@ export function CollectionDetailPage() {
                         }}
                         disabled={deleteAllCards.isPending}
                         className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40">
-                        <span className="text-red-300">✕</span> Clear cards
+                        <span className="text-red-300">✕</span> {t("collection_detail.clear_cards_btn")}
                       </button>
                     )}
                     <button
@@ -1327,7 +1381,7 @@ export function CollectionDetailPage() {
                       <span className="text-red-300">
                         <IoTrashBinOutline />
                       </span>{" "}
-                      Delete
+                      {t("collection_detail.delete_btn_short")}
                     </button>
                   </div>
                 )}
@@ -1364,7 +1418,7 @@ export function CollectionDetailPage() {
                         {sortDir === "asc" ? "↑" : "↓"}
                       </span>
                     ) : (
-                      <span className="hidden sm:inline">Sort</span>
+                      <span className="hidden lg:inline">{t("collection_detail.sort_btn")}</span>
                     )}
                   </button>
                   {sortMenuOpen && (
@@ -1381,7 +1435,7 @@ export function CollectionDetailPage() {
                               ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
                               : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                           }`}>
-                          <span className="capitalize">{field}</span>
+                          <span className="capitalize">{t(`collection_detail.sort_${field}`)}</span>
                           {sortField === field && <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>}
                         </button>
                       ))}
@@ -1396,7 +1450,7 @@ export function CollectionDetailPage() {
                             ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
                             : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                         }`}>
-                        ↑ Ascending
+                        {t("collection_detail.sort_asc")}
                       </button>
                       <button
                         onClick={() => {
@@ -1408,7 +1462,7 @@ export function CollectionDetailPage() {
                             ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
                             : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                         }`}>
-                        ↓ Descending
+                        {t("collection_detail.sort_desc")}
                       </button>
                       {sortField && (
                         <>
@@ -1419,7 +1473,7 @@ export function CollectionDetailPage() {
                               setSortMenuOpen(false);
                             }}
                             className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            × Clear sort
+                            {t("collection_detail.sort_clear")}
                           </button>
                         </>
                       )}
@@ -1437,7 +1491,9 @@ export function CollectionDetailPage() {
                         : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}>
                     <span className="text-sm leading-none">★</span>
-                    {rateFilter === null && <span className="hidden sm:inline">Filter</span>}
+                    {rateFilter === null && (
+                      <span className="hidden lg:inline">{t("collection_detail.filter_btn")}</span>
+                    )}
                     {rateFilter === 0 && <span>—</span>}
                     {rateFilter === "not5" && <span>≠5</span>}
                     {typeof rateFilter === "number" && rateFilter > 0 && <span>{rateFilter}★</span>}
@@ -1458,15 +1514,20 @@ export function CollectionDetailPage() {
                                 ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
                                 : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                             }`}>
-                            {opt === null && "All cards"}
+                            {opt === null && t("collection_detail.filter_all")}
                             {opt === "not5" && (
                               <>
                                 <span className="text-yellow-400">★★★★</span>
                                 <span className="text-gray-300 dark:text-gray-600">★</span>
-                                <span className="ml-1">Not mastered</span>
+                                <span className="ml-1">{t("collection_detail.filter_not_mastered")}</span>
                               </>
                             )}
-                            {opt === 0 && <><span className="text-gray-300 dark:text-gray-600">★★★★★</span><span className="ml-1">Not rated</span></>}
+                            {opt === 0 && (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-600">★★★★★</span>
+                                <span className="ml-1">{t("collection_detail.filter_not_rated")}</span>
+                              </>
+                            )}
                             {typeof opt === "number" && opt > 0 && (
                               <>
                                 <span className="text-yellow-400">{"★".repeat(opt)}</span>
@@ -1489,7 +1550,8 @@ export function CollectionDetailPage() {
                         ? "bg-indigo-600 text-white"
                         : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}>
-                    <PiListBold className="text-[18px]" /> <span className="hidden sm:inline">List</span>
+                    <PiListBold className="text-[18px]" />{" "}
+                    <span className="hidden lg:inline">{t("collection_detail.view_list")}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("compact")}
@@ -1500,7 +1562,7 @@ export function CollectionDetailPage() {
                         : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}>
                     <BsGrid className="text-[15px]" />
-                    <span className="hidden sm:inline">Compact</span>
+                    <span className="hidden lg:inline">{t("collection_detail.view_compact")}</span>
                   </button>
                   <button
                     onClick={() => setViewMode("grid")}
@@ -1511,7 +1573,7 @@ export function CollectionDetailPage() {
                         : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}>
                     <BsGridFill className="text-[15px]" />
-                    <span className="hidden sm:inline">Cards</span>
+                    <span className="hidden lg:inline">{t("collection_detail.view_cards")}</span>
                   </button>
                 </div>
               </div>
@@ -1541,16 +1603,16 @@ export function CollectionDetailPage() {
       {/* Empty state */}
       {!isLoading && cards.length === 0 && !addingCard && (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-lg mb-4">No cards yet</p>
+          <p className="text-lg mb-4">{t("collection_detail.empty_title")}</p>
           <div className="flex gap-2 justify-center flex-wrap">
             <Button size="sm" onClick={() => setAddingCard(true)}>
-              Add card
+              {t("collection_detail.add_card_btn")}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => setPasteOpen(true)}>
-              Paste list
+              {t("collection_detail.paste_list_btn")}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => setFileOpen(true)}>
-              Import file
+              {t("collection_detail.import_file_btn")}
             </Button>
           </div>
         </div>
@@ -1601,12 +1663,18 @@ export function CollectionDetailPage() {
       {/* No search/filter results */}
       {!isLoading && cards.length > 0 && filtered.length === 0 && (
         <div className="text-center text-gray-400 py-8">
-          <p>No cards match your {search && rateFilter !== null ? "search and filter" : search ? "search" : "filter"}.</p>
+          <p>
+            {search && rateFilter !== null
+              ? t("collection_detail.no_search_filter_results")
+              : search
+                ? t("collection_detail.no_search_results")
+                : t("collection_detail.no_filter_results")}
+          </p>
           {rateFilter !== null && (
             <button
               onClick={() => setRateFilter(null)}
               className="mt-2 text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
-              Clear filter
+              {t("collection_detail.filter_clear")}
             </button>
           )}
         </div>
@@ -1626,7 +1694,7 @@ export function CollectionDetailPage() {
           <>
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                Details
+                {t("collection_detail.drawer_details")}
               </p>
               <div className="flex flex-col flex-wrap gap-2">
                 {collection?.category && (
@@ -1638,21 +1706,22 @@ export function CollectionDetailPage() {
                   </span>
                 )}{" "}
                 <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                  {cards.length} {cards.length === 1 ? "card" : "cards"}
+                  {cards.length}{" "}
+                  {cards.length === 1 ? t("collection_detail.card_singular") : t("collection_detail.card_plural")}
                 </span>
               </div>
             </div>
 
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                Settings
+                {t("collection_detail.drawer_settings")}
               </p>
               <div className="flex flex-wrap gap-2 flex-col">
                 <button
                   onClick={() =>
                     togglePublic.mutate(
                       { id: collectionId, isPublic: !collection?.isPublic },
-                      { onError: () => toast.error("Failed to update visibility") },
+                      { onError: () => toast.error(t("collection_detail.toast_visibility_error")) },
                     )
                   }
                   disabled={togglePublic.isPending}
@@ -1661,13 +1730,15 @@ export function CollectionDetailPage() {
                       ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800"
                       : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
                   }`}>
-                  {collection?.isPublic ? "🔓 public collection" : "🔒 private collection"}
+                  {collection?.isPublic
+                    ? `🔓 ${t("collection_detail.public_collection")}`
+                    : `🔒 ${t("collection_detail.private_collection")}`}
                 </button>
                 <button
                   onClick={() =>
                     toggleFavorite.mutate(
                       { id: collectionId, isFavorite: !collection?.isFavorite },
-                      { onError: () => toast.error("Failed to update favorite") },
+                      { onError: () => toast.error(t("collection_detail.toast_fav_error")) },
                     )
                   }
                   disabled={toggleFavorite.isPending}
@@ -1676,19 +1747,23 @@ export function CollectionDetailPage() {
                       ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
                       : "bg-gray-50 dark:bg-gray-700 text-gray-400 border-gray-200 dark:border-gray-600"
                   }`}>
-                  {collection?.isFavorite ? "♥ favorite" : "♥ add to favorites"}
+                  {collection?.isFavorite
+                    ? `♥ ${t("collection_detail.fav_label")}`
+                    : `♥ ${t("collection_detail.fav_add_label")}`}
                 </button>
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tags</p>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  {t("collection_detail.drawer_tags")}
+                </p>
                 {!editingTags && (
                   <button
                     onClick={() => setEditingTags(true)}
                     className="text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
-                    Edit
+                    {t("collection_detail.edit_btn")}
                   </button>
                 )}
               </div>
@@ -1702,7 +1777,7 @@ export function CollectionDetailPage() {
                     </span>
                   ))}
                   {collectionTags.length === 0 && (
-                    <span className="text-xs text-gray-300 dark:text-gray-600">no tags</span>
+                    <span className="text-xs text-gray-300 dark:text-gray-600">{t("collection_detail.no_tags")}</span>
                   )}
                 </div>
               ) : (
@@ -1715,7 +1790,7 @@ export function CollectionDetailPage() {
                         setPendingTagIds(collectionTags.map((t) => t.id));
                       }}
                       className="text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      Cancel
+                      {t("collection_detail.cancel_btn")}
                     </button>
                     <button
                       onClick={() =>
@@ -1723,16 +1798,16 @@ export function CollectionDetailPage() {
                           { collectionId, tagIds: pendingTagIds },
                           {
                             onSuccess: () => {
-                              toast.success("Tags updated");
+                              toast.success(t("collection_detail.toast_tags_updated"));
                               setEditingTags(false);
                             },
-                            onError: () => toast.error("Failed to update tags"),
+                            onError: () => toast.error(t("collection_detail.toast_tags_error")),
                           },
                         )
                       }
                       disabled={setCollectionTags.isPending}
                       className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-                      Save
+                      {t("collection_detail.save_btn")}
                     </button>
                   </div>
                 </div>
@@ -1756,7 +1831,7 @@ export function CollectionDetailPage() {
         <div className="sm:hidden fixed bottom-10 left-0 right-0 z-40 py-2 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700">
           <Link to={`/play/${id}`} className="block">
             <Button className="w-full  rounded-none justify-center" size="md">
-              <PiShootingStarThin className="w-8 h-8 mr-2" /> PRACTICE
+              <PiShootingStarThin className="w-8 h-8 mr-2" /> {t("collection_detail.practice_btn").toUpperCase()}
             </Button>
           </Link>
         </div>

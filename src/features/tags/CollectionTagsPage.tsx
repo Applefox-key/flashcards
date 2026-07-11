@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -27,6 +28,7 @@ interface AssignPanelProps {
 }
 
 function AssignPanel({ tagId, onClose }: AssignPanelProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const setCollectionTags = useSetCollectionTags();
   const { data: categoriesData = [] } = useCategoriesWithCollections();
@@ -64,10 +66,10 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
           return setCollectionTags.mutateAsync({ collectionId: col.id, tagIds: newIds });
         }),
       );
-      toast.success("Assignments saved");
+      toast.success(t('tags_page.toast_assignments_saved'));
       onClose();
     } catch {
-      toast.error("Failed to save assignments");
+      toast.error(t('tags_page.toast_assignments_error'));
     } finally {
       setSaving(false);
     }
@@ -78,7 +80,7 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
   return (
     <div className="bg-white dark:bg-gray-800 border border-violet-200 dark:border-violet-800 rounded-lg p-3 mt-1 mb-2">
       {!hasCollections ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500 py-2">No collections found.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 py-2">{t('tags_page.assign_no_collections')}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {categoriesData.map((cat) => {
@@ -107,10 +109,10 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
       )}
       <div className="flex items-center justify-end gap-3 mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
         <button onClick={onClose} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-          Cancel
+          {t('tags_page.assign_cancel_btn')}
         </button>
         <Button size="sm" onClick={handleSave} disabled={saving}>
-          Save
+          {t('tags_page.assign_save_btn')}
         </Button>
       </div>
     </div>
@@ -118,6 +120,7 @@ function AssignPanel({ tagId, onClose }: AssignPanelProps) {
 }
 
 export function CollectionTagsPage() {
+  const { t } = useTranslation();
   const toast = useToast();
   const { data: tags = [], isLoading } = useCollectionTags();
   const createTag = useCreateCollectionTag();
@@ -164,9 +167,9 @@ export function CollectionTagsPage() {
   }
 
   function handleDelete(id: number, name: string) {
-    if (!window.confirm(`Delete tag "${name}"? It will be removed from all collections.`)) return;
+    if (!window.confirm(t('tags_page.confirm_delete', { name }))) return;
     deleteTag.mutate(id, {
-      onSuccess: () => toast.success("Tag deleted"),
+      onSuccess: () => toast.success(t('tags_page.toast_deleted')),
     });
   }
 
@@ -179,10 +182,10 @@ export function CollectionTagsPage() {
     <div>
       {/* Header */}
       <div className="sticky top-0 pt-3 sm:pt-0 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 flex items-center justify-between mb-6">
-        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">Tags</h1>
+        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">{t('tags_page.title')}</h1>
         {!addingNew && (
           <Button size="sm" onClick={() => setAddingNew(true)}>
-            + New tag
+            {t('tags_page.new_btn')}
           </Button>
         )}
       </div>
@@ -202,11 +205,11 @@ export function CollectionTagsPage() {
                 setNewName("");
               }
             }}
-            placeholder="Tag name"
+            placeholder={t('tags_page.name_placeholder')}
             className="flex-1 text-sm outline-none bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
           <Button size="sm" onClick={handleAdd} disabled={createTag.isPending || !newName.trim()}>
-            Add
+            {t('tags_page.add_btn')}
           </Button>
           <button
             onClick={() => {
@@ -214,7 +217,7 @@ export function CollectionTagsPage() {
               setNewName("");
             }}
             className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            Cancel
+            {t('tags_page.cancel_btn')}
           </button>
         </div>
       )}
@@ -231,8 +234,8 @@ export function CollectionTagsPage() {
       {/* Empty state */}
       {!isLoading && tags.length === 0 && !addingNew && (
         <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-          <p className="text-lg mb-1">No tags yet.</p>
-          <p className="text-sm">Create tags to organise your collections.</p>
+          <p className="text-lg mb-1">{t('tags_page.empty_title')}</p>
+          <p className="text-sm">{t('tags_page.empty_subtitle')}</p>
         </div>
       )}
 
@@ -267,12 +270,12 @@ export function CollectionTagsPage() {
                         onClick={handleSaveEdit}
                         disabled={editTag.isPending || !editName.trim()}
                         className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 font-medium transition-colors disabled:opacity-50">
-                        Save
+                        {t('tags_page.save_btn')}
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
                         className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                        Cancel
+                        {t('tags_page.cancel_btn')}
                       </button>
                     </>
                   ) : (
@@ -284,7 +287,7 @@ export function CollectionTagsPage() {
                       <button
                         onClick={() => handleAssign(tag.id)}
                         className="text-xs text-gray-400 hover:text-violet-600 transition-colors opacity-0 group-hover:opacity-100">
-                        Assign
+                        {t('tags_page.assign_btn')}
                       </button>
                       <button
                         onClick={() => {
@@ -293,12 +296,12 @@ export function CollectionTagsPage() {
                           setAssigningTagId(null);
                         }}
                         className="text-xs text-gray-400 hover:text-violet-600 transition-colors opacity-0 group-hover:opacity-100">
-                        Edit
+                        {t('tags_page.edit_btn')}
                       </button>
                       <button
                         onClick={() => handleDelete(tag.id, tag.name)}
                         className="text-xs text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                        Delete
+                        {t('tags_page.delete_btn')}
                       </button>
                     </>
                   )}

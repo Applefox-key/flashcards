@@ -45,7 +45,7 @@ export const authApi = {
    * Callers must spread the existing nested value before passing it.
    */
   updateSettings: async (partial: Partial<UserSettings>): Promise<UserSettings> => {
-    const res = await apiClient.patch('/users/settings', { data: partial })
+    const res = await apiClient.patch('/users/settings', partial)
     return res.data.settings as UserSettings
   },
 

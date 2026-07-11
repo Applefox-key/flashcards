@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { usePlaylists, useDeletePlaylist, useEditPlaylist, usePlaylistContent } from "@/hooks/usePlaylistHooks";
 import { useCollections } from "@/hooks/useCollectionHooks";
 import { PlaylistModal } from "./PlaylistModal";
@@ -41,6 +42,8 @@ function PlaylistListItem({
   selected: boolean;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
+  const count = playlist.collections.length;
   return (
     <button
       onClick={onClick}
@@ -51,9 +54,9 @@ function PlaylistListItem({
       }`}>
       <div className="font-medium text-sm leading-snug truncate">{playlist.name}</div>
       <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-        {playlist.collections.length === 0
-          ? "No collections"
-          : `${playlist.collections.length} ${playlist.collections.length === 1 ? "collection" : "collections"}`}
+        {count === 0
+          ? t('playlists.item_no_collections')
+          : t(count === 1 ? 'playlists.item_collections_singular' : 'playlists.item_collections_plural', { count })}
       </div>
     </button>
   );
@@ -178,10 +181,13 @@ function PickerPanel({
   onClose: () => void;
   searchRef: React.RefObject<HTMLInputElement | null>;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-5 border border-indigo-200 dark:border-indigo-700 rounded-xl p-4 bg-indigo-50/60 dark:bg-indigo-900/10">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Filling slot {activeSlot + 1}</span>
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          {t('playlists.picker_filling_slot', { n: activeSlot + 1 })}
+        </span>
         <button
           onClick={onClose}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none w-6 text-center">
@@ -193,7 +199,7 @@ function PickerPanel({
         ref={searchRef}
         value={search}
         onChange={(e) => onSearch(e.target.value)}
-        placeholder="Search collections…"
+        placeholder={t('playlists.picker_search_placeholder')}
         className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                    focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -219,7 +225,7 @@ function PickerPanel({
       <div className="mt-3 max-h-52 overflow-y-auto flex flex-col gap-0.5">
         {pickerCollections.length === 0 ? (
           <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
-            {search || tagFilter ? "No matches" : "No collections available"}
+            {search || tagFilter ? t('playlists.picker_no_matches') : t('playlists.picker_no_collections')}
           </p>
         ) : (
           pickerCollections.map((col) => (
@@ -258,6 +264,7 @@ function PlaylistPanel({
   deleteLoading: boolean;
   onCreateNew: () => void;
 }) {
+  const { t } = useTranslation();
   const [view, setView] = useState<"collections" | "cards">("collections");
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
@@ -310,10 +317,10 @@ function PlaylistPanel({
       { id: playlist.id, data: { name: editName.trim(), listIds } },
       {
         onSuccess: () => {
-          toast.success("Playlist saved");
+          toast.success(t('playlists.panel_toast_saved'));
           exitEditMode();
         },
-        onError: () => toast.error("Failed to save playlist"),
+        onError: () => toast.error(t('playlists.panel_toast_save_error')),
       },
     );
   }
@@ -379,21 +386,21 @@ function PlaylistPanel({
               onClick={onDelete}
               loading={deleteLoading}
               className="hidden sm:inline-flex">
-              Delete
+              {t('playlists.panel_delete')}
             </Button>
 
             {/* Practice — always visible when collections exist */}
             {playlist.collections.length > 0 && (
               <Link to={`/play/${playlist.id}?src=pl`}>
                 <Button size="sm" variant="secondary">
-                  <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+                  <PiShootingStarThin className="w-4 h-4 mr-2" /> {t('playlists.panel_practice')}
                 </Button>
               </Link>
             )}
 
             {/* Desktop: Edit */}
             <Button size="sm" variant="secondary" onClick={() => enterEditMode()} className="hidden sm:inline-flex">
-              Edit
+              {t('playlists.panel_edit')}
             </Button>
 
             {/* View toggle */}
@@ -405,7 +412,7 @@ function PlaylistPanel({
                     ? "bg-indigo-600 text-white"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
-                Collections
+                {t('playlists.panel_view_collections')}
               </button>
               <button
                 onClick={() => setView("cards")}
@@ -414,7 +421,7 @@ function PlaylistPanel({
                     ? "bg-indigo-600 text-white"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
-                Cards
+                {t('playlists.panel_view_cards')}
                 {!cardsLoading && cards.length > 0 && <span className="ml-1 opacity-70">{cards.length}</span>}
               </button>
             </div>
@@ -434,7 +441,7 @@ function PlaylistPanel({
                       setMobileMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    Edit
+                    {t('playlists.panel_edit')}
                   </button>
                   <button
                     onClick={() => {
@@ -442,7 +449,7 @@ function PlaylistPanel({
                       setMobileMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
-                    Delete
+                    {t('playlists.panel_delete')}
                   </button>
                 </div>
               )}
@@ -472,7 +479,9 @@ function PlaylistPanel({
               )}
 
               {!cardsLoading && sortedCards.length === 0 && (
-                <p className="text-center text-gray-400 dark:text-gray-500 py-16">No cards in this playlist</p>
+                <p className="text-center text-gray-400 dark:text-gray-500 py-16">
+                  {t('playlists.panel_no_cards')}
+                </p>
               )}
 
               {!cardsLoading && sortedCards.length > 0 && (
@@ -483,13 +492,13 @@ function PlaylistPanel({
                       <thead>
                         <tr className="bg-gray-50 dark:bg-gray-700/60 border-b border-gray-200 dark:border-gray-700">
                           <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[38%]">
-                            Question
+                            {t('playlists.panel_col_question')}
                           </th>
                           <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[38%]">
-                            Answer
+                            {t('playlists.panel_col_answer')}
                           </th>
                           <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[24%]">
-                            Collection
+                            {t('playlists.panel_col_collection')}
                           </th>
                         </tr>
                       </thead>
@@ -515,9 +524,13 @@ function PlaylistPanel({
                       <div
                         key={card.id}
                         className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
-                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">Question</p>
+                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">
+                          {t('playlists.panel_col_question')}
+                        </p>
                         <p className="text-sm text-gray-900 dark:text-gray-100 mb-2">{card.question}</p>
-                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">Answer</p>
+                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">
+                          {t('playlists.panel_col_answer')}
+                        </p>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{card.answer}</p>
                         <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 px-2 py-0.5 rounded-full">
                           {card.collectionname ?? "—"}
@@ -539,16 +552,16 @@ function PlaylistPanel({
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
-              placeholder="Playlist name"
+              placeholder={t('playlists.panel_name_placeholder')}
               className="flex-1 min-w-0 sm:max-w-xs border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                          bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                          focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
             <Button size="sm" onClick={handleSave} loading={editPlaylistMutation.isPending} disabled={!editName.trim()}>
-              Save
+              {t('playlists.panel_save')}
             </Button>
             <Button size="sm" variant="secondary" onClick={exitEditMode}>
-              Cancel
+              {t('playlists.panel_cancel')}
             </Button>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -601,6 +614,7 @@ function PlaylistPanel({
 // ── Main page ─────────────────────────────────────────────────────────────
 
 export function PlaylistsPage() {
+  const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const toast = useToast();
@@ -623,22 +637,22 @@ export function PlaylistsPage() {
   }, [allCollections]);
 
   const handleDelete = (playlist: Playlist) => {
-    if (!window.confirm(`Delete playlist "${playlist.name}"?`)) return;
+    if (!window.confirm(t('playlists.confirm_delete', { name: playlist.name }))) return;
     deletePlaylist.mutate(playlist.id, {
       onSuccess: () => {
-        toast.success("Playlist deleted");
+        toast.success(t('playlists.toast_deleted'));
         setSelectedId(null);
       },
-      onError: () => toast.error("Failed to delete playlist"),
+      onError: () => toast.error(t('playlists.toast_delete_error')),
     });
   };
 
   return (
     <div>
       <div className="hidden sm:flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Playlists</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('playlists.title')}</h1>
         <Button size="sm" onClick={() => setCreateModalOpen(true)}>
-          + New set
+          {t('playlists.new_btn')}
         </Button>
       </div>
 
@@ -646,9 +660,9 @@ export function PlaylistsPage() {
 
       {!isLoading && playlists.length === 0 && (
         <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-          <p className="text-lg mb-2">No playlists yet</p>
+          <p className="text-lg mb-2">{t('playlists.empty_title')}</p>
           <Button size="sm" onClick={() => setCreateModalOpen(true)}>
-            Create your first playlist
+            {t('playlists.create_first_btn')}
           </Button>
         </div>
       )}
@@ -657,14 +671,16 @@ export function PlaylistsPage() {
         <>
           {/* Mobile dropdown */}
           <div className="sm:hidden pt-3 mb-4 flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 shrink-0">Playlists:</span>
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 shrink-0">
+              {t('playlists.mobile_label')}
+            </span>
             <select
               value={effectiveId ?? ""}
               onChange={(e) => setSelectedId(Number(e.target.value))}
               className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-indigo-50 dark:bg-gray-800 text-indigo-700 dark:text-gray-100 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:[color-scheme:dark]">
               {effectiveId === null && (
                 <option value="" disabled>
-                  Select a playlist…
+                  {t('playlists.mobile_placeholder')}
                 </option>
               )}
               {playlists.map((p) => (
@@ -704,11 +720,10 @@ export function PlaylistsPage() {
                 <div className="flex flex-col items-center justify-center min-h-[320px] text-center px-8 py-12">
                   <div className="text-4xl mb-4 select-none">🎵</div>
                   <p className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Select a playlist to get started
+                    {t('playlists.select_hint_title')}
                   </p>
                   <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm leading-relaxed">
-                    A playlist lets you group multiple collections together so you can practice all of them in a single
-                    session — perfect for combining related topics or subjects.
+                    {t('playlists.select_hint_desc')}
                   </p>
                 </div>
               )}
@@ -717,7 +732,7 @@ export function PlaylistsPage() {
         </>
       )}
 
-      <MobileFab onClick={() => setCreateModalOpen(true)} label="Add playlist" />
+      <MobileFab onClick={() => setCreateModalOpen(true)} label={t('playlists.fab_label')} />
       <PlaylistModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
   );

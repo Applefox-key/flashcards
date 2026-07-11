@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/Button";
 import { Modal } from "@/components/Modal";
 import type { Content } from "@/types";
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function ResultEndless({ playableCards, probs, onResetCard }: Props) {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
 
   return (
@@ -17,10 +19,10 @@ export function ResultEndless({ playableCards, probs, onResetCard }: Props) {
       <button
         onClick={() => setShow(true)}
         className="ml-auto text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-        Results
+        {t('result_screen.results_btn')}
       </button>
       {show && (
-        <Modal open={show} onClose={() => setShow(false)} title="Game Results" size="md">
+        <Modal open={show} onClose={() => setShow(false)} title={t('result_screen.modal_title')} size="md">
           <div>
             <div className="flex flex-col border-b border-gray-200 dark:border-gray-700">
               {playableCards.map((c) => {
@@ -34,7 +36,7 @@ export function ResultEndless({ playableCards, probs, onResetCard }: Props) {
                     {onResetCard && (
                       <button
                         onClick={() => onResetCard(c.id)}
-                        title="Reset rating"
+                        title={t('result_screen.reset_rating')}
                         className="shrink-0 text-xs px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 hover:border-red-300 hover:text-red-400 dark:hover:border-red-700 dark:hover:text-red-400 transition-colors">
                         ↺
                       </button>
@@ -45,7 +47,7 @@ export function ResultEndless({ playableCards, probs, onResetCard }: Props) {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="secondary" onClick={() => setShow(false)}>
-                Close
+                {t('result_screen.close')}
               </Button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { shuffle, buildTestOptions, weightedRandom, adjustProb } from "@/utils/gameUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
@@ -20,6 +21,7 @@ type AnswerState = "idle" | "correct" | "wrong";
 const DEFAULT_PROB = 10;
 
 export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false, mode = "oneshot" }: Props) {
+  const { t } = useTranslation();
   const { probs, updateProb, resetProb, saveProbs } = useGameProbs(cards, "test0");
 
   const deck = useMemo(() => shuffle(cards), [cards]);
@@ -140,18 +142,18 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
       return (
         <div className="text-center py-16 flex flex-col items-center gap-4 text-gray-500 dark:text-gray-400">
           <p className="text-4xl">🎉</p>
-          <p className="text-base font-medium text-gray-700 dark:text-gray-200">All cards are at 100%!</p>
-          <p className="text-sm">There's nothing left to practice in this mode.</p>
+          <p className="text-base font-medium text-gray-700 dark:text-gray-200">{t("test_game.all_learned_title")}</p>
+          <p className="text-sm">{t("test_game.all_learned_desc")}</p>
           <div className="flex gap-3 mt-2">
             <button
               onClick={onPlayAgain}
               className="text-sm px-4 py-2 rounded-lg border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
-              Play Endless instead
+              {t("test_game.play_endless_btn")}
             </button>
             <button
               onClick={onBack}
               className="text-sm px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              Go back
+              {t("test_game.go_back_btn")}
             </button>
           </div>
         </div>
@@ -198,7 +200,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
 
       {/* Prompt card */}
       <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? "Answer" : "Question"}</p>
+        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("test_game.label_answer") : t("test_game.label_question")}</p>
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
         <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
       </div>
@@ -243,7 +245,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
           <button
             onClick={handleFinish}
             className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-            Finish
+            {t("test_game.finish_btn")}
           </button>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 const PB_LIMIT = 20;
 import { Link, useNavigate } from "react-router-dom";
@@ -84,6 +85,7 @@ function Pagination({
   totalPages: number;
   onChange: (p: number) => void;
 }) {
+  const { t } = useTranslation();
   if (totalPages <= 1) return null;
   const pages = getPageNumbers(page, totalPages);
   const btnBase = "h-8 min-w-8 px-2 text-sm rounded-lg border transition-colors";
@@ -98,7 +100,7 @@ function Pagination({
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         className={`${btnBase} ${btnInactive} ${page === 1 ? btnDisabled : ""} px-3`}>
-        ← Prev
+        {t("public_library.prev")}
       </button>
       {pages.map((p, i) =>
         p === "..." ? (
@@ -118,7 +120,7 @@ function Pagination({
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
         className={`${btnBase} ${btnInactive} ${page === totalPages ? btnDisabled : ""} px-3`}>
-        Next →
+        {t("public_library.next")}
       </button>
     </div>
   );
@@ -135,6 +137,7 @@ interface CardProps {
 
 function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPending }: CardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const categoryName = getCategoryName(col);
   const tagNames = getTagNames(col);
 
@@ -165,19 +168,19 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
 
       <div className="flex items-center justify-between gap-2 mt-auto sm:pt-1">
         {" "}
-        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{col.cardCount ?? 0} cards</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{t("collections.card_count", { count: col.cardCount ?? 0 })}</span>
         <div className="flex items-center gap-2 min-w-0">
           {" "}
           <Link
             to={`/play/flashcard/${col.id}`}
             onClick={(e) => e.stopPropagation()}
             className="flex opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg">
-            <PiShootingStarThin className="w-4 h-4 mr-2" /> Practice
+            <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
           </Link>
           {isMine ? (
-            <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium shrink-0">Your collection</span>
+            <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium shrink-0">{t("public_library.your_collection")}</span>
           ) : isCopied ? (
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">✓ Copied</span>
+            <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">{t("public_library.copied")}</span>
           ) : (
             <Button
               size="sm"
@@ -188,7 +191,7 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
               }}
               loading={copyPending}
               className="border-none text-xs text-indigo-400 hover:text-indigo-600 transition-colors">
-              Copy
+              {t("public_library.copy")}
             </Button>
           )}{" "}
         </div>
@@ -198,16 +201,17 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
 }
 
 function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-0">
       <div className="hidden sm:flex shrink-0">
         <Link
           to="/library"
           className="px-5 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent transition-colors">
-          My Library
+          {t("collections.my_library")}
         </Link>
         <span className="px-5 py-2.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 -mb-px cursor-default select-none">
-          Public Library
+          {t("collections.public_library")}
         </span>
       </div>
 
@@ -215,7 +219,7 @@ function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: st
         <input
           value={search}
           onChange={(e) => onSearch(e.target.value)}
-          placeholder="Search by name, category or tag…"
+          placeholder={t("public_library.search_placeholder")}
           className="w-full sm:w-64 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -226,6 +230,7 @@ function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: st
 }
 
 export function PublicLibraryPage() {
+  const { t } = useTranslation();
   const [filterOpen, setFilterOpen] = useState(false);
   const { publicLibrary, setPublicLibrary } = useLibraryUiStore();
   const search = publicLibrary.search;
@@ -269,9 +274,9 @@ export function PublicLibraryPage() {
     copyCollection.mutate(col.id, {
       onSuccess: () => {
         setCopiedIds((prev) => new Set([...prev, col.id]));
-        toast.success(`"${col.name}" added to your library`);
+        toast.success(t("public_library.toast_copied", { name: col.name }));
       },
-      onError: () => toast.error("Failed to copy collection"),
+      onError: () => toast.error(t("public_library.toast_copy_error")),
     });
   };
 
@@ -310,7 +315,7 @@ export function PublicLibraryPage() {
 
         {!isLoading && filtered.length === 0 && (
           <p className="text-center text-gray-400 py-16">
-            {search || activeTag !== null ? "No collections match your search" : "No public collections yet"}
+            {search || activeTag !== null ? t("public_library.no_results_search") : t("public_library.no_results_empty")}
           </p>
         )}
 
@@ -351,7 +356,7 @@ export function PublicLibraryPage() {
         hasActiveFilters={activeTag !== null}>
         {allTagNames.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("collections.tags_section")}</p>
             <div className="flex flex-wrap gap-1.5">
               {allTagNames.map((tag) => (
                 <button

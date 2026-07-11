@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { shuffle } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
 import { ImageThumb } from "@/components/ImageThumb";
@@ -16,6 +17,7 @@ const FADE_OUT = 300;
 const FADE_IN = 300;
 
 export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirst = false, delay = 2 }: Props) {
+  const { t } = useTranslation();
   const [cards] = useState(() => shuffle(initialCards));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -123,7 +125,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
               style={{ backfaceVisibility: "hidden", overflowY: "auto" }}>
               <div className="m-auto flex flex-col items-center gap-3 w-full">
                 <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">
-                  {answerFirst ? "Answer" : "Question"}
+                  {answerFirst ? t("timed_game.label_answer") : t("timed_game.label_question")}
                 </span>
                 <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">
                   {answerFirst ? card.answer : card.question}
@@ -141,7 +143,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
               style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", overflowY: "auto" }}>
               <div className="m-auto flex flex-col items-center gap-3 w-full">
                 <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">
-                  {answerFirst ? "Question" : "Answer"}
+                  {answerFirst ? t("timed_game.label_question") : t("timed_game.label_answer")}
                 </span>
                 <p className="text-2xl font-semibold text-white text-center">
                   {answerFirst ? card.question : card.answer}
@@ -166,9 +168,9 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
               ? "bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30"
               : "bg-indigo-600 text-white hover:bg-indigo-700"
           }`}>
-          {running ? "⏸ Pause" : "▶ Start"}
+          {running ? t("timed_game.pause_btn") : t("timed_game.start_btn")}
         </button>
-        <span className="text-xs text-gray-400 dark:text-gray-500">{delay}s per side</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">{t("timed_game.per_side", { value: delay })}</span>
       </div>
 
       {/* Manual navigation when paused */}
@@ -178,7 +180,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
             onClick={() => goToCard(Math.max(0, index - 1))}
             disabled={index === 0}
             className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            ← Prev
+            {t("timed_game.prev_btn")}
           </button>
           <button
             onClick={() => {
@@ -187,7 +189,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
             }}
             disabled={index === cards.length - 1}
             className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            Next →
+            {t("timed_game.next_btn")}
           </button>
         </div>
       )}
