@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { DarkModeToggle } from "./DarkModeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const APPS = [
   {
     name: "FlashMinds",
-    desc: "Collections & flashcards",
+    descKey: "apps.flashminds_desc" as const,
     href: "https://flashcards.learnypie.com",
     current: true,
     iconBg: "#eef2ff",
@@ -13,7 +15,7 @@ const APPS = [
   },
   {
     name: "Phrasely",
-    desc: "90-second method",
+    descKey: "apps.phrasely_desc" as const,
     href: "https://phrasely.learnypie.com",
     current: false,
     iconBg: "#faf5ff",
@@ -21,15 +23,16 @@ const APPS = [
   },
   {
     name: "Tracker",
-    desc: "Progress & vocabulary",
+    descKey: "apps.tracker_desc" as const,
     href: "https://tracker.learnypie.com",
     current: false,
     iconBg: "#f0fdf4",
     iconColor: "#16a34a",
   },
-] as const;
+];
 
 export function PublicNavbar() {
+  const { t } = useTranslation();
   const [appsOpen, setAppsOpen] = useState(false);
 
   useEffect(() => {
@@ -62,13 +65,14 @@ export function PublicNavbar() {
                   : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               }`
             }>
-            About
+            {t("nav.about")}
           </NavLink>
         </div>
 
         {/* Right controls */}
         <div className="ml-auto sm:ml-0 flex items-center gap-2">
           <DarkModeToggle />
+          <LanguageSwitcher />
 
           {/* Apps switcher */}
           <div id="pub-apps-dropdown" className="relative">
@@ -85,7 +89,7 @@ export function PublicNavbar() {
                 <rect x="1" y="10" width="5" height="5" rx="1.5" />
                 <rect x="10" y="10" width="5" height="5" rx="1.5" />
               </svg>
-              <span className="hidden sm:inline">Apps</span>
+              <span className="hidden sm:inline">{t("layout.apps")}</span>
               <svg
                 className="hidden sm:block"
                 width="10"
@@ -103,7 +107,7 @@ export function PublicNavbar() {
             {appsOpen && (
               <div className="absolute right-0 top-10 z-50 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-3">
                 <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 px-1">
-                  learnypie.com — all tools
+                  {t("layout.apps_suite")}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {APPS.map((app) =>
@@ -120,9 +124,9 @@ export function PublicNavbar() {
                           </svg>
                         </div>
                         <span className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{app.name}</span>
-                        <span className="text-xs text-indigo-400 leading-tight">{app.desc}</span>
+                        <span className="text-xs text-indigo-400 leading-tight">{t(app.descKey)}</span>
                         <span className="text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded px-1.5 py-0.5 w-fit mt-0.5">
-                          current
+                          {t("layout.current")}
                         </span>
                       </div>
                     ) : (
@@ -141,7 +145,7 @@ export function PublicNavbar() {
                           </svg>
                         </div>
                         <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">{app.name}</span>
-                        <span className="text-xs text-gray-400 leading-tight">{app.desc}</span>
+                        <span className="text-xs text-gray-400 leading-tight">{t(app.descKey)}</span>
                       </a>
                     ),
                   )}
@@ -151,23 +155,23 @@ export function PublicNavbar() {
           </div>
 
           {/* Login + Register — desktop */}
-          <Link
+          {/* <Link
             to="/login"
             className="hidden sm:inline text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-2 py-1.5 rounded transition-colors">
-            Login
-          </Link>
+            {t("layout.sign_in")}
+          </Link> */}
           <Link
             to="/login"
             state={{ tab: "register" }}
             className="hidden sm:inline text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition-colors">
-            Register
+            {t("layout.register")}
           </Link>
 
           {/* Mobile: single Login button */}
           <Link
             to="/login"
             className="sm:hidden text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition-colors">
-            Login
+            {t("layout.sign_in")}
           </Link>
         </div>
       </div>
@@ -181,7 +185,7 @@ export function PublicNavbar() {
               isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-300"
             }`
           }>
-          About
+          {t("nav.about")}
         </NavLink>
       </div>
     </header>

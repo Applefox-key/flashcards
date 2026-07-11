@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/Button";
 import { authApi } from "@/api";
 import { useLogin, useRegister } from "./hooks/useAuth";
@@ -8,20 +9,24 @@ import { PublicNavbar } from "@/components/PublicNavbar";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 type AuthTab = "login" | "register" | "forgot";
 
-const DIVIDER = (
-  <div className="flex items-center gap-2">
-    <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-    <span className="text-xs text-gray-400 dark:text-gray-500">or</span>
-    <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-  </div>
-);
-
 const INPUT_CLS =
   "border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500";
+
+function Divider() {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+      <span className="text-xs text-gray-400 dark:text-gray-500">{t("auth.or")}</span>
+      <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+    </div>
+  );
+}
 
 // ── Forgot password form ─────────────────────────────────────────────────────
 
 function ForgotForm({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -35,7 +40,7 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
       await authApi.sendResetEmail(email);
       setSent(true);
     } catch {
-      setError("Could not send reset email. Check the address and try again.");
+      setError(t("auth.forgot_error"));
     } finally {
       setSending(false);
     }
@@ -45,12 +50,12 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
     return (
       <div className="flex flex-col gap-4 text-center">
         <div className="text-green-600 text-3xl">✉</div>
-        <p className="font-semibold text-gray-800 dark:text-gray-200">Check your email</p>
+        <p className="font-semibold text-gray-800 dark:text-gray-200">{t("auth.check_email_title")}</p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          A password reset link was sent to <strong>{email}</strong>.
+          {t("auth.check_email_desc")} <strong>{email}</strong>.
         </p>
         <button onClick={onBack} className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline mt-2">
-          ← Back to login
+          {t("auth.back_to_login")}
         </button>
       </div>
     );
@@ -59,7 +64,7 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-        Enter your email and we'll send you a link to reset your password.
+        {t("auth.forgot_desc")}
       </p>
       <input
         value={email}
@@ -68,19 +73,19 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
           setEmail(e.target.value);
         }}
         type="email"
-        placeholder="Email"
+        placeholder={t("auth.email_placeholder")}
         required
         className={INPUT_CLS}
       />
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button type="submit" loading={sending} disabled={!email}>
-        Send reset link
+        {t("auth.send_reset_btn")}
       </Button>
       <button
         type="button"
         onClick={onBack}
         className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-center">
-        ← Back to login
+        {t("auth.back_to_login")}
       </button>
     </form>
   );
@@ -103,7 +108,10 @@ function EyeIcon({ visible }: { visible: boolean }) {
   );
 }
 
+const TAB_KEYS = ["login", "register"] as const;
+
 export function AuthPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const initialTab: AuthTab = (location.state as { tab?: AuthTab } | null)?.tab ?? "login";
   const [tab, setTab] = useState<AuthTab>(initialTab);
@@ -152,23 +160,23 @@ export function AuthPage() {
             <button
               onClick={handleDemoLogin}
               className="text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors px-4 py-1.5 rounded-full font-medium">
-              ▶ Try Demo — no account needed
+              {t("auth.try_demo")}
             </button>
           </div>
 
           {/* Tabs (only for login/register) */}
           {tab !== "forgot" && (
             <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
-              {(["login", "register"] as const).map((t) => (
+              {TAB_KEYS.map((tabId) => (
                 <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`flex-1 pb-2 text-sm font-medium capitalize transition-colors ${
-                    tab === t
+                  key={tabId}
+                  onClick={() => setTab(tabId)}
+                  className={`flex-1 pb-2 text-sm font-medium transition-colors ${
+                    tab === tabId
                       ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400"
                       : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                   }`}>
-                  {t}
+                  {t(`auth.tab_${tabId}`)}
                 </button>
               ))}
             </div>
@@ -177,31 +185,31 @@ export function AuthPage() {
           {/* Forgot password header */}
           {tab === "forgot" && (
             <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200 text-center mb-6">
-              Password reset
+              {t("auth.forgot_title")}
             </h2>
           )}
 
           {/* Login form */}
           {tab === "login" && (
             <form onSubmit={handleLogin} className="flex flex-col gap-4">
-              <input name="email" type="email" placeholder="Email" required className={INPUT_CLS} />
+              <input name="email" type="email" placeholder={t("auth.email_placeholder")} required className={INPUT_CLS} />
               <div className="relative">
-                <input name="password" type={showLoginPwd ? "text" : "password"} placeholder="Password" required className={INPUT_CLS + " w-full pr-9"} />
+                <input name="password" type={showLoginPwd ? "text" : "password"} placeholder={t("auth.password_placeholder")} required className={INPUT_CLS + " w-full pr-9"} />
                 <button type="button" onClick={() => setShowLoginPwd((v) => !v)} className="absolute inset-y-0 right-2.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                   <EyeIcon visible={showLoginPwd} />
                 </button>
               </div>
-              {loginMutation.isError && <p className="text-sm text-red-600">Login failed. Check your credentials.</p>}
+              {loginMutation.isError && <p className="text-sm text-red-600">{t("auth.login_error")}</p>}
               <Button type="submit" loading={loginMutation.isPending}>
-                Login
+                {t("auth.login_btn")}
               </Button>
-              {DIVIDER}
+              <Divider />
               <GoogleAuthButton mode="signin" />
               <button
                 type="button"
                 onClick={() => setTab("forgot")}
                 className="text-xs text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 text-center transition-colors">
-                Forgot password?
+                {t("auth.forgot_password")}
               </button>
             </form>
           )}
@@ -209,21 +217,21 @@ export function AuthPage() {
           {/* Register form */}
           {tab === "register" && (
             <form onSubmit={handleRegister} className="flex flex-col gap-4">
-              <input name="name" type="text" placeholder="Name" required className={INPUT_CLS} />
-              <input name="email" type="email" placeholder="Email" required className={INPUT_CLS} />
+              <input name="name" type="text" placeholder={t("auth.name_placeholder")} required className={INPUT_CLS} />
+              <input name="email" type="email" placeholder={t("auth.email_placeholder")} required className={INPUT_CLS} />
               <div className="relative">
-                <input name="password" type={showRegisterPwd ? "text" : "password"} placeholder="Password" required className={INPUT_CLS + " w-full pr-9"} />
+                <input name="password" type={showRegisterPwd ? "text" : "password"} placeholder={t("auth.password_placeholder")} required className={INPUT_CLS + " w-full pr-9"} />
                 <button type="button" onClick={() => setShowRegisterPwd((v) => !v)} className="absolute inset-y-0 right-2.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                   <EyeIcon visible={showRegisterPwd} />
                 </button>
               </div>
               {registerMutation.isError && (
-                <p className="text-sm text-red-600">Registration failed. Please try again.</p>
+                <p className="text-sm text-red-600">{t("auth.register_error")}</p>
               )}
               <Button type="submit" loading={registerMutation.isPending}>
-                Register
+                {t("auth.register_btn")}
               </Button>
-              {DIVIDER}
+              <Divider />
               <GoogleAuthButton mode="signup" />
             </form>
           )}

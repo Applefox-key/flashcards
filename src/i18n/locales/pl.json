@@ -14,7 +14,7 @@
   "layout": {
     "demo_banner": "Tryb demo — zmiany nie są zapisywane i zostaną utracone po odświeżeniu.",
     "sign_in": "Zaloguj się",
-    "register": "Zarejestruj się",
+    "register": "Zaloguj się oraz Zarejestruj się",
     "toggle_sidebar": "Otwórz/zamknij menu",
     "navigation": "Nawigacja",
     "theme": "Motyw",
@@ -675,6 +675,32 @@
     "feature_copy": "Kopiuj publiczne kolekcje do własnej biblioteki",
     "feature_playlists": "Grupuj kolekcje w zestawy do kombinowanej nauki",
     "feature_ratings": "Śledź postępy pamięci za pomocą ocen gwiazdkowych",
-    "feature_filter": "Filtruj ćwiczenia według trudności (ocena gwiazdkowa)"
+    "feature_filter": "Filtruj ćwiczenia według trudności (ocena gwiazdkowa)",
+    "cta_title": "Gotowy, aby zacząć?",
+    "cta_desc": "Utwórz konto lub zaloguj się, aby zapisywać postępy i uzyskać dostęp do wszystkich funkcji.",
+    "cta_signin": "Zaloguj się / Zarejestruj"
+  },
+  "auth": {
+    "tab_login": "Logowanie",
+    "tab_register": "Rejestracja",
+    "try_demo": "▶ Wypróbuj demo — bez konta",
+    "forgot_title": "Resetowanie hasła",
+    "email_placeholder": "E-mail",
+    "password_placeholder": "Hasło",
+    "name_placeholder": "Imię",
+    "login_btn": "Zaloguj",
+    "register_btn": "Zarejestruj",
+    "login_error": "Logowanie nie powiodło się. Sprawdź dane.",
+    "register_error": "Rejestracja nie powiodła się. Spróbuj ponownie.",
+    "forgot_password": "Nie pamiętasz hasła?",
+    "forgot_desc": "Podaj swój e-mail, a wyślemy Ci link do resetowania hasła.",
+    "send_reset_btn": "Wyślij link",
+    "forgot_error": "Nie udało się wysłać e-maila. Sprawdź adres i spróbuj ponownie.",
+    "back_to_login": "← Wróć do logowania",
+    "check_email_title": "Sprawdź skrzynkę",
+    "check_email_desc": "Link do resetowania hasła został wysłany na",
+    "google_signin": "Zaloguj przez Google",
+    "google_signup": "Zarejestruj przez Google",
+    "or": "lub"
   }
 }

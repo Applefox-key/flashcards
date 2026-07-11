@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { ErrorPage } from "@/components/ErrorPage";
 import { RootRedirect } from "./RootRedirect";
 
+import { PublicLayout } from "@/components/PublicLayout";
 import { AuthPage } from "@/features/auth/AuthPage";
 import { ResetPasswordPage } from "@/features/auth/ResetPasswordPage";
 import { CollectionsPage } from "@/features/collections/CollectionsPage";
@@ -31,7 +32,10 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <RootRedirect /> },
       { path: "login", element: <AuthPage /> },
-      { path: "about", element: <AboutPage /> },
+      {
+        element: <PublicLayout />,
+        children: [{ path: "about", element: <AboutPage /> }],
+      },
       { path: "reset/:token", element: <ResetPasswordPage /> },
       {
         element: <ProtectedRoute />,

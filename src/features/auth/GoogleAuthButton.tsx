@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 // Portable Google OAuth button — only dependency is Tailwind CSS.
 // To adapt for another project:
 //   1. Change the path in getGoogleAuthUrl() to match your backend endpoint.
@@ -35,12 +37,13 @@ function getGoogleAuthUrl(
   return `${apiUrl}/users/auth/google?redirect=${encodeURIComponent(appUrl)}`;
 }
 export function GoogleAuthButton({ href = getGoogleAuthUrl(), mode = "signin" }: GoogleAuthButtonProps) {
+  const { t } = useTranslation();
   return (
     <a
       href={href}
       className="flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors font-medium">
       {GOOGLE_ICON}
-      {mode === "signin" ? "Sign in with Google" : "Sign up with Google"}
+      {mode === "signin" ? t("auth.google_signin") : t("auth.google_signup")}
     </a>
   );
 }

@@ -125,16 +125,14 @@ export function Layout() {
       {/* Demo banner — fixed at top, never scrolls */}
       {isDemo && (
         <div className="shrink-0 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50 px-4 py-1.5 flex items-center justify-between gap-4">
-          <p className="text-xs text-amber-700 dark:text-amber-400">
-            👋 {t("layout.demo_banner")}
-          </p>
+          <p className="text-xs text-amber-700 dark:text-amber-400">👋 {t("layout.demo_banner")}</p>
           <div className="flex gap-3">
-            <NavLink
+            {/* <NavLink
               to="/login"
               onClick={logout}
               className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-medium underline">
               {t("layout.sign_in")}
-            </NavLink>
+            </NavLink> */}
             <NavLink
               to="/login"
               onClick={logout}
@@ -409,8 +407,7 @@ export function Layout() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="h-full"
-          >
+            className="h-full">
             <Outlet />
           </motion.div>
         </main>

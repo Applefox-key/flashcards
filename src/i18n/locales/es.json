@@ -14,7 +14,7 @@
   "layout": {
     "demo_banner": "Modo demo — los cambios no se guardan y se perderán al recargar.",
     "sign_in": "Iniciar sesión",
-    "register": "Registrarse",
+    "register": "Iniciar sesión o Registrarse",
     "toggle_sidebar": "Abrir/cerrar menú",
     "navigation": "Navegación",
     "theme": "Tema",
@@ -675,6 +675,32 @@
     "feature_copy": "Copia colecciones públicas a tu propia biblioteca",
     "feature_playlists": "Agrupa colecciones en conjuntos para práctica combinada",
     "feature_ratings": "Sigue tu progreso de memoria con valoraciones de estrellas",
-    "feature_filter": "Filtra la práctica por dificultad (valoración de estrellas)"
+    "feature_filter": "Filtra la práctica por dificultad (valoración de estrellas)",
+    "cta_title": "¿Listo para empezar?",
+    "cta_desc": "Crea una cuenta o inicia sesión para guardar tu progreso y acceder a todas las funciones.",
+    "cta_signin": "Iniciar sesión / Registrarse"
+  },
+  "auth": {
+    "tab_login": "Iniciar sesión",
+    "tab_register": "Registrarse",
+    "try_demo": "▶ Probar demo — sin cuenta",
+    "forgot_title": "Restablecer contraseña",
+    "email_placeholder": "Correo electrónico",
+    "password_placeholder": "Contraseña",
+    "name_placeholder": "Nombre",
+    "login_btn": "Iniciar sesión",
+    "register_btn": "Registrarse",
+    "login_error": "Error al iniciar sesión. Verifica tus credenciales.",
+    "register_error": "Error al registrarse. Por favor, inténtalo de nuevo.",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "forgot_desc": "Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+    "send_reset_btn": "Enviar enlace",
+    "forgot_error": "No se pudo enviar el correo. Verifica la dirección e inténtalo de nuevo.",
+    "back_to_login": "← Volver al inicio de sesión",
+    "check_email_title": "Revisa tu correo",
+    "check_email_desc": "Se envió un enlace de restablecimiento a",
+    "google_signin": "Iniciar sesión con Google",
+    "google_signup": "Registrarse con Google",
+    "or": "o"
   }
 }

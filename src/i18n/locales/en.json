@@ -14,7 +14,7 @@
   "layout": {
     "demo_banner": "Demo mode — changes are not saved and will be lost on refresh.",
     "sign_in": "Sign in",
-    "register": "Register",
+    "register": "Sign in or Register",
     "toggle_sidebar": "Toggle sidebar",
     "navigation": "Navigation",
     "theme": "Theme",
@@ -675,6 +675,32 @@
     "feature_copy": "Copy public collections to your own library",
     "feature_playlists": "Group collections into sets for combined practice",
     "feature_ratings": "Track your memory progress with star ratings",
-    "feature_filter": "Filter practice by difficulty (star rating)"
+    "feature_filter": "Filter practice by difficulty (star rating)",
+    "cta_title": "Ready to get started?",
+    "cta_desc": "Create an account or sign in to save your progress and access all features.",
+    "cta_signin": "Sign In / Register"
+  },
+  "auth": {
+    "tab_login": "Login",
+    "tab_register": "Register",
+    "try_demo": "▶ Try Demo — no account needed",
+    "forgot_title": "Password reset",
+    "email_placeholder": "Email",
+    "password_placeholder": "Password",
+    "name_placeholder": "Name",
+    "login_btn": "Login",
+    "register_btn": "Register",
+    "login_error": "Login failed. Check your credentials.",
+    "register_error": "Registration failed. Please try again.",
+    "forgot_password": "Forgot password?",
+    "forgot_desc": "Enter your email and we'll send you a link to reset your password.",
+    "send_reset_btn": "Send reset link",
+    "forgot_error": "Could not send reset email. Check the address and try again.",
+    "back_to_login": "← Back to login",
+    "check_email_title": "Check your email",
+    "check_email_desc": "A password reset link was sent to",
+    "google_signin": "Sign in with Google",
+    "google_signup": "Sign up with Google",
+    "or": "or"
   }
 }

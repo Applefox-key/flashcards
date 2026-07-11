@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
 
@@ -87,6 +87,19 @@ export function AboutPage() {
             ))}
           </div>
         </div>
+
+        {/* CTA for unauthenticated users */}
+        {!isAuthenticated && !isDemo && (
+          <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-xl p-5 flex flex-col items-center text-center gap-3">
+            <p className="text-base font-semibold text-indigo-700 dark:text-indigo-300">{t("about.cta_title")}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t("about.cta_desc")}</p>
+            <Link
+              to="/login"
+              className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors">
+              {t("about.cta_signin")}
+            </Link>
+          </div>
+        )}
 
         {/* Footer */}
         <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-4">
