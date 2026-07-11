@@ -17,11 +17,7 @@ export function PublicLayout() {
           <div className="ml-auto flex items-center gap-3">
             <DarkModeToggle />
             <LanguageSwitcher />
-            <NavLink
-              to="/login"
-              className="text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium">
-              {t("layout.sign_in")}
-            </NavLink>
+
             <NavLink
               to="/login"
               className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">

@@ -155,11 +155,7 @@ export function PublicNavbar() {
           </div>
 
           {/* Login + Register — desktop */}
-          {/* <Link
-            to="/login"
-            className="hidden sm:inline text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-2 py-1.5 rounded transition-colors">
-            {t("layout.sign_in")}
-          </Link> */}
+
           <Link
             to="/login"
             state={{ tab: "register" }}
