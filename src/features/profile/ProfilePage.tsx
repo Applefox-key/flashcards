@@ -55,7 +55,9 @@ function AvatarPicker({ currentUrl, onSelect, onClose }: AvatarPickerProps) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{t("profile.avatar_picker_title")}</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+            {t("profile.avatar_picker_title")}
+          </h3>
           <button
             onClick={onClose}
             className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">
@@ -210,7 +212,7 @@ export function ProfilePage() {
     <div className="max-w-lg m-auto">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t("profile.title")}</h1>
 
-      <form onSubmit={handleSave} className="flex flex-col gap-6">
+      <form id="profile-form" onSubmit={handleSave} className="flex flex-col gap-6 pb-32">
         {/* Avatar */}
         <div className="flex flex-col items-center gap-3">
           <div className="relative cursor-pointer group" onClick={() => setPickerOpen(true)}>
@@ -298,10 +300,10 @@ export function ProfilePage() {
         {/* Speech languages */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("profile.speech_langs_title")}</h2>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-              {t("profile.speech_langs_desc")}
-            </p>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              {t("profile.speech_langs_title")}
+            </h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{t("profile.speech_langs_desc")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {ALL_SPEECH_LANGS.map(({ code, label, name: langName }) => {
@@ -328,13 +330,13 @@ export function ProfilePage() {
 
         {/* Onboarding */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t("profile.onboarding_section_title")}</h2>
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            {t("profile.onboarding_section_title")}
+          </h2>
           <label className="flex items-center justify-between gap-4 cursor-pointer">
             <div>
               <p className="text-sm text-gray-700 dark:text-gray-200">{t("profile.onboarding_completed")}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                {t("profile.onboarding_desc")}
-              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{t("profile.onboarding_desc")}</p>
             </div>
             <button
               type="button"
@@ -353,10 +355,20 @@ export function ProfilePage() {
           </label>
         </div>
 
-        <Button type="submit" loading={saving}>
+        {/* Desktop save button — hidden on mobile */}
+        <Button type="submit" loading={saving} className="hidden sm:flex">
           {t("profile.save_btn")}
         </Button>
       </form>
+
+      {/* Mobile save button — fixed above bottom nav */}
+      <div
+        className="sm:hidden fixed bottom-[50px] left-0 right-0 z-20 px-4 py-2 bg-white/95 dark:bg-gray-900/95 border-t border-gray-200 dark:border-gray-700 backdrop-blur-sm"
+        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
+        <Button type="submit" form="profile-form" loading={saving} className="w-full">
+          {t("profile.save_btn")}
+        </Button>
+      </div>
 
       {pickerOpen && (
         <AvatarPicker currentUrl={avatarUrl} onSelect={handleAvatarSelect} onClose={() => setPickerOpen(false)} />

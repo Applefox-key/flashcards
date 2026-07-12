@@ -409,7 +409,7 @@ export function Layout() {
 
       {/* Mobile bottom navigation — hidden on game pages */}
       {!isGamePage && (
-        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex">
+        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex pb-safe" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
           <NavLink
             to="/library"
             className={`flex-1 text-center py-3 text-md font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
