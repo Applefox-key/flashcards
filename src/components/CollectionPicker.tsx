@@ -39,7 +39,6 @@ export function CollectionPicker({
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [allCollections]);
 
-
   const pickerCollections = useMemo(
     () =>
       allCollections
@@ -126,8 +125,8 @@ export function CollectionPicker({
         {content("max-h-64 overflow-y-auto mt-2")}
       </div>
       {/* Mobile overlay */}
-      <div className="sm:hidden absolute inset-0 z-10 bg-white dark:bg-gray-800 rounded-lg border border-indigo-200 dark:border-indigo-700 p-3 flex flex-col">
-        {content("flex-1 overflow-y-auto mt-2")}
+      <div className="sm:hidden fixed left-2 right-2 sm:bottom-4 z-[60] max-h-[40vh] sm:max-h-[70vh] bg-white dark:bg-gray-800 rounded-lg border border-indigo-200 dark:border-indigo-700 p-3 flex flex-col shadow-xl">
+        {content("flex-1 min-h-0 overflow-y-auto mt-2")}
       </div>
     </>
   );
