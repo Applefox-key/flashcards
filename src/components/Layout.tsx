@@ -93,9 +93,7 @@ export function Layout() {
   const isLibrarySearchPage = location.pathname === "/library" || isPublicLibraryPage;
   const headerSearch = isPublicLibraryPage ? publicLibrary.search : myLibrary.search;
   const setHeaderSearch = (v: string) =>
-    isPublicLibraryPage
-      ? setPublicLibrary({ search: v, page: 1 })
-      : setMyLibrary({ search: v, allPage: 1 });
+    isPublicLibraryPage ? setPublicLibrary({ search: v, page: 1 }) : setMyLibrary({ search: v, allPage: 1 });
 
   const activeSection =
     location.pathname === "/library" ||
@@ -167,7 +165,9 @@ export function Layout() {
                 type="search"
                 value={headerSearch}
                 onChange={(e) => setHeaderSearch(e.target.value)}
-                placeholder={t(isPublicLibraryPage ? "public_library.search_placeholder" : "collections.search_placeholder")}
+                placeholder={t(
+                  isPublicLibraryPage ? "public_library.search_placeholder" : "collections.search_placeholder",
+                )}
                 className="sm:hidden flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                            bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                            focus:outline-none focus:ring-2 focus:ring-indigo-400"
