@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StudyDot } from "@/components/StudyDot";
+import { CategoryFilter, getCategoryDisplayName } from "@/components/CategoryFilter";
 import type { Collection } from "@/types";
 
 interface CollectionPickerProps {
@@ -38,15 +39,6 @@ export function CollectionPicker({
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [allCollections]);
 
-  const allCategories = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const col of allCollections) {
-      if (col.category) map.set(col.category.id, col.category.name);
-    }
-    return Array.from(map.entries())
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [allCollections]);
 
   const pickerCollections = useMemo(
     () =>
@@ -80,21 +72,12 @@ export function CollectionPicker({
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                    focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
-      {allCategories.length > 0 && (
-        <select
-          value={categoryFilter ?? ""}
-          onChange={(e) => setCategoryFilter(e.target.value ? Number(e.target.value) : null)}
-          className="w-full mt-1.5 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs
-                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                     focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <option value="">{t("playlists.picker_category_all")}</option>
-          {allCategories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      )}
+      <CategoryFilter
+        allCollections={allCollections}
+        value={categoryFilter}
+        onChange={setCategoryFilter}
+        className="mt-1.5"
+      />
       {allTagNames.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">
           {allTagNames.map((tag) => (
@@ -126,7 +109,9 @@ export function CollectionPicker({
               className="flex items-center gap-2 px-3 py-2 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 cursor-pointer text-sm rounded">
               <StudyDot stats={col.stats} showFallback className="w-2 h-2 shrink-0" />
               <span className="flex-1 text-gray-800 dark:text-gray-200">{col.name}</span>
-              {col.category && <span className="text-xs text-indigo-400 shrink-0">{col.category.name}</span>}
+              {getCategoryDisplayName(col.category) && (
+                <span className="text-xs text-indigo-400 shrink-0">{getCategoryDisplayName(col.category)}</span>
+              )}
             </div>
           ))
         )}

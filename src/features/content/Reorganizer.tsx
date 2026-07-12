@@ -5,6 +5,7 @@ import { collectionsApi } from "@/api";
 import { useMoveCards, useEditCard } from "./hooks/useContent";
 import { Button } from "@/components/Button";
 import { useToast } from "@/hooks/useToast";
+import { CategoryFilter, getCategoryDisplayName } from "@/components/CategoryFilter";
 import type { Content } from "@/types";
 
 type Mode = "move" | "swap";
@@ -25,6 +26,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [targetId, setTargetId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const [swapping, setSwapping] = useState(false);
 
   const { data: allCollections = [] } = useQuery({
@@ -33,7 +35,9 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
   });
 
   const otherCollections = allCollections.filter((c) => c.id !== collectionId);
-  const filteredCollections = otherCollections.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredCollections = otherCollections
+    .filter((c) => !categoryFilter || c.categoryid === categoryFilter)
+    .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
 
   function toggle(id: number) {
     setSelected((prev) => {
@@ -174,7 +178,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
                   {t("reorganize.move_panel_title")}
                 </span>
               </div>
-              <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-900">
+              <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-1.5">
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -182,6 +186,11 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-1.5 text-sm
                              bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                              focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                />
+                <CategoryFilter
+                  allCollections={otherCollections}
+                  value={categoryFilter}
+                  onChange={setCategoryFilter}
                 />
               </div>
               <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
@@ -207,8 +216,10 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
                       />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{col.name}</p>
-                        {col.category && (
-                          <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{col.category.name}</p>
+                        {getCategoryDisplayName(col.category) && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                            {getCategoryDisplayName(col.category)}
+                          </p>
                         )}
                       </div>
                       {col.cardCount !== undefined && (
