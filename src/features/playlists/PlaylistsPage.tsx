@@ -581,9 +581,6 @@ export function PlaylistsPage() {
         <>
           {/* Mobile dropdown */}
           <div className="sm:hidden pt-3 mb-4 flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 shrink-0">
-              {t("playlists.mobile_label")}
-            </span>
             <select
               value={effectiveId ?? ""}
               onChange={(e) => setSelectedId(Number(e.target.value))}

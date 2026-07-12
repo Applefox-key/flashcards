@@ -179,11 +179,22 @@ export function Layout() {
               </NavLink>
             </>
           ) : (
-            <NavLink
-              to="/library"
-              className="text-lg font-bold text-indigo-600 dark:text-indigo-400 absolute left-1/2 -translate-x-1/2 sm:static sm:translate-x-0">
-              FlashMinds
-            </NavLink>
+            <>
+              {(activeSection === "playlists" || activeSection === "categories" || activeSection === "tags") && (
+                <span className="sm:hidden text-base font-semibold text-gray-800 dark:text-gray-100 absolute left-1/2 -translate-x-1/2">
+                  {activeSection === "playlists"
+                    ? t("nav.playlists")
+                    : activeSection === "categories"
+                      ? t("nav.categories")
+                      : t("nav.tags")}
+                </span>
+              )}
+              <NavLink
+                to="/library"
+                className={`text-lg font-bold text-indigo-600 dark:text-indigo-400 ${activeSection === "playlists" || activeSection === "categories" || activeSection === "tags" ? "hidden sm:inline" : "absolute left-1/2 -translate-x-1/2 sm:static sm:translate-x-0"}`}>
+                FlashMinds
+              </NavLink>
+            </>
           )}
 
           <nav className="ml-4 hidden sm:flex gap-2">
