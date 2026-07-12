@@ -15,18 +15,26 @@ export const DEMO_CATEGORIES: Category[] = [
 ]
 
 export const DEMO_COLLECTIONS: Collection[] = [
-  { id: 1, name: 'Common Idioms', note: 'Popular English idioms', userid: 999,
+  {
+    id: 1, name: 'Common Idioms', note: 'Popular English idioms', userid: 999,
     categoryid: 1, isPublic: true, isFavorite: true, cardCount: 5,
-    category: { id: 1, name: 'english', userid: 999 } },
-  { id: 2, name: 'Phrasal Verbs', note: '', userid: 999,
+    category: { id: 1, name: 'english', userid: 999 }
+  },
+  {
+    id: 2, name: 'Phrasal Verbs', note: '', userid: 999,
     categoryid: 1, isPublic: false, isFavorite: false, cardCount: 4,
-    category: { id: 1, name: 'english', userid: 999 } },
-  { id: 3, name: 'World War II', note: 'Key events and dates', userid: 999,
+    category: { id: 1, name: 'english', userid: 999 }
+  },
+  {
+    id: 3, name: 'World War II', note: 'Key events and dates', userid: 999,
     categoryid: 2, isPublic: true, isFavorite: false, cardCount: 4,
-    category: { id: 2, name: 'history', userid: 999 } },
-  { id: 4, name: 'The Solar System', note: '', userid: 999,
+    category: { id: 2, name: 'history', userid: 999 }
+  },
+  {
+    id: 4, name: 'The Solar System', note: '', userid: 999,
     categoryid: 3, isPublic: false, isFavorite: true, cardCount: 4,
-    category: { id: 3, name: 'science', userid: 999 } },
+    category: { id: 3, name: 'science', userid: 999 }
+  },
 ]
 
 export const DEMO_CONTENT: Record<number, Content[]> = {

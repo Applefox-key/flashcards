@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiSettings } from "react-icons/fi";
 import { useGameCards } from "./useGameCards";
-import { DifficultyFilter } from "./DifficultyFilter";
+import { DifficultyFilter, type RateFilter } from "./DifficultyFilter";
 import { FlashcardGame } from "./FlashcardGame";
 import { TimedGame } from "./TimedGame";
 import { PairsGame } from "./PairsGame";
@@ -21,7 +21,7 @@ export function GamePage() {
   const { cards, title, isLoading, isError } = useGameCards();
   const collectionId = Number(id);
 
-  const [rateFilter, setRateFilter] = useState<number[]>([]);
+  const [rateFilter, setRateFilter] = useState<RateFilter>(null);
   const [mistakeIds, setMistakeIds] = useState<Set<number> | null>(null);
   const [gameKey, setGameKey] = useState(0);
   const [answerFirst, setAnswerFirst] = useState(false);
@@ -35,13 +35,17 @@ export function GamePage() {
   const filtered = useMemo<Content[]>(() => {
     if (mistakeIds) return cards.filter((c) => mistakeIds.has(c.id));
 
-    if (rateFilter.length > 0) return cards.filter((c) => rateFilter.includes(c.rate ?? 0));
+    if (rateFilter !== null) {
+      return cards.filter((c) =>
+        rateFilter === "not5" ? (c.rate ?? 0) < 5 : (c.rate ?? 0) === rateFilter
+      );
+    }
     return cards;
   }, [cards, rateFilter, mistakeIds]);
 
   const activeCards = filtered.length > 0 ? filtered : [];
 
-  function handleFilterChange(val: number[]) {
+  function handleFilterChange(val: RateFilter) {
     setRateFilter(val);
     setMistakeIds(null);
     setGameKey((k) => k + 1);
@@ -117,7 +121,7 @@ export function GamePage() {
   const hasActiveSettings =
     answerFirst ||
     isShuffled ||
-    rateFilter.length > 0 ||
+    rateFilter !== null ||
     (type === "parts" && partsMode !== "oneshot") ||
     (type === "write" && writeMode !== "oneshot") ||
     (type === "test" && testMode !== "oneshot");
@@ -245,7 +249,7 @@ export function GamePage() {
             </div>
           )}
           <div className="ml-auto">
-            <DifficultyFilter selected={rateFilter} onChange={handleFilterChange} />
+            <DifficultyFilter value={rateFilter} onChange={handleFilterChange} />
           </div>
         </div>
       )}
@@ -303,7 +307,7 @@ export function GamePage() {
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
             {t("game_page.section_difficulty")}
           </p>
-          <DifficultyFilter selected={rateFilter} onChange={handleFilterChange} />
+          <DifficultyFilter value={rateFilter} onChange={handleFilterChange} />
         </div>
 
         {/* Mode — parts / write / test */}

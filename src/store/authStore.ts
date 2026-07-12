@@ -28,8 +28,10 @@ export const useAuthStore = create<AuthState>()(
       login: (token, _role) =>
         set({ token, isAuthenticated: true, isDemo: false }),
 
-      logout: () =>
-        set({ user: null, token: null, isAuthenticated: false, isDemo: false }),
+      logout: () => {
+        localStorage.removeItem('fm_onboarded');
+        return set({ user: null, token: null, isAuthenticated: false, isDemo: false });
+      },
 
       setUser: (user) =>
         set({ user }),

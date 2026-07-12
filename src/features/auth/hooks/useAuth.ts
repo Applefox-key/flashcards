@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authApi } from '@/api'
 import { useAuthStore } from '@/store/authStore'
 import type { LoginRequest, RegisterRequest } from '@/types'
@@ -37,11 +37,12 @@ export function useRegister() {
 
 export function useLogout() {
   const logout = useAuthStore((s) => s.logout)
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => authApi.logout(),
     onSettled: () => {
-      // Log out locally even if the request fails
       logout()
+      queryClient.clear()
     },
   })
 }

@@ -184,6 +184,7 @@ export function ProfilePage() {
 
       let updated = await authApi.updateProfile(fd);
       if (!updated?.id) updated = await authApi.getMe();
+      localStorage.setItem('fm_onboarded', String(onboarded));
       setUser(updated);
       setPassword("");
       setConfirmPassword("");
@@ -205,8 +206,6 @@ export function ProfilePage() {
 
   const inputClass =
     "w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400";
-  console.log(user);
-  console.log(avatarFile);
 
   return (
     <div className="max-w-lg m-auto">

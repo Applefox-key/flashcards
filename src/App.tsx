@@ -4,6 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { router } from './router'
 import { authApi } from './api'
 import { useAuthStore } from './store/authStore'
+import { parseUserSettings } from './lib/userSettings'
+
+function syncOnboardedFromUser(user: { settings?: unknown } | null) {
+  if (!user) return
+  const s = parseUserSettings(user.settings)
+  if (s.flashcards?.onboarded) localStorage.setItem('fm_onboarded', 'true')
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +36,7 @@ function AppInit() {
           if (!user?.id || !user?.email) {
             logout()
           } else {
+            syncOnboardedFromUser(user)
             setUser(user)
           }
         })
@@ -42,13 +50,14 @@ function AppInit() {
       setInitializing(false)
     } else if (token) {
       authApi.getMe()
-        .then(setUser)
+        .then((user) => { syncOnboardedFromUser(user); setUser(user) })
         .catch(() => logout())
         .finally(() => setInitializing(false))
     } else {
       // No token in localStorage — try cookie auth (cross-project SSO)
       authApi.getMe()
         .then((user) => {
+          syncOnboardedFromUser(user)
           useAuthStore.setState({ isAuthenticated: true })
           setUser(user)
         })

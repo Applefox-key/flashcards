@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import { contentApi } from "@/api";
 import { shuffle } from "@/utils/gameUtils";
 import { FlashCardFace } from "@/components/FlashCardFace";
@@ -30,6 +31,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
   const demoStore = useDemoStore();
   const editCard = useEditCard();
   const toast = useToast();
+  const queryClient = useQueryClient();
   const [cards, setCards] = useState<Content[]>(() => (isShuffled ? shuffle([...initialCards]) : [...initialCards]));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -99,7 +101,13 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
       demoStore.updateCardRate(cardId, collectionId, newRate);
     } else {
       const ratedCard = cards.find((c) => c.id === cardId);
-      contentApi.edit({ id: cardId, rate: newRate, imgQ: ratedCard?.imgQ, imgA: ratedCard?.imgA }).catch(() => {});
+      contentApi
+        .edit({ id: cardId, rate: newRate, imgQ: ratedCard?.imgQ, imgA: ratedCard?.imgA })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ["collections"] });
+          queryClient.invalidateQueries({ queryKey: ["playlists"] });
+        })
+        .catch(() => {});
     }
   }
 

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 const LANGUAGES = [
   { code: "en", label: "English" },
   { code: "ru", label: "Русский" },
-  { code: "uk", label: "Українська" },
+  { code: "ua", label: "Українська" },
   { code: "es", label: "Español" },
   { code: "pl", label: "Polski" },
 ];

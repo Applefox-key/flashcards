@@ -6,9 +6,12 @@ import { useCollections } from "@/hooks/useCollectionHooks";
 import { PlaylistModal } from "./PlaylistModal";
 import { Button } from "@/components/Button";
 import { MobileFab } from "@/components/MobileFab";
+import { CollectionPicker } from "@/components/CollectionPicker";
 import { useToast } from "@/hooks/useToast";
+import { useLibraryUiStore } from "@/store/libraryUiStore";
 import type { Playlist, PlaylistCollection, Collection } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
+import { StudyDot } from "@/components/StudyDot";
 
 const MAX_SLOTS = 10;
 
@@ -55,8 +58,8 @@ function PlaylistListItem({
       <div className="font-medium text-sm leading-snug truncate">{playlist.name}</div>
       <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
         {count === 0
-          ? t('playlists.item_no_collections')
-          : t(count === 1 ? 'playlists.item_collections_singular' : 'playlists.item_collections_plural', { count })}
+          ? t("playlists.item_no_collections")
+          : t(count === 1 ? "playlists.item_collections_singular" : "playlists.item_collections_plural", { count })}
       </div>
     </button>
   );
@@ -64,7 +67,17 @@ function PlaylistListItem({
 
 // ── Tiles ─────────────────────────────────────────────────────────────────
 
-function ViewTile({ col, index, onEmptyClick }: { col?: PlaylistCollection; index: number; onEmptyClick: () => void }) {
+function ViewTile({
+  col,
+  index,
+  onEmptyClick,
+  resolveStats,
+}: {
+  col?: PlaylistCollection;
+  index: number;
+  onEmptyClick: () => void;
+  resolveStats: (id: number) => Collection["stats"];
+}) {
   const navigate = useNavigate();
 
   if (col) {
@@ -74,12 +87,15 @@ function ViewTile({ col, index, onEmptyClick }: { col?: PlaylistCollection; inde
         className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2 sm:py-3
                    flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1
                    cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all sm:min-h-[5rem]">
-        <span className="text-xs text-gray-300 dark:text-gray-600 select-none shrink-0 w-5 sm:w-auto text-right sm:text-left">
-          {index + 1}
-        </span>
-        <span className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug flex-1 sm:flex-none truncate">
-          {col.name}
-        </span>
+        <div className="flex items-center justify-between gap-1.5 sm:flex-none min-w-0 sm:w-full">
+          <span className="text-xs text-gray-300 dark:text-gray-600 select-none shrink-0 w-5 sm:w-auto text-right sm:text-left">
+            {index + 1}
+          </span>
+          <StudyDot stats={resolveStats(col.id)} showFallback className="w-2 h-2 shrink-0" />
+        </div>
+        <div className="flex items-center gap-1.5 flex-1 sm:flex-none min-w-0">
+          <span className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug ">{col.name}</span>
+        </div>
         {col.isMy === 0 && <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 sm:mt-auto">shared</span>}
       </div>
     );
@@ -104,6 +120,7 @@ function EditTile({
   index,
   isActive,
   resolveName,
+  resolveStats,
   onRemove,
   onActivate,
 }: {
@@ -111,6 +128,7 @@ function EditTile({
   index: number;
   isActive: boolean;
   resolveName: (id: number) => string;
+  resolveStats: (id: number) => Collection["stats"];
   onRemove: () => void;
   onActivate: () => void;
 }) {
@@ -122,9 +140,12 @@ function EditTile({
         <span className="text-xs text-gray-300 dark:text-gray-600 select-none shrink-0 w-5 sm:w-auto text-right sm:text-left">
           {index + 1}
         </span>
-        <span className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug flex-1 sm:flex-none truncate pr-5 sm:pr-5">
-          {resolveName(id)}
-        </span>
+        <div className="flex items-center gap-1.5 flex-1 sm:flex-none min-w-0 pr-5 sm:pr-5">
+          <StudyDot stats={resolveStats(id)} showFallback className="w-2 h-2 shrink-0" />
+          <span className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-snug truncate">
+            {resolveName(id)}
+          </span>
+        </div>
         <button
           onClick={onRemove}
           className="absolute top-1.5 right-2 sm:top-2 text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors text-lg leading-none w-6 text-center">
@@ -156,113 +177,20 @@ function EditTile({
   );
 }
 
-// ── Inline picker ─────────────────────────────────────────────────────────
-
-function PickerPanel({
-  activeSlot,
-  search,
-  onSearch,
-  tagFilter,
-  onTagFilter,
-  allTagNames,
-  pickerCollections,
-  onPick,
-  onClose,
-  searchRef,
-}: {
-  activeSlot: number;
-  search: string;
-  onSearch: (v: string) => void;
-  tagFilter: string | null;
-  onTagFilter: (v: string | null) => void;
-  allTagNames: string[];
-  pickerCollections: Collection[];
-  onPick: (id: number) => void;
-  onClose: () => void;
-  searchRef: React.RefObject<HTMLInputElement | null>;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="mt-5 border border-indigo-200 dark:border-indigo-700 rounded-xl p-4 bg-indigo-50/60 dark:bg-indigo-900/10">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-          {t('playlists.picker_filling_slot', { n: activeSlot + 1 })}
-        </span>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none w-6 text-center">
-          ×
-        </button>
-      </div>
-
-      <input
-        ref={searchRef}
-        value={search}
-        onChange={(e) => onSearch(e.target.value)}
-        placeholder={t('playlists.picker_search_placeholder')}
-        className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
-                   focus:outline-none focus:ring-2 focus:ring-indigo-400"
-      />
-
-      {allTagNames.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {allTagNames.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => onTagFilter(tagFilter === tag ? null : tag)}
-              className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                tagFilter === tag
-                  ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-600"
-                  : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400"
-              }`}>
-              {tag}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-3 max-h-52 overflow-y-auto flex flex-col gap-0.5">
-        {pickerCollections.length === 0 ? (
-          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
-            {search || tagFilter ? t('playlists.picker_no_matches') : t('playlists.picker_no_collections')}
-          </p>
-        ) : (
-          pickerCollections.map((col) => (
-            <div
-              key={col.id}
-              onClick={() => onPick(col.id)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 cursor-pointer">
-              <span className="flex-1 text-sm text-gray-800 dark:text-gray-200">{col.name}</span>
-              {col.category && (
-                <span className="text-xs text-indigo-400 dark:text-indigo-500 shrink-0">
-                  {(col.category as { name?: string }).name}
-                </span>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Right panel — holds all edit state, reset via key prop ────────────────
 
 function PlaylistPanel({
   playlist,
   allCollections,
-  allTagNames,
   onDelete,
   deleteLoading,
-  onCreateNew: _onCreateNew,
+  onClose,
 }: {
   playlist: Playlist;
   allCollections: Collection[];
-  allTagNames: string[];
   onDelete: () => void;
   deleteLoading: boolean;
-  onCreateNew: () => void;
+  onClose: () => void;
 }) {
   const { t } = useTranslation();
   const [view, setView] = useState<"collections" | "cards">("collections");
@@ -270,18 +198,12 @@ function PlaylistPanel({
   const [editName, setEditName] = useState("");
   const [localIds, setLocalIds] = useState<(number | undefined)[]>([]);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const editPlaylistMutation = useEditPlaylist();
   const { data: cards = [], isLoading: cardsLoading } = usePlaylistContent(playlist.id);
-
-  useEffect(() => {
-    if (activeSlot !== null) setTimeout(() => searchRef.current?.focus(), 50);
-  }, [activeSlot]);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -306,8 +228,6 @@ function PlaylistPanel({
   function exitEditMode() {
     setIsEditing(false);
     setActiveSlot(null);
-    setSearch("");
-    setTagFilter(null);
   }
 
   function handleSave() {
@@ -317,10 +237,10 @@ function PlaylistPanel({
       { id: playlist.id, data: { name: editName.trim(), listIds } },
       {
         onSuccess: () => {
-          toast.success(t('playlists.panel_toast_saved'));
+          toast.success(t("playlists.panel_toast_saved"));
           exitEditMode();
         },
-        onError: () => toast.error(t('playlists.panel_toast_save_error')),
+        onError: () => toast.error(t("playlists.panel_toast_save_error")),
       },
     );
   }
@@ -353,15 +273,9 @@ function PlaylistPanel({
     return col?.name ?? `Collection #${id}`;
   }
 
-  const pickerCollections = useMemo(
-    () =>
-      allCollections
-        .filter((c) => !localIds.includes(c.id))
-        .filter((c) => !tagFilter || (c.tags ?? []).some((t) => t.name === tagFilter))
-        .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [allCollections, localIds, tagFilter, search],
-  );
+  function resolveCollectionStats(id: number): Collection["stats"] {
+    return allCollections.find((c) => c.id === id)?.stats;
+  }
 
   const filledCount = localIds.filter(Boolean).length;
 
@@ -379,6 +293,18 @@ function PlaylistPanel({
       {!isEditing && (
         <>
           <div className="sticky -top-3 sm:-top-6 z-10 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 py-2 mb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+            {/* Practice — always visible when collections exist */}
+            {playlist.collections.length > 0 && (
+              <Link to={`/play/${playlist.id}?src=pl`}>
+                <Button size="sm" variant="primary">
+                  <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("playlists.panel_practice")}
+                </Button>
+              </Link>
+            )}
+            {/* Desktop: Edit */}
+            <Button size="sm" variant="secondary" onClick={() => enterEditMode()} className="hidden sm:inline-flex">
+              {t("playlists.panel_edit")}
+            </Button>
             {/* Desktop: Delete */}
             <Button
               size="sm"
@@ -386,23 +312,12 @@ function PlaylistPanel({
               onClick={onDelete}
               loading={deleteLoading}
               className="hidden sm:inline-flex">
-              {t('playlists.panel_delete')}
+              {t("playlists.panel_delete")}
             </Button>
-
-            {/* Practice — always visible when collections exist */}
-            {playlist.collections.length > 0 && (
-              <Link to={`/play/${playlist.id}?src=pl`}>
-                <Button size="sm" variant="secondary">
-                  <PiShootingStarThin className="w-4 h-4 mr-2" /> {t('playlists.panel_practice')}
-                </Button>
-              </Link>
-            )}
-
-            {/* Desktop: Edit */}
-            <Button size="sm" variant="secondary" onClick={() => enterEditMode()} className="hidden sm:inline-flex">
-              {t('playlists.panel_edit')}
+            {/* Desktop: Close */}
+            <Button size="sm" variant="secondary" onClick={onClose} className="hidden sm:inline-flex">
+              {t("playlists.panel_close")}
             </Button>
-
             {/* View toggle */}
             <div className="ml-auto flex items-center rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs font-medium">
               <button
@@ -412,7 +327,7 @@ function PlaylistPanel({
                     ? "bg-indigo-600 text-white"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
-                {t('playlists.panel_view_collections')}
+                {t("playlists.panel_view_collections")}
               </button>
               <button
                 onClick={() => setView("cards")}
@@ -421,11 +336,10 @@ function PlaylistPanel({
                     ? "bg-indigo-600 text-white"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
-                {t('playlists.panel_view_cards')}
+                {t("playlists.panel_view_cards")}
                 {!cardsLoading && cards.length > 0 && <span className="ml-1 opacity-70">{cards.length}</span>}
               </button>
             </div>
-
             {/* Mobile: "..." context menu */}
             <div ref={mobileMenuRef} className="relative sm:hidden">
               <button
@@ -441,7 +355,7 @@ function PlaylistPanel({
                       setMobileMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    {t('playlists.panel_edit')}
+                    {t("playlists.panel_edit")}
                   </button>
                   <button
                     onClick={() => {
@@ -449,7 +363,7 @@ function PlaylistPanel({
                       setMobileMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
-                    {t('playlists.panel_delete')}
+                    {t("playlists.panel_delete")}
                   </button>
                 </div>
               )}
@@ -459,7 +373,13 @@ function PlaylistPanel({
           {view === "collections" && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {Array.from({ length: MAX_SLOTS }).map((_, i) => (
-                <ViewTile key={i} col={playlist.collections[i]} index={i} onEmptyClick={() => enterEditMode(i)} />
+                <ViewTile
+                  key={i}
+                  col={playlist.collections[i]}
+                  index={i}
+                  onEmptyClick={() => enterEditMode(i)}
+                  resolveStats={resolveCollectionStats}
+                />
               ))}
             </div>
           )}
@@ -479,9 +399,7 @@ function PlaylistPanel({
               )}
 
               {!cardsLoading && sortedCards.length === 0 && (
-                <p className="text-center text-gray-400 dark:text-gray-500 py-16">
-                  {t('playlists.panel_no_cards')}
-                </p>
+                <p className="text-center text-gray-400 dark:text-gray-500 py-16">{t("playlists.panel_no_cards")}</p>
               )}
 
               {!cardsLoading && sortedCards.length > 0 && (
@@ -492,13 +410,13 @@ function PlaylistPanel({
                       <thead>
                         <tr className="bg-gray-50 dark:bg-gray-700/60 border-b border-gray-200 dark:border-gray-700">
                           <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[38%]">
-                            {t('playlists.panel_col_question')}
+                            {t("playlists.panel_col_question")}
                           </th>
                           <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[38%]">
-                            {t('playlists.panel_col_answer')}
+                            {t("playlists.panel_col_answer")}
                           </th>
                           <th className="px-4 py-2.5 text-left font-semibold text-gray-600 dark:text-gray-300 w-[24%]">
-                            {t('playlists.panel_col_collection')}
+                            {t("playlists.panel_col_collection")}
                           </th>
                         </tr>
                       </thead>
@@ -525,11 +443,11 @@ function PlaylistPanel({
                         key={card.id}
                         className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
                         <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">
-                          {t('playlists.panel_col_question')}
+                          {t("playlists.panel_col_question")}
                         </p>
                         <p className="text-sm text-gray-900 dark:text-gray-100 mb-2">{card.question}</p>
                         <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">
-                          {t('playlists.panel_col_answer')}
+                          {t("playlists.panel_col_answer")}
                         </p>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{card.answer}</p>
                         <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 px-2 py-0.5 rounded-full">
@@ -552,16 +470,16 @@ function PlaylistPanel({
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
-              placeholder={t('playlists.panel_name_placeholder')}
+              placeholder={t("playlists.panel_name_placeholder")}
               className="flex-1 min-w-0 sm:max-w-xs border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                          bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                          focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
             <Button size="sm" onClick={handleSave} loading={editPlaylistMutation.isPending} disabled={!editName.trim()}>
-              {t('playlists.panel_save')}
+              {t("playlists.panel_save")}
             </Button>
             <Button size="sm" variant="secondary" onClick={exitEditMode}>
-              {t('playlists.panel_cancel')}
+              {t("playlists.panel_cancel")}
             </Button>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -581,6 +499,7 @@ function PlaylistPanel({
                 index={i}
                 isActive={activeSlot === i}
                 resolveName={resolveCollectionName}
+                resolveStats={resolveCollectionStats}
                 onRemove={() => removeSlot(i)}
                 onActivate={() => setActiveSlot(i)}
               />
@@ -588,22 +507,16 @@ function PlaylistPanel({
           </div>
 
           {activeSlot !== null && (
-            <PickerPanel
-              activeSlot={activeSlot}
-              search={search}
-              onSearch={setSearch}
-              tagFilter={tagFilter}
-              onTagFilter={setTagFilter}
-              allTagNames={allTagNames}
-              pickerCollections={pickerCollections}
-              onPick={pickCollection}
-              onClose={() => {
-                setActiveSlot(null);
-                setSearch("");
-                setTagFilter(null);
-              }}
-              searchRef={searchRef}
-            />
+            <div className="relative mt-5">
+              <CollectionPicker
+                activeSlot={activeSlot}
+                selectedIds={localIds}
+                allCollections={allCollections}
+                onPick={pickCollection}
+                onClose={() => setActiveSlot(null)}
+                searchRef={searchRef}
+              />
+            </div>
           )}
         </>
       )}
@@ -615,7 +528,9 @@ function PlaylistPanel({
 
 export function PlaylistsPage() {
   const { t } = useTranslation();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const { playlists: playlistsUi, setPlaylists } = useLibraryUiStore();
+  const selectedId = playlistsUi.selectedId;
+  const setSelectedId = (id: number | null) => setPlaylists({ selectedId: id });
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const toast = useToast();
   const deletePlaylist = useDeletePlaylist();
@@ -623,46 +538,41 @@ export function PlaylistsPage() {
   const { data: playlists = [], isLoading } = usePlaylists();
   const { data: allCollections = [] } = useCollections();
 
-  const effectiveId =
-    selectedId !== null && playlists.some((p) => p.id === selectedId) ? selectedId : null;
+  const effectiveId = selectedId !== null && playlists.some((p) => p.id === selectedId) ? selectedId : null;
 
   const selected = playlists.find((p) => p.id === effectiveId) ?? null;
 
-  const allTagNames = useMemo<string[]>(() => {
-    const set = new Set<string>();
-    for (const col of allCollections) {
-      for (const tag of col.tags ?? []) set.add(tag.name);
-    }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allCollections]);
-
   const handleDelete = (playlist: Playlist) => {
-    if (!window.confirm(t('playlists.confirm_delete', { name: playlist.name }))) return;
+    if (!window.confirm(t("playlists.confirm_delete", { name: playlist.name }))) return;
     deletePlaylist.mutate(playlist.id, {
       onSuccess: () => {
-        toast.success(t('playlists.toast_deleted'));
+        toast.success(t("playlists.toast_deleted"));
         setSelectedId(null);
       },
-      onError: () => toast.error(t('playlists.toast_delete_error')),
+      onError: () => toast.error(t("playlists.toast_delete_error")),
     });
   };
 
   return (
     <div>
       <div className="hidden sm:flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('playlists.title')}</h1>
-        <Button size="sm" onClick={() => setCreateModalOpen(true)}>
-          {t('playlists.new_btn')}
-        </Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("playlists.title")}</h1>
+        {selected ? (
+          <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 truncate max-w-xs">{selected.name}</h1>
+        ) : (
+          <Button size="sm" onClick={() => setCreateModalOpen(true)}>
+            {t("playlists.new_btn")}
+          </Button>
+        )}
       </div>
 
       {isLoading && <PlaylistSkeleton />}
 
       {!isLoading && playlists.length === 0 && (
         <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-          <p className="text-lg mb-2">{t('playlists.empty_title')}</p>
+          <p className="text-lg mb-2">{t("playlists.empty_title")}</p>
           <Button size="sm" onClick={() => setCreateModalOpen(true)}>
-            {t('playlists.create_first_btn')}
+            {t("playlists.create_first_btn")}
           </Button>
         </div>
       )}
@@ -672,7 +582,7 @@ export function PlaylistsPage() {
           {/* Mobile dropdown */}
           <div className="sm:hidden pt-3 mb-4 flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 shrink-0">
-              {t('playlists.mobile_label')}
+              {t("playlists.mobile_label")}
             </span>
             <select
               value={effectiveId ?? ""}
@@ -680,7 +590,7 @@ export function PlaylistsPage() {
               className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-indigo-50 dark:bg-gray-800 text-indigo-700 dark:text-gray-100 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:[color-scheme:dark]">
               {effectiveId === null && (
                 <option value="" disabled>
-                  {t('playlists.mobile_placeholder')}
+                  {t("playlists.mobile_placeholder")}
                 </option>
               )}
               {playlists.map((p) => (
@@ -711,19 +621,18 @@ export function PlaylistsPage() {
                   key={selected.id}
                   playlist={selected}
                   allCollections={allCollections}
-                  allTagNames={allTagNames}
                   onDelete={() => handleDelete(selected)}
-                  onCreateNew={() => setCreateModalOpen(true)}
                   deleteLoading={deletePlaylist.isPending}
+                  onClose={() => setSelectedId(null)}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center min-h-[320px] text-center px-8 py-12">
                   <div className="text-4xl mb-4 select-none">🎵</div>
                   <p className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {t('playlists.select_hint_title')}
+                    {t("playlists.select_hint_title")}
                   </p>
                   <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm leading-relaxed">
-                    {t('playlists.select_hint_desc')}
+                    {t("playlists.select_hint_desc")}
                   </p>
                 </div>
               )}
@@ -732,7 +641,7 @@ export function PlaylistsPage() {
         </>
       )}
 
-      <MobileFab onClick={() => setCreateModalOpen(true)} label={t('playlists.fab_label')} />
+      <MobileFab onClick={() => setCreateModalOpen(true)} label={t("playlists.fab_label")} />
       <PlaylistModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
   );

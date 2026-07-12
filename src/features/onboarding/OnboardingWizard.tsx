@@ -13,7 +13,7 @@ import { categoriesApi, contentApi } from "@/api";
 const UI_LANGS = [
   { code: "en", label: "English" },
   { code: "ru", label: "Русский" },
-  { code: "uk", label: "Українська" },
+  { code: "ua", label: "Українська" },
   { code: "es", label: "Español" },
   { code: "pl", label: "Polski" },
 ] as const;
@@ -25,9 +25,13 @@ export function OnboardingWizard() {
   const isDemo = useIsDemo();
   const { flashcardsSettings, saveFlashcardsSettings } = useUserSettings();
 
-  if (!user || isDemo || flashcardsSettings.onboarded) return null;
+  const localOnboarded = localStorage.getItem("fm_onboarded") === "true";
+  if (!user || isDemo || flashcardsSettings.onboarded || localOnboarded) return null;
 
-  const finish = () => void saveFlashcardsSettings({ onboarded: true });
+  const finish = () => {
+    localStorage.setItem("fm_onboarded", "true");
+    void saveFlashcardsSettings({ onboarded: true });
+  };
 
   return createPortal(<WizardModal onFinish={finish} />, document.body);
 }

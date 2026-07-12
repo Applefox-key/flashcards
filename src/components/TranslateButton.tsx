@@ -3,7 +3,7 @@ import { translateText } from "@/lib/translate";
 import { ALL_SPEECH_LANGS, type LangCode } from "@/lib/userSettings";
 import { useUserSettings } from "@/hooks/useUserSettings";
 
-const FALLBACK_LANG_CODES: LangCode[] = ["en-US", "ru-RU", "uk-UA", "de-DE", "fr-FR"];
+const FALLBACK_LANG_CODES: LangCode[] = ["en-US", "ru-RU", "ua-UA", "de-DE", "fr-FR"];
 
 interface Props {
   sourceText: string;
