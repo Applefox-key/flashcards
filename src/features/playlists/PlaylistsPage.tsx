@@ -293,9 +293,9 @@ function PlaylistPanel({
       {!isEditing && (
         <>
           <div className="sticky -top-3 sm:-top-6 z-10 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 py-2 mb-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
-            {/* Practice — always visible when collections exist */}
+            {/* Practice — desktop only; mobile gets fixed bottom bar */}
             {playlist.collections.length > 0 && (
-              <Link to={`/play/${playlist.id}?src=pl`}>
+              <Link to={`/play/${playlist.id}?src=pl`} className="hidden sm:inline-flex">
                 <Button size="sm" variant="primary">
                   <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("playlists.panel_practice")}
                 </Button>
@@ -638,6 +638,16 @@ export function PlaylistsPage() {
         </>
       )}
 
+      {/* Practice bar — mobile only, fixed above bottom nav */}
+      {selected && selected.collections.length > 0 && (
+        <div className="sm:hidden fixed bottom-10 left-0 right-0 z-40 py-2 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700">
+          <Link to={`/play/${selected.id}?src=pl`} className="block">
+            <Button className="w-full rounded-none justify-center" size="md">
+              <PiShootingStarThin className="w-8 h-8 mr-2" /> {t("playlists.panel_practice").toUpperCase()}
+            </Button>
+          </Link>
+        </div>
+      )}
       <MobileFab onClick={() => setCreateModalOpen(true)} label={t("playlists.fab_label")} />
       <PlaylistModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
