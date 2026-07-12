@@ -398,7 +398,7 @@ function AllCollectionsView({ search }: { search: string }) {
   }
 
   return (
-    <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : ""}>
+    <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : "pb-[10rem] sm:pb-auto"}>
       <div className="hidden sm:flex items-center justify-between mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900">
         {data && totalPages > 1 ? (
           <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
@@ -413,7 +413,7 @@ function AllCollectionsView({ search }: { search: string }) {
         </div>
       )}
       {compact && (
-        <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800">
+        <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800 ">
           {visible.map((col) => (
             <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
           ))}
@@ -602,7 +602,7 @@ function LibraryTabsBar({
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder={t("collections.search_placeholder")}
-          className="flex-1 min-w-0 sm:w-52 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
+          className="hidden sm:block sm:w-52 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
                      focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
@@ -705,7 +705,7 @@ export function CollectionsPage() {
   const showContent = !isLoading && totalCollections > 0;
 
   return (
-    <div className="pb-10">
+    <div className="pb-2">
       {/* ── Sticky header block ── */}
       <div className="sticky top-0 pt-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
         <LibraryTabsBar search={search} onSearch={setSearch} active={activeFilter} onChange={setActiveFilter} />
@@ -798,7 +798,7 @@ export function CollectionsPage() {
             : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} ❯`
         }
         tabIcon={<IoFilter />}
-        topValue="top-[130px] w-full flex flex-row nowrap"
+        topValue="top-[100px] w-full flex flex-row nowrap"
         title={t("collections.filters_title")}
         hasActiveIndicator={
           activeFilter !== "All" ||

@@ -215,7 +215,7 @@ function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: st
         </span>
       </div>
 
-      <div className="w-full sm:w-auto sm:ml-auto pb-2">
+      <div className="hidden sm:block sm:w-auto sm:ml-auto pb-2">
         <input
           value={search}
           onChange={(e) => onSearch(e.target.value)}

@@ -30,7 +30,7 @@ export function FilterDrawer({
       onOpen={onOpen}
       tabLabel={label}
       tabIcon={<FilterIcon />}
-      topValue="top-[130px] flex-row"
+      topValue="top-[100px] flex-row"
       title="Filters"
       hasActiveIndicator={hasActiveFilters}>
       {children}

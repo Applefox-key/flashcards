@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
+import { useLibraryUiStore } from "@/store/libraryUiStore";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { parseUserSettings } from "@/lib/userSettings";
 import { Toaster } from "./Toast";
@@ -59,7 +60,7 @@ function NavAvatar({ name, img, userId }: { name: string; img?: string; userId?:
   const avatarUrl = getAvatarUrl(img, userId);
 
   return avatarUrl ? (
-    <img key={avatarUrl} src={avatarUrl} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
+    <img key={avatarUrl} src={avatarUrl} alt="avatar" className="w-11 h-11 rounded-full object-cover" />
   ) : (
     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-300 select-none">
       {initials}
@@ -86,6 +87,15 @@ export function Layout() {
   }, [user?.settings]);
 
   const isGamePage = /^\/play\/[^/]+\/[^/]+/.test(location.pathname);
+
+  const { myLibrary, publicLibrary, setMyLibrary, setPublicLibrary } = useLibraryUiStore();
+  const isPublicLibraryPage = location.pathname === "/library/public";
+  const isLibrarySearchPage = location.pathname === "/library" || isPublicLibraryPage;
+  const headerSearch = isPublicLibraryPage ? publicLibrary.search : myLibrary.search;
+  const setHeaderSearch = (v: string) =>
+    isPublicLibraryPage
+      ? setPublicLibrary({ search: v, page: 1 })
+      : setMyLibrary({ search: v, allPage: 1 });
 
   const activeSection =
     location.pathname === "/library" ||
@@ -150,12 +160,31 @@ export function Layout() {
             <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300" />
           </button>
 
-          {/* Title: centered absolutely on mobile, inline on desktop */}
-          <NavLink
-            to="/library"
-            className="text-lg font-bold text-indigo-600 dark:text-indigo-400 absolute left-1/2 -translate-x-1/2 sm:static sm:translate-x-0">
-            FlashMinds
-          </NavLink>
+          {/* Mobile: search bar on library pages, centered title elsewhere */}
+          {isLibrarySearchPage ? (
+            <>
+              <input
+                type="search"
+                value={headerSearch}
+                onChange={(e) => setHeaderSearch(e.target.value)}
+                placeholder={t(isPublicLibraryPage ? "public_library.search_placeholder" : "collections.search_placeholder")}
+                className="sm:hidden flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm
+                           bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+                           focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <NavLink
+                to="/library"
+                className="text-lg font-bold text-indigo-600 dark:text-indigo-400 hidden sm:inline">
+                FlashMinds
+              </NavLink>
+            </>
+          ) : (
+            <NavLink
+              to="/library"
+              className="text-lg font-bold text-indigo-600 dark:text-indigo-400 absolute left-1/2 -translate-x-1/2 sm:static sm:translate-x-0">
+              FlashMinds
+            </NavLink>
+          )}
 
           <nav className="ml-4 hidden sm:flex gap-2">
             <NavLink
