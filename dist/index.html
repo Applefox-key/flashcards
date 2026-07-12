@@ -9,12 +9,17 @@
     <title>flashminds</title>
     <script>
       try {
-        if (localStorage.getItem('flashminds_theme') === 'dark') {
+        const isDark = localStorage.getItem('flashminds_theme') === 'dark';
+        if (isDark) {
           document.documentElement.classList.add('dark');
         }
+        const meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        meta.content = isDark ? '#111827' : '#f9fafb';
+        document.head.appendChild(meta);
       } catch {}
     </script>
-    <script type="module" crossorigin src="/assets/index-DvqhGFiT.js"></script>
+    <script type="module" crossorigin src="/assets/index-OgzhhSOC.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BuAnlMjX.css">
   </head>
   <body>

@@ -18,6 +18,8 @@ export function DarkModeToggle() {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("flashminds_theme", "light");
     }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", dark ? "#111827" : "#f9fafb");
   }, [dark]);
   const { t } = useTranslation();
   return (

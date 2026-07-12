@@ -9,9 +9,14 @@
     <title>flashminds</title>
     <script>
       try {
-        if (localStorage.getItem('flashminds_theme') === 'dark') {
+        const isDark = localStorage.getItem('flashminds_theme') === 'dark';
+        if (isDark) {
           document.documentElement.classList.add('dark');
         }
+        const meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        meta.content = isDark ? '#111827' : '#f9fafb';
+        document.head.appendChild(meta);
       } catch {}
     </script>
   </head>
