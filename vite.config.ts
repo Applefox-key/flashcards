@@ -6,6 +6,13 @@ export default defineConfig({
   resolve: {
     alias: { '@': '/src' },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: true,
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
