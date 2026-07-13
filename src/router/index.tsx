@@ -1,8 +1,9 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ErrorPage } from "@/components/ErrorPage";
 import { RootRedirect } from "./RootRedirect";
+import { useAuthStore } from "@/store/authStore";
 
 import { PublicLayout } from "@/components/PublicLayout";
 import { AuthPage } from "@/features/auth/AuthPage";
