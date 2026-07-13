@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { ErrorPage } from "@/components/ErrorPage";
@@ -26,6 +26,18 @@ import { CategoryCollectionsPage } from "@/features/categories/CategoryCollectio
 import { PublicCollectionPage } from "@/features/collections/PublicCollectionPage";
 import { CollectionTagsPage } from "@/features/tags/CollectionTagsPage";
 
+function AboutLayout() {
+  const { isAuthenticated, isDemo, isInitializing } = useAuthStore();
+  if (isInitializing) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  return isAuthenticated || isDemo ? <Layout /> : <PublicLayout />;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -34,7 +46,7 @@ export const router = createBrowserRouter([
       { index: true, element: <RootRedirect /> },
       { path: "login", element: <AuthPage /> },
       {
-        element: <PublicLayout />,
+        element: <AboutLayout />,
         children: [{ path: "about", element: <AboutPage /> }],
       },
       { path: "reset/:token", element: <ResetPasswordPage /> },
@@ -60,7 +72,6 @@ export const router = createBrowserRouter([
               { path: "categories", element: <CategoriesPage /> },
               { path: "categories/:id", element: <CategoryCollectionsPage /> },
               { path: "tags", element: <CollectionTagsPage /> },
-              { path: "about", element: <AboutPage /> },
               { path: "*", element: <Navigate to="/library" replace /> },
             ],
           },
