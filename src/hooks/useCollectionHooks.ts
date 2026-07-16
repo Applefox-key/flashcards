@@ -6,6 +6,7 @@ import { useEditCollection as realUseEditCollection } from '@/features/collectio
 import { useDeleteCollection as realUseDeleteCollection } from '@/features/collections/hooks/useCollections'
 import { useDeleteAllCards as realUseDeleteAllCards } from '@/features/collections/hooks/useCollections'
 import * as demo from '@/demo/useDemoCollections'
+import { useDemoStore } from '@/demo/demoStore'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { collectionsApi } from '@/api'
 
@@ -83,9 +84,29 @@ export function useDeleteAllCards() {
 }
 
 export function useCollectionsPaginated(page: number, limit: number, search?: string, isFavorite?: boolean, isPublic?: boolean, tagId?: number) {
-  return useQuery({
+  const isDemo = useIsDemo()
+  const demoCollections = useDemoStore((s) => s.collections)
+
+  const realQuery = useQuery({
     queryKey: ['collections', 'paginated', page, limit, search ?? '', isFavorite ?? false, isPublic ?? false, tagId ?? null],
     queryFn: () => collectionsApi.getPaginated(page, limit, search, isFavorite, isPublic, tagId),
     placeholderData: keepPreviousData,
+    enabled: !isDemo,
   })
+
+  if (isDemo) {
+    let filtered = demoCollections
+    if (search) filtered = filtered.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+    if (isFavorite) filtered = filtered.filter((c) => c.isFavorite)
+    if (isPublic) filtered = filtered.filter((c) => c.isPublic)
+    const start = (page - 1) * limit
+    return {
+      data: { data: filtered.slice(start, start + limit), total: filtered.length },
+      isLoading: false as const,
+      isError: false as const,
+      isFetching: false as const,
+    }
+  }
+
+  return realQuery
 }

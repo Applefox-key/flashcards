@@ -146,9 +146,7 @@ export function GamePage() {
         <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate">{title}</h1>
         {mistakeIds && (
           <span className="text-xs bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full">
-            {mistakeIds.size === 1
-              ? t("game_page.retrying_singular", { count: mistakeIds.size })
-              : t("game_page.retrying_plural", { count: mistakeIds.size })}
+            {t("game_page.retrying", { count: mistakeIds.size })}
           </span>
         )}
       </div>

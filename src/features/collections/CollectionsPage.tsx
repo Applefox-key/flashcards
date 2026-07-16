@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/Button";
 import { collectionsApi } from "@/api";
+import { useIsDemo } from "@/hooks/useIsDemo";
+import { useDemoStore } from "@/demo/demoStore";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
 import { useCollections, useCollectionsPaginated } from "@/hooks/useCollectionHooks";
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
@@ -69,10 +71,15 @@ function CollectionCard({
 }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const isDemo = useIsDemo();
+  const demoContent = useDemoStore((s) => s.content[collection.id]);
+  const demoCardPreviews = (demoContent ?? []).slice(0, 3).map((c) => ({ id: c.id, question: c.question, answer: c.answer }));
+
   const { data, isLoading } = useQuery({
     queryKey: ["collections", collection.id, "preview"],
     queryFn: () => collectionsApi.getPreview(collection.id, 3),
     staleTime: 5 * 60 * 1000,
+    enabled: !isDemo,
     select: (d) => {
       const raw = d as unknown as Array<{
         collection: { stats?: CollectionStats };
@@ -85,17 +92,19 @@ function CollectionCard({
     },
   });
 
-  if (isLoading) return <CollectionCardSkeleton />;
+  const preview = isDemo ? { cards: demoCardPreviews, stats: undefined } : data;
 
-  const cardCount = data?.stats
-    ? data.stats.toLearn + data.stats.inProgress + data.stats.learned
+  if (!isDemo && isLoading) return <CollectionCardSkeleton />;
+
+  const cardCount = preview?.stats
+    ? preview.stats.toLearn + preview.stats.inProgress + preview.stats.learned
     : (collection.cardCount ?? 0);
 
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
       className="group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-1 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
-      <StudyDot stats={data?.stats} className="absolute top-2 right-2 w-2.5 h-2.5 shadow-sm" />
+      <StudyDot stats={preview?.stats} className="absolute top-2 right-2 w-2.5 h-2.5 shadow-sm" />
       <div className="font-medium  text-gray-800 dark:text-gray-100 text-sm leading-snug">
         <div className="flex justify-start uppercase truncate">{highlight(collection.name, search)}</div>
 
@@ -107,11 +116,11 @@ function CollectionCard({
           {!!collection.isPublic && <span className="text-sm pb-1">🔓</span>}
         </div>
       </div>
-      <CollectionProgressBar stats={data?.stats} variant="minimal" />
-      {!compact && data && data.cards.length > 0 && (
+      <CollectionProgressBar stats={preview?.stats} variant="minimal" />
+      {!compact && preview && preview.cards.length > 0 && (
         <>
           <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
-            {data.cards.map((card) => (
+            {preview.cards.map((card) => (
               <div key={card.id} className="grid grid-cols-2 gap-1 text-sm text-gray-400 dark:text-gray-500">
                 <span className="truncate">{card.question ? card.question : <CiImageOn />}</span>
                 <span className="truncate text-gray-300 dark:text-gray-600">
@@ -155,10 +164,15 @@ function CollectionListRow({
 }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const isDemo = useIsDemo();
+  const demoContent = useDemoStore((s) => s.content[collection.id]);
+  const demoCardPreviews = (demoContent ?? []).slice(0, 3).map((c) => ({ id: c.id, question: c.question, answer: c.answer }));
+
   const { data } = useQuery({
     queryKey: ["collections", collection.id, "preview"],
     queryFn: () => collectionsApi.getPreview(collection.id, 3),
     staleTime: 5 * 60 * 1000,
+    enabled: !isDemo,
     select: (d) => {
       const raw = d as unknown as Array<{
         collection: { stats?: CollectionStats };
@@ -171,11 +185,13 @@ function CollectionListRow({
     },
   });
 
+  const preview = isDemo ? { cards: demoCardPreviews, stats: undefined } : data;
+
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
       className="group relative flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors first:rounded-t-xl last:rounded-b-xl border-b border-gray-100 dark:border-gray-700/60 last:border-b-0">
-      <StudyDot stats={data?.stats} showFallback className="shrink-0 w-2 h-2" />
+      <StudyDot stats={preview?.stats} showFallback className="shrink-0 w-2 h-2" />
       <span className="flex-1 min-w-0 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
         {highlight(collection.name, search)}
       </span>
@@ -193,15 +209,15 @@ function CollectionListRow({
       )}
 
       <div className="w-20 shrink-0 absolute bottom-0 w-full left-0">
-        <CollectionProgressBar stats={data?.stats} variant="minimal" />
+        <CollectionProgressBar stats={preview?.stats} variant="minimal" />
       </div>
 
       <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
         {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
         {!!collection.isPublic && <span className="text-xs">🔓</span>}{" "}
         {t("collections.card_count", {
-          count: data?.stats
-            ? data.stats.toLearn + data.stats.inProgress + data.stats.learned
+          count: preview?.stats
+            ? preview.stats.toLearn + preview.stats.inProgress + preview.stats.learned
             : (collection.cardCount ?? 0),
         })}
       </span>
@@ -213,11 +229,11 @@ function CollectionListRow({
         <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
       </Link>
 
-      {data && data.cards.length > 0 && (
+      {preview && preview.cards.length > 0 && (
         <div className="pointer-events-none absolute left-0 right-0 top-full z-10 pt-px opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-75">
           <div className="mx-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-lg shadow-lg px-3 py-2.5">
             <div className="flex flex-col gap-1.5">
-              {data.cards.map((card) => (
+              {preview.cards.map((card) => (
                 <div key={card.id} className="grid grid-cols-2 gap-3 text-xs">
                   <span className="text-gray-700 dark:text-gray-300 truncate">{card.question}</span>
                   <span className="text-gray-400 dark:text-gray-500 truncate">{card.answer}</span>

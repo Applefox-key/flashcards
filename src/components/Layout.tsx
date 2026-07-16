@@ -132,7 +132,7 @@ export function Layout() {
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Demo banner — fixed at top, never scrolls */}
       {isDemo && (
-        <div className="shrink-0 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50 px-4 py-1.5 flex items-center justify-between gap-4">
+        <div className="shrink-0 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50 px-4 py-1.5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-amber-700 dark:text-amber-400">👋 {t("layout.demo_banner")}</p>
           <div className="flex gap-3">
             <NavLink

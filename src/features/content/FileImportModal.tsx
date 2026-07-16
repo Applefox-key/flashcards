@@ -90,9 +90,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
       {
         onSuccess: () => {
           toast.success(
-            list.length === 1
-              ? t("file_import.toast_added_singular", { count: list.length })
-              : t("file_import.toast_added_plural", { count: list.length }),
+            t("file_import.toast_added", { count: list.length }),
           );
           handleClose();
         },
@@ -236,9 +234,7 @@ export function FileImportModal({ open, onClose, collectionId }: Props) {
                 {t("file_import.cancel_btn")}
               </Button>
               <Button onClick={handleSave} loading={bulkAdd.isPending} disabled={cards.length === 0}>
-                {cards.length === 1
-                  ? t("file_import.save_btn_singular", { count: cards.length })
-                  : t("file_import.save_btn_plural", { count: cards.length })}
+                {t("file_import.save_btn", { count: cards.length })}
               </Button>
             </div>
           </div>

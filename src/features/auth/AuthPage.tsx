@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/Button";
 import { authApi } from "@/api";
@@ -113,8 +113,11 @@ const TAB_KEYS = ["login", "register"] as const;
 export function AuthPage() {
   const { t } = useTranslation();
   const location = useLocation();
+  const { user } = useAuthStore();
   const initialTab: AuthTab = (location.state as { tab?: AuthTab } | null)?.tab ?? "login";
   const [tab, setTab] = useState<AuthTab>(initialTab);
+
+  if (user) return <Navigate to="/library" replace />;
   const [showLoginPwd, setShowLoginPwd] = useState(false);
   const [showRegisterPwd, setShowRegisterPwd] = useState(false);
   const navigate = useNavigate();

@@ -64,7 +64,7 @@ function PlaylistListItem({
       <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
         {count === 0
           ? t("playlists.item_no_collections")
-          : t(count === 1 ? "playlists.item_collections_singular" : "playlists.item_collections_plural", { count })}
+          : t("playlists.item_collections", { count })}
       </div>
     </button>
   );

@@ -77,9 +77,7 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
       {
         onSuccess: () => {
           toast.success(
-            list.length === 1
-              ? t("paste_cards.toast_added_singular", { count: list.length })
-              : t("paste_cards.toast_added_plural", { count: list.length }),
+            t("paste_cards.toast_added", { count: list.length }),
           );
           handleClose();
         },
@@ -200,9 +198,7 @@ export function PasteCardsModal({ open, onClose, collectionId }: Props) {
                 {t("paste_cards.cancel_btn")}
               </Button>
               <Button onClick={handleSave} loading={bulkAdd.isPending} disabled={cards.length === 0}>
-                {cards.length === 1
-                  ? t("paste_cards.save_btn_singular", { count: cards.length })
-                  : t("paste_cards.save_btn_plural", { count: cards.length })}
+                {t("paste_cards.save_btn", { count: cards.length })}
               </Button>
             </div>
           </div>

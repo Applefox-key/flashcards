@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -55,14 +55,12 @@ function CardImg({ filename, collectionId, alt }: { filename: string | undefined
 // ── Image upload field ───────────────────────────────────────────────
 
 function ImageUploadField({
-  label,
   currentFilename,
   collectionId,
   file,
   onFileChange,
   onClear,
 }: {
-  label: string;
   currentFilename?: string;
   collectionId: number;
   file: File | null;
@@ -87,8 +85,8 @@ function ImageUploadField({
   const hasExisting = !!currentFilename && currentFilename !== "null" && currentFilename !== "" && !file;
 
   return (
-    <div className="flex flex-col gap-1 mt-2">
-      <span className="text-xs text-gray-400 md:hidden">{label}</span>
+    <div className="flex flex-col gap-1 sm:mt-2">
+      {/* <span className="text-xs text-gray-400 md:hidden">{label}</span> */}
       <input
         ref={inputRef}
         type="file"
@@ -130,7 +128,8 @@ function ImageUploadField({
         <div
           onClick={() => inputRef.current?.click()}
           className="relative border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
-          <BiImageAdd className="text-2xl absolute bottom-0 right-0 " /> {t("collection_detail.img_click_to_add")}
+          <BiImageAdd className="text-xl sm:text-2xl absolute bottom-0 left-0 sm:right-0 sm:left-unset" />{" "}
+          {t("collection_detail.img_click_to_add")}
         </div>
       )}
     </div>
@@ -227,14 +226,13 @@ function EditCardModal({
   return (
     <Modal open={open} onClose={onClose} title={t("collection_detail.edit_card_title")} size="lg">
       <div className="flex flex-col gap-3">
-        <div>
+        <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
             <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
             <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2">
             <ImageUploadField
-              label={t("collection_detail.question_img_label")}
               currentFilename={clearImgQ ? undefined : card.imgQ}
               collectionId={collectionId}
               file={imgQFile}
@@ -249,11 +247,11 @@ function EditCardModal({
               onChange={(e) => setQuestion(e.target.value)}
               rows={2}
               autoFocus
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="w-full border border-gray-300 dark:border-gray-600 roundedpx-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
           </div>
         </div>
-        <div>
+        <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
             <label className="text-xs text-gray-400">{t("collection_detail.answer_label")}</label>
             <div className="flex items-center gap-1">
@@ -274,7 +272,6 @@ function EditCardModal({
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2">
             <ImageUploadField
-              label={t("collection_detail.answer_img_label")}
               currentFilename={clearImgA ? undefined : card.imgA}
               collectionId={collectionId}
               file={imgAFile}
@@ -407,7 +404,6 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
             className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
-            label={t("collection_detail.question_img_label")}
             collectionId={collectionId}
             file={imgQFile}
             onFileChange={setImgQFile}
@@ -444,7 +440,6 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
             className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
           <ImageUploadField
-            label={t("collection_detail.answer_img_label")}
             collectionId={collectionId}
             file={imgAFile}
             onFileChange={setImgAFile}
@@ -837,7 +832,7 @@ export function CollectionDetailPage() {
   const [fileOpen, setFileOpen] = useState(false);
   const [reorgMode, setReorgMode] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
-  const [pendingTagIds, setPendingTagIds] = useState<number[]>([]);
+  const [editedTagIds, setEditedTagIds] = useState<number[] | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [addCardDropdownOpen, setAddCardDropdownOpen] = useState(false);
@@ -859,9 +854,8 @@ export function CollectionDetailPage() {
     enabled: !!collectionId,
   });
 
-  useEffect(() => {
-    setPendingTagIds(collectionTags.map((t) => t.id));
-  }, [collectionTags]);
+  const serverTagIds = useMemo(() => collectionTags.map((t) => t.id), [collectionTags]);
+  const pendingTagIds = editedTagIds ?? serverTagIds;
 
   useEffect(() => {
     if (!editingTags) return;
@@ -871,7 +865,7 @@ export function CollectionDetailPage() {
       const inDesktop = tagPopoverDesktopRef.current?.contains(target);
       if (!inMobile && !inDesktop) {
         setEditingTags(false);
-        setPendingTagIds(collectionTags.map((t) => t.id));
+        setEditedTagIds(null);
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -1134,10 +1128,7 @@ export function CollectionDetailPage() {
             <div>
               <div className="hidden sm:flex gap-3 ml-8 mb-2 text-sm text-gray-400">
                 <div className="flex items-center flex-rows gap-1.5 justify-center">
-                  <span>
-                    {cards.length}{" "}
-                    {cards.length === 1 ? t("collection_detail.card_singular") : t("collection_detail.card_plural")}
-                  </span>
+                  <span>{t("collection_detail.card", { count: cards.length })}</span>
                   {collection?.category && (
                     <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
                       {typeof collection.category === "object"
@@ -1222,13 +1213,13 @@ export function CollectionDetailPage() {
                         <button
                           onClick={() => {
                             setEditingTags(false);
-                            setPendingTagIds(collectionTags.map((t) => t.id));
+                            setEditedTagIds(null);
                           }}
                           className="text-gray-400 hover:text-gray-600 text-lg leading-none">
                           ×
                         </button>
                       </div>
-                      <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
+                      <TagSelect value={pendingTagIds} onChange={setEditedTagIds} />
                       <div className="mt-3 flex justify-end">
                         <button
                           onClick={() =>
@@ -1706,8 +1697,7 @@ export function CollectionDetailPage() {
                   </span>
                 )}{" "}
                 <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                  {cards.length}{" "}
-                  {cards.length === 1 ? t("collection_detail.card_singular") : t("collection_detail.card_plural")}
+                  {t("collection_detail.card", { count: cards.length })}
                 </span>
               </div>
             </div>
@@ -1782,12 +1772,12 @@ export function CollectionDetailPage() {
                 </div>
               ) : (
                 <div ref={tagPopoverMobileRef}>
-                  <TagSelect value={pendingTagIds} onChange={setPendingTagIds} />
+                  <TagSelect value={pendingTagIds} onChange={setEditedTagIds} />
                   <div className="mt-3 flex gap-2 justify-end">
                     <button
                       onClick={() => {
                         setEditingTags(false);
-                        setPendingTagIds(collectionTags.map((t) => t.id));
+                        setEditedTagIds(null);
                       }}
                       className="text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                       {t("collection_detail.cancel_btn")}

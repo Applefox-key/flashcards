@@ -66,9 +66,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
       {
         onSuccess: () => {
           toast.success(
-            selected.size === 1
-              ? t("reorganize.toast_moved_singular", { count: selected.size })
-              : t("reorganize.toast_moved_plural", { count: selected.size }),
+            t("reorganize.toast_moved", { count: selected.size }),
           );
           onClose();
         },
@@ -87,11 +85,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
           editCard.mutateAsync({ collectionId: card.collectionid, data: { id: card.id, question: card.answer, answer: card.question, imgQ: card.imgQ, imgA: card.imgA } }),
         ),
       );
-      toast.success(
-        selected.size === 1
-          ? t("reorganize.toast_swapped_singular", { count: selected.size })
-          : t("reorganize.toast_swapped_plural", { count: selected.size }),
-      );
+      toast.success(t("reorganize.toast_swapped", { count: selected.size }));
       onClose();
     } catch {
       toast.error(t("reorganize.toast_swap_error"));
@@ -238,9 +232,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("reorganize.swap_title")}</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 max-w-xs">{t("reorganize.swap_desc")}</p>
               <Button onClick={handleSwap} loading={swapping} disabled={selected.size === 0}>
-                {selected.size === 1
-                  ? t("reorganize.swap_btn_singular", { count: selected.size })
-                  : t("reorganize.swap_btn_plural", { count: selected.size })}
+                {t("reorganize.swap_btn", { count: selected.size })}
               </Button>
             </div>
           )}
@@ -253,9 +245,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
           <>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {selected.size > 0 && targetId
-                ? selected.size === 1
-                  ? t("reorganize.move_hint_singular", { count: selected.size, name: targetName })
-                  : t("reorganize.move_hint_plural", { count: selected.size, name: targetName })
+                ? t("reorganize.move_hint", { count: selected.size, name: targetName })
                 : t("reorganize.move_hint_select")}
             </p>
             <div className="flex gap-2">
@@ -274,9 +264,7 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
           <>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {selected.size > 0
-                ? selected.size === 1
-                  ? t("reorganize.swap_selected_singular", { count: selected.size })
-                  : t("reorganize.swap_selected_plural", { count: selected.size })
+                ? t("reorganize.swap_selected", { count: selected.size })
                 : t("reorganize.swap_hint_select")}
             </p>
             <Button variant="secondary" onClick={onClose}>

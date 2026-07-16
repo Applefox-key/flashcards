@@ -56,9 +56,7 @@ export function CardPreviewTable({ cards, onChange }: Props) {
         ))}
       </div>
       <div className="bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 px-3 py-1.5 text-xs text-gray-400 dark:text-gray-500">
-        {cards.length === 1
-          ? t("card_preview_table.footer_singular", { count: cards.length })
-          : t("card_preview_table.footer_plural", { count: cards.length })}
+        {t("card_preview_table.footer", { count: cards.length })}
       </div>
     </div>
   );

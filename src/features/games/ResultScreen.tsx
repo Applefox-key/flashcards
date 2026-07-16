@@ -35,7 +35,7 @@ export function ResultScreen({ score, onPlayAgain, onRetryMistakes, onBack }: Pr
       <div className="flex flex-col gap-2 w-full max-w-xs">
         {onRetryMistakes && score.w > 0 && (
           <Button onClick={onRetryMistakes}>
-            {t(score.w === 1 ? 'result_screen.retry_mistakes_singular' : 'result_screen.retry_mistakes_plural', { count: score.w })}
+            {t('result_screen.retry_mistakes', { count: score.w })}
           </Button>
         )}
         <Button variant="secondary" onClick={onPlayAgain}>
