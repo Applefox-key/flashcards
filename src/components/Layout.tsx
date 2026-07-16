@@ -15,11 +15,11 @@ import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
 import i18n from "@/i18n";
 
 const UI_LANGS = [
-  { code: "en", label: "EN" },
-  { code: "ru", label: "RU" },
-  { code: "ua", label: "UA" },
-  { code: "es", label: "ES" },
-  { code: "pl", label: "PL" },
+  { code: "en", label: "English" },
+  { code: "ru", label: "Русский" },
+  { code: "ua", label: "Українська" },
+  { code: "es", label: "Español" },
+  { code: "pl", label: "Polski" },
 ];
 
 const APPS = [
@@ -340,22 +340,18 @@ export function Layout() {
                 <DarkModeToggle />
               </div>
               {/* Language picker */}
-              <div className="flex items-center justify-between py-1">
-                <span className="text-sm text-gray-700 dark:text-gray-300">UI</span>
-                <div className="flex gap-1">
+              <div className="flex items-center justify-between py-1 gap-2">
+                <span className="text-sm text-gray-700 dark:text-gray-300 shrink-0">{t("layout.language")}</span>
+                <select
+                  value={currentLang}
+                  onChange={(e) => saveLangUI(e.target.value)}
+                  className="text-xs rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer">
                   {UI_LANGS.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => saveLangUI(lang.code)}
-                      className={`px-1.5 py-0.5 rounded text-xs font-medium transition-colors ${
-                        currentLang === lang.code
-                          ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}>
+                    <option key={lang.code} value={lang.code}>
                       {lang.label}
-                    </button>
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
               <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
               <NavLink
