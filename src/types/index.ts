@@ -148,3 +148,9 @@ export interface SaveGameResultsRequest {
 export interface ApiError {
   error: string
 }
+
+/** Per-game probability map for one card: { "test0": 8, "write0": 12, ... } */
+export type CardProbs = Record<string, number>
+
+/** contentId (string) → CardProbs, returned by GET /gamesresult/collection/:id */
+export type CollectionProbs = Record<string, CardProbs>

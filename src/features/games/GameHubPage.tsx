@@ -33,6 +33,10 @@ export function GameHubPage() {
     navigate(isPlaylist ? `${base}?src=pl` : base);
   }
 
+  function handleStats() {
+    navigate(isPlaylist ? `/playlists/${id}` : `/collections/${id}/stats`);
+  }
+
   if (isError) {
     return (
       <div className="text-center py-16 text-red-500">
@@ -73,6 +77,17 @@ export function GameHubPage() {
           <span className="text-xs text-gray-400 ml-1">
             {t("collections.card_count", { count: cards.length })}
           </span>
+        )}
+        {!isLoading && !isPlaylist && (
+          <button
+            onClick={handleStats}
+            title={t("stats.title")}
+            className="ml-auto text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M3 3h2v18H3V3zm4 9h2v9H7v-9zm4-5h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
+            </svg>
+          </button>
         )}
       </div>
 

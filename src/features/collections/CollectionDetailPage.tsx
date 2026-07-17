@@ -1058,6 +1058,17 @@ export function CollectionDetailPage() {
                     className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <span className="text-xs text-gray-400">✏</span> {t("collection_detail.edit_collection_btn")}
                   </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate(`/collections/${id}/stats`);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-gray-400" fill="currentColor">
+                      <path d="M3 3h2v18H3V3zm4 9h2v9H7v-9zm4-5h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
+                    </svg>
+                    {t("stats.title")}
+                  </button>
                   {cards.length > 1 && (
                     <button
                       onClick={() => {
@@ -1306,6 +1317,14 @@ export function CollectionDetailPage() {
                 </>
               )}
               {/* Split button: left = Edit collection, right = dropdown */}
+              <Link to={`/collections/${id}/stats`} title={t("stats.title")}>
+                <Button className="rounded-lg" size="sm" variant="secondary">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 mr-1.5" fill="currentColor">
+                    <path d="M3 3h2v18H3V3zm4 9h2v9H7v-9zm4-5h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
+                  </svg>
+                  {t("stats.title")}
+                </Button>
+              </Link>{" "}
               <div className="relative flex" ref={editDropdownRef}>
                 <div className="flex">
                   <button

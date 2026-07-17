@@ -750,5 +750,25 @@
     "google_signin": "Zaloguj przez Google",
     "google_signup": "Zarejestruj przez Google",
     "or": "lub"
+  },
+  "stats": {
+    "title": "Statystyki",
+    "user_ratings": "Oceny gwiazdkowe",
+    "auto_mastery": "Auto-opanowanie",
+    "auto_mastery_hint": "Średnia ze wszystkich rozegranych trybów (1 = opanowane, 20 = trudne)",
+    "overall": "średnio",
+    "game_modes": "Według trybu",
+    "card_list": "Karty",
+    "question": "Pytanie",
+    "answer": "Odpowiedź",
+    "unrated": "Bez oceny",
+    "no_ratings_yet": "Brak ocen — oceń karty w trybie «Karty»",
+    "not_played": "Jeszcze nie grano w tym trybie",
+    "no_cards": "Brak kart",
+    "n_cards_one": "{{count}} karta",
+    "n_cards_few": "{{count}} karty",
+    "n_cards_many": "{{count}} kart",
+    "n_cards_other": "{{count}} karty",
+    "card_stats_title": "Postęp karty"
   }
 }

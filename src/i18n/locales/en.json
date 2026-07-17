@@ -716,5 +716,23 @@
     "google_signin": "Sign in with Google",
     "google_signup": "Sign up with Google",
     "or": "or"
+  },
+  "stats": {
+    "title": "Statistics",
+    "user_ratings": "Star ratings",
+    "auto_mastery": "Auto-mastery",
+    "auto_mastery_hint": "Average across all played modes (1 = mastered, 20 = struggling)",
+    "overall": "overall",
+    "game_modes": "By mode",
+    "card_list": "Cards",
+    "question": "Question",
+    "answer": "Answer",
+    "unrated": "Unrated",
+    "no_ratings_yet": "No ratings yet — rate cards in Flashcard mode",
+    "not_played": "Not played in this mode yet",
+    "no_cards": "No cards",
+    "n_cards_one": "{{count}} card",
+    "n_cards_other": "{{count}} cards",
+    "card_stats_title": "Card progress"
   }
 }

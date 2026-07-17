@@ -716,5 +716,23 @@
     "google_signin": "Iniciar sesión con Google",
     "google_signup": "Registrarse con Google",
     "or": "o"
+  },
+  "stats": {
+    "title": "Estadísticas",
+    "user_ratings": "Valoraciones",
+    "auto_mastery": "Dominio automático",
+    "auto_mastery_hint": "Promedio en todos los modos jugados (1 = dominado, 20 = difícil)",
+    "overall": "promedio",
+    "game_modes": "Por modo",
+    "card_list": "Tarjetas",
+    "question": "Pregunta",
+    "answer": "Respuesta",
+    "unrated": "Sin valorar",
+    "no_ratings_yet": "Sin valoraciones — califica tarjetas en modo «Tarjetas»",
+    "not_played": "Aún no jugado en este modo",
+    "no_cards": "Sin tarjetas",
+    "n_cards_one": "{{count}} tarjeta",
+    "n_cards_other": "{{count}} tarjetas",
+    "card_stats_title": "Progreso de tarjeta"
   }
 }

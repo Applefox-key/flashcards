@@ -25,6 +25,7 @@ import { CategoriesPage } from "@/features/categories/CategoriesPage";
 import { CategoryCollectionsPage } from "@/features/categories/CategoryCollectionsPage";
 import { PublicCollectionPage } from "@/features/collections/PublicCollectionPage";
 import { CollectionTagsPage } from "@/features/tags/CollectionTagsPage";
+import { CollectionStatsPage } from "@/features/stats/CollectionStatsPage";
 
 function AboutLayout() {
   const { isAuthenticated, isDemo, isInitializing } = useAuthStore();
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
               { path: "library/public/:id", element: <PublicCollectionPage /> },
               { path: "collections/:id", element: <CollectionDetailPage /> },
               { path: "collections/:id/edit", element: <CollectionEditPage /> },
+              { path: "collections/:id/stats", element: <CollectionStatsPage /> },
               { path: "collections/new", element: <CollectionCreatePage /> },
               { path: "playlists", element: <PlaylistsPage /> },
               { path: "playlists/:id", element: <PlaylistDetailPage /> },

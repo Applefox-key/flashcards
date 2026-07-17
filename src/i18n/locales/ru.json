@@ -751,5 +751,25 @@
     "google_signin": "Войти через Google",
     "google_signup": "Зарегистрироваться через Google",
     "or": "или"
+  },
+  "stats": {
+    "title": "Статистика",
+    "user_ratings": "Оценки звёздами",
+    "auto_mastery": "Авто-оценка",
+    "auto_mastery_hint": "Среднее по всем сыгранным режимам (1 = выучено, 20 = сложно)",
+    "overall": "в среднем",
+    "game_modes": "По режимам",
+    "card_list": "Карточки",
+    "question": "Вопрос",
+    "answer": "Ответ",
+    "unrated": "Без оценки",
+    "no_ratings_yet": "Оценок пока нет — ставьте звёзды в режиме «Карточки»",
+    "not_played": "Ещё не играли в этом режиме",
+    "no_cards": "Карточек нет",
+    "n_cards_one": "{{count}} карточка",
+    "n_cards_few": "{{count}} карточки",
+    "n_cards_many": "{{count}} карточек",
+    "n_cards_other": "{{count}} карточки",
+    "card_stats_title": "Прогресс карточки"
   }
 }

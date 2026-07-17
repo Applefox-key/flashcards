@@ -752,5 +752,25 @@
     "google_signin": "Увійти через Google",
     "google_signup": "Зареєструватися через Google",
     "or": "або"
+  },
+  "stats": {
+    "title": "Статистика",
+    "user_ratings": "Оцінки зірками",
+    "auto_mastery": "Авто-оцінка",
+    "auto_mastery_hint": "Середнє по всіх зіграних режимах (1 = вивчено, 20 = складно)",
+    "overall": "у середньому",
+    "game_modes": "За режимами",
+    "card_list": "Картки",
+    "question": "Питання",
+    "answer": "Відповідь",
+    "unrated": "Без оцінки",
+    "no_ratings_yet": "Оцінок ще немає — ставте зірки в режимі «Картки»",
+    "not_played": "Ще не грали в цьому режимі",
+    "no_cards": "Карток немає",
+    "n_cards_one": "{{count}} картка",
+    "n_cards_few": "{{count}} картки",
+    "n_cards_many": "{{count}} карток",
+    "n_cards_other": "{{count}} картки",
+    "card_stats_title": "Прогрес картки"
   }
 }
