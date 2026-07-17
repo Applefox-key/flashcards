@@ -121,7 +121,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
             }}>
             {/* Front face */}
             <div
-              className="absolute inset-0 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex flex-col p-8"
+              className="absolute inset-0 rounded-2xl border border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 bg-white dark:bg-gray-800 shadow-lg flex flex-col p-8"
               style={{ backfaceVisibility: "hidden", overflowY: "auto" }}>
               <div className="m-auto flex flex-col items-center gap-3 w-full">
                 <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">
@@ -139,7 +139,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
 
             {/* Back face */}
             <div
-              className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-600 dark:bg-indigo-900/20 shadow-sm flex flex-col p-8"
+              className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-600 dark:bg-indigo-900/20 shadow-lg flex flex-col p-8"
               style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", overflowY: "auto" }}>
               <div className="m-auto flex flex-col items-center gap-3 w-full">
                 <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">

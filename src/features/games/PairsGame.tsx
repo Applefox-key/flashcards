@@ -186,8 +186,8 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
               onClick={() => handleClick(cell)}
               disabled={cell.matched}
               className={`
-                rounded-xl border-2 px-3 py-4 text-sm font-medium text-center
-                transition-all duration-200 leading-tight min-h-[60px]
+                rounded-xl border-2 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 px-3 py-4 text-sm font-medium text-center
+                transition-all duration-200 leading-tight min-h-[60px] shadow-sm
                 ${getCellClass(cell)}
               `}>
               {cell.img && (
@@ -207,8 +207,8 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
               onClick={() => handleClick(cell)}
               disabled={cell.matched}
               className={`
-                rounded-xl border-2 px-3 py-4 text-sm font-medium text-center
-                transition-all duration-200 leading-tight min-h-[60px]
+                rounded-xl border-2 border-t-4 border-t-orange-400 dark:border-t-orange-400 px-3 py-4 text-sm font-medium text-center
+                transition-all duration-200 leading-tight min-h-[60px] shadow-sm
                 ${getCellClass(cell)}
               `}>
               {cell.img && (

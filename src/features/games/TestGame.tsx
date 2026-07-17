@@ -199,7 +199,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
       </div>
 
       {/* Prompt card */}
-      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
+      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("test_game.label_answer") : t("test_game.label_question")}</p>
         <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
         <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />

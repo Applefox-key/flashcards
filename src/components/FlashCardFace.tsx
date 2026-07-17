@@ -154,7 +154,7 @@ export function FlashCardFace({
         }}>
         {/* Front face */}
         <div
-          className="absolute inset-0 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex flex-col"
+          className="absolute inset-0 rounded-2xl border border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 bg-white dark:bg-gray-800 shadow-lg flex flex-col"
           style={{ backfaceVisibility: "hidden" }}>
           <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
             <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
@@ -177,7 +177,7 @@ export function FlashCardFace({
 
         {/* Back face */}
         <div
-          className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-500 dark:bg-indigo-900/20 shadow-sm flex flex-col"
+          className="absolute inset-0 rounded-2xl border border-indigo-500 bg-indigo-500 dark:bg-indigo-900/20 shadow-lg flex flex-col"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
           <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
             <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>
