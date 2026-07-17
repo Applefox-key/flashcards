@@ -419,7 +419,18 @@
   "flashcard_game": {
     "no_cards": "Brak fiszek do wyświetlenia.",
     "prev_btn": "← Poprz.",
-    "next_btn": "Nast. →"
+    "next_btn": "Nast. →",
+    "mode_normal": "Normalny",
+    "mode_mastery": "Mistrzostwo",
+    "grade_again": "Nie pamiętam",
+    "grade_hard": "Trudne",
+    "grade_good": "Dobrze",
+    "grade_easy": "Łatwe",
+    "mastery_progress": "Opanowane: {{count}} / {{total}}",
+    "mastery_flip_hint": "Dotknij, aby zobaczyć odpowiedź",
+    "mastery_complete_title": "Wszystkie fiszki opanowane!",
+    "mastery_complete_subtitle": "Świetna robota! Udało ci się zapamiętać cały zestaw.",
+    "mastery_reset": "Zacznij od nowa"
   },
   "game_page": {
     "failed_to_load": "Nie udało się załadować kart.",

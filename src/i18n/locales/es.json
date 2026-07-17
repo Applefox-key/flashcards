@@ -395,7 +395,18 @@
   "flashcard_game": {
     "no_cards": "No hay tarjetas para mostrar.",
     "prev_btn": "← Ant.",
-    "next_btn": "Sig. →"
+    "next_btn": "Sig. →",
+    "mode_normal": "Normal",
+    "mode_mastery": "Dominio",
+    "grade_again": "Olvidé",
+    "grade_hard": "Difícil",
+    "grade_good": "Bien",
+    "grade_easy": "Fácil",
+    "mastery_progress": "Dominadas: {{count}} / {{total}}",
+    "mastery_flip_hint": "Toca para ver la respuesta",
+    "mastery_complete_title": "¡Todas las tarjetas dominadas!",
+    "mastery_complete_subtitle": "¡Excelente trabajo! Has memorizado todo el conjunto con éxito.",
+    "mastery_reset": "Empezar de nuevo"
   },
   "game_page": {
     "failed_to_load": "Error al cargar las tarjetas.",

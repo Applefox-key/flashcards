@@ -420,7 +420,18 @@
   "flashcard_game": {
     "no_cards": "Нет карточек для показа.",
     "prev_btn": "← Назад",
-    "next_btn": "Вперёд →"
+    "next_btn": "Вперёд →",
+    "mode_normal": "Обычный",
+    "mode_mastery": "До победного",
+    "grade_again": "Не вспомнил",
+    "grade_hard": "Сложно",
+    "grade_good": "Хорошо",
+    "grade_easy": "Легко",
+    "mastery_progress": "Освоено: {{count}} / {{total}}",
+    "mastery_flip_hint": "Нажмите, чтобы увидеть ответ",
+    "mastery_complete_title": "Все карточки освоены!",
+    "mastery_complete_subtitle": "Отличная работа! Вы успешно запомнили весь набор.",
+    "mastery_reset": "Начать заново"
   },
   "game_page": {
     "failed_to_load": "Не удалось загрузить карточки.",

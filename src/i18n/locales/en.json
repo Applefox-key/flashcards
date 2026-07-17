@@ -395,7 +395,18 @@
   "flashcard_game": {
     "no_cards": "No cards to show.",
     "prev_btn": "← Prev",
-    "next_btn": "Next →"
+    "next_btn": "Next →",
+    "mode_normal": "Normal",
+    "mode_mastery": "Mastery",
+    "grade_again": "Forgot",
+    "grade_hard": "Hard",
+    "grade_good": "Good",
+    "grade_easy": "Easy",
+    "mastery_progress": "Mastered: {{count}} / {{total}}",
+    "mastery_flip_hint": "Tap to reveal the answer",
+    "mastery_complete_title": "All cards mastered!",
+    "mastery_complete_subtitle": "Great job! You have successfully memorized the entire set.",
+    "mastery_reset": "Start Over"
   },
   "game_page": {
     "failed_to_load": "Failed to load cards.",

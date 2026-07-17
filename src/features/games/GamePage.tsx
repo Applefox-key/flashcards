@@ -27,6 +27,7 @@ export function GamePage() {
   const [answerFirst, setAnswerFirst] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [timedDelay, setTimedDelay] = useState(2);
+  const [flashcardMode, setFlashcardMode] = useState<"normal" | "mastery">("normal");
   const [partsMode, setPartsMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
   const [writeMode, setWriteMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
   const [testMode, setTestMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
@@ -122,6 +123,7 @@ export function GamePage() {
     answerFirst ||
     isShuffled ||
     rateFilter !== null ||
+    (type === "flashcard" && flashcardMode !== "normal") ||
     (type === "parts" && partsMode !== "oneshot") ||
     (type === "write" && writeMode !== "oneshot") ||
     (type === "test" && testMode !== "oneshot");
@@ -160,9 +162,23 @@ export function GamePage() {
             </button>
           )}
           {type === "flashcard" && (
-            <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
-              {t("game_page.shuffle")}
-            </button>
+            <>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => { setFlashcardMode("normal"); setGameKey((k) => k + 1); }}
+                  className={`${btnBase} ${flashcardMode === "normal" ? btnActive : btnInactive}`}>
+                  {t("flashcard_game.mode_normal")}
+                </button>
+                <button
+                  onClick={() => { setFlashcardMode("mastery"); setGameKey((k) => k + 1); }}
+                  className={`${btnBase} ${flashcardMode === "mastery" ? btnActive : btnInactive}`}>
+                  {t("flashcard_game.mode_mastery")}
+                </button>
+              </div>
+              <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
+                {t("game_page.shuffle")}
+              </button>
+            </>
           )}
           {type === "parts" && (
             <div className="flex gap-1">
@@ -265,6 +281,7 @@ export function GamePage() {
               collectionId={collectionId}
               answerFirst={answerFirst}
               isShuffled={isShuffled}
+              mode={flashcardMode}
             />
           )}
           {type === "timed" && (
@@ -387,6 +404,27 @@ export function GamePage() {
                 onClick={() => { setTestMode("endless-skip"); setGameKey((k) => k + 1); }}
                 className={`${btnBase} ${testMode === "endless-skip" ? btnActive : btnInactive}`}>
                 {t("game_page.endless_skip")}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mode — flashcard only */}
+        {type === "flashcard" && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              {t("game_page.section_mode")}
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => { setFlashcardMode("normal"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${flashcardMode === "normal" ? btnActive : btnInactive}`}>
+                {t("flashcard_game.mode_normal")}
+              </button>
+              <button
+                onClick={() => { setFlashcardMode("mastery"); setGameKey((k) => k + 1); }}
+                className={`${btnBase} ${flashcardMode === "mastery" ? btnActive : btnInactive}`}>
+                {t("flashcard_game.mode_mastery")}
               </button>
             </div>
           </div>

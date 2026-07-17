@@ -420,7 +420,18 @@
   "flashcard_game": {
     "no_cards": "Немає карток для показу.",
     "prev_btn": "← Назад",
-    "next_btn": "Вперед →"
+    "next_btn": "Вперед →",
+    "mode_normal": "Звичайний",
+    "mode_mastery": "До переможного",
+    "grade_again": "Не згадав",
+    "grade_hard": "Важко",
+    "grade_good": "Добре",
+    "grade_easy": "Легко",
+    "mastery_progress": "Освоєно: {{count}} / {{total}}",
+    "mastery_flip_hint": "Натисніть, щоб побачити відповідь",
+    "mastery_complete_title": "Всі картки освоєно!",
+    "mastery_complete_subtitle": "Чудова робота! Ви успішно запам'ятали весь набір.",
+    "mastery_reset": "Почати знову"
   },
   "game_page": {
     "failed_to_load": "Не вдалося завантажити картки.",
