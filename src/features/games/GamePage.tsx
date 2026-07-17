@@ -12,6 +12,7 @@ import { WriteGame } from "./WriteGame";
 import { PartsGame } from "./PartsGame";
 import { SideDrawer } from "@/components/SideDrawer";
 import { GameModeHelp } from "./GameModeHelp";
+import { GameModeSelect, PRACTICE_MODE_OPTIONS, FLASHCARD_MODE_OPTIONS } from "./GameModeSelect";
 import type { Content } from "@/types";
 
 export function GamePage() {
@@ -157,94 +158,47 @@ export function GamePage() {
       {!isLoading && (
         <div className="hidden sm:flex mb-5 items-center gap-3 flex-wrap">
           {type !== "pairs" && (
-            <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive}`}>
+            <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive} flex items-center gap-1.5`}>
+              <span className="opacity-60">{t("game_page.section_direction")}:</span>
               {directionLabel}
             </button>
           )}
           {type === "flashcard" && (
             <>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => { setFlashcardMode("normal"); setGameKey((k) => k + 1); }}
-                  className={`${btnBase} ${flashcardMode === "normal" ? btnActive : btnInactive}`}>
-                  {t("flashcard_game.mode_normal")}
-                </button>
-                <button
-                  onClick={() => { setFlashcardMode("mastery"); setGameKey((k) => k + 1); }}
-                  className={`${btnBase} ${flashcardMode === "mastery" ? btnActive : btnInactive}`}>
-                  {t("flashcard_game.mode_mastery")}
-                </button>
-              </div>
+              <GameModeSelect
+                value={flashcardMode}
+                onChange={(mode) => { setFlashcardMode(mode); setGameKey((k) => k + 1); }}
+                options={FLASHCARD_MODE_OPTIONS}
+                prefixKey="game_page.section_mode"
+              />
               <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
                 {t("game_page.shuffle")}
               </button>
             </>
           )}
           {type === "parts" && (
-            <div className="flex gap-1">
-              <button
-                onClick={() => {
-                  setPartsMode("oneshot");
-                  setGameKey((k) => k + 1);
-                }}
-                className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
-                {t("game_page.one_shot")}
-              </button>
-              <button
-                onClick={() => {
-                  setPartsMode("endless");
-                  setGameKey((k) => k + 1);
-                }}
-                className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
-                {t("game_page.endless")}
-              </button>
-              <button
-                onClick={() => {
-                  setPartsMode("endless-skip");
-                  setGameKey((k) => k + 1);
-                }}
-                className={`${btnBase} ${partsMode === "endless-skip" ? btnActive : btnInactive}`}>
-                {t("game_page.endless_skip")}
-              </button>
-            </div>
+            <GameModeSelect
+              value={partsMode}
+              onChange={(mode) => { setPartsMode(mode); setGameKey((k) => k + 1); }}
+              options={PRACTICE_MODE_OPTIONS}
+              prefixKey="game_page.section_mode"
+            />
           )}
           {type === "write" && (
-            <div className="flex gap-1">
-              <button
-                onClick={() => { setWriteMode("oneshot"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${writeMode === "oneshot" ? btnActive : btnInactive}`}>
-                {t("game_page.one_shot")}
-              </button>
-              <button
-                onClick={() => { setWriteMode("endless"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${writeMode === "endless" ? btnActive : btnInactive}`}>
-                {t("game_page.endless")}
-              </button>
-              <button
-                onClick={() => { setWriteMode("endless-skip"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${writeMode === "endless-skip" ? btnActive : btnInactive}`}>
-                {t("game_page.endless_skip")}
-              </button>
-            </div>
+            <GameModeSelect
+              value={writeMode}
+              onChange={(mode) => { setWriteMode(mode); setGameKey((k) => k + 1); }}
+              options={PRACTICE_MODE_OPTIONS}
+              prefixKey="game_page.section_mode"
+            />
           )}
           {type === "test" && (
-            <div className="flex gap-1">
-              <button
-                onClick={() => { setTestMode("oneshot"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${testMode === "oneshot" ? btnActive : btnInactive}`}>
-                {t("game_page.one_shot")}
-              </button>
-              <button
-                onClick={() => { setTestMode("endless"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${testMode === "endless" ? btnActive : btnInactive}`}>
-                {t("game_page.endless")}
-              </button>
-              <button
-                onClick={() => { setTestMode("endless-skip"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${testMode === "endless-skip" ? btnActive : btnInactive}`}>
-                {t("game_page.endless_skip")}
-              </button>
-            </div>
+            <GameModeSelect
+              value={testMode}
+              onChange={(mode) => { setTestMode(mode); setGameKey((k) => k + 1); }}
+              options={PRACTICE_MODE_OPTIONS}
+              prefixKey="game_page.section_mode"
+            />
           )}
           {type === "timed" && (
             <div className="flex items-center gap-2">
@@ -311,7 +265,8 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_direction")}
             </p>
-            <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive}`}>
+            <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive} flex items-center gap-1.5`}>
+              <span className="opacity-60">{t("game_page.section_direction")}:</span>
               {directionLabel}
             </button>
           </div>
@@ -331,32 +286,13 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_mode")}
             </p>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => {
-                  setPartsMode("oneshot");
-                  setGameKey((k) => k + 1);
-                }}
-                className={`${btnBase} ${partsMode === "oneshot" ? btnActive : btnInactive}`}>
-                {t("game_page.one_shot")}
-              </button>
-              <button
-                onClick={() => {
-                  setPartsMode("endless");
-                  setGameKey((k) => k + 1);
-                }}
-                className={`${btnBase} ${partsMode === "endless" ? btnActive : btnInactive}`}>
-                {t("game_page.endless")}
-              </button>
-              <button
-                onClick={() => {
-                  setPartsMode("endless-skip");
-                  setGameKey((k) => k + 1);
-                }}
-                className={`${btnBase} ${partsMode === "endless-skip" ? btnActive : btnInactive}`}>
-                {t("game_page.endless_skip")}
-              </button>
-            </div>
+            <GameModeSelect
+              value={partsMode}
+              onChange={(mode) => { setPartsMode(mode); setGameKey((k) => k + 1); }}
+              options={PRACTICE_MODE_OPTIONS}
+              prefixKey="game_page.section_mode"
+              inline
+            />
           </div>
         )}
 
@@ -365,47 +301,28 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_mode")}
             </p>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => { setWriteMode("oneshot"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${writeMode === "oneshot" ? btnActive : btnInactive}`}>
-                {t("game_page.one_shot")}
-              </button>
-              <button
-                onClick={() => { setWriteMode("endless"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${writeMode === "endless" ? btnActive : btnInactive}`}>
-                {t("game_page.endless")}
-              </button>
-              <button
-                onClick={() => { setWriteMode("endless-skip"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${writeMode === "endless-skip" ? btnActive : btnInactive}`}>
-                {t("game_page.endless_skip")}
-              </button>
-            </div>
+            <GameModeSelect
+              value={writeMode}
+              onChange={(mode) => { setWriteMode(mode); setGameKey((k) => k + 1); }}
+              options={PRACTICE_MODE_OPTIONS}
+              prefixKey="game_page.section_mode"
+              inline
+            />
           </div>
         )}
+
         {type === "test" && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_mode")}
             </p>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => { setTestMode("oneshot"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${testMode === "oneshot" ? btnActive : btnInactive}`}>
-                {t("game_page.one_shot")}
-              </button>
-              <button
-                onClick={() => { setTestMode("endless"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${testMode === "endless" ? btnActive : btnInactive}`}>
-                {t("game_page.endless")}
-              </button>
-              <button
-                onClick={() => { setTestMode("endless-skip"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${testMode === "endless-skip" ? btnActive : btnInactive}`}>
-                {t("game_page.endless_skip")}
-              </button>
-            </div>
+            <GameModeSelect
+              value={testMode}
+              onChange={(mode) => { setTestMode(mode); setGameKey((k) => k + 1); }}
+              options={PRACTICE_MODE_OPTIONS}
+              prefixKey="game_page.section_mode"
+              inline
+            />
           </div>
         )}
 
@@ -415,18 +332,13 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_mode")}
             </p>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => { setFlashcardMode("normal"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${flashcardMode === "normal" ? btnActive : btnInactive}`}>
-                {t("flashcard_game.mode_normal")}
-              </button>
-              <button
-                onClick={() => { setFlashcardMode("mastery"); setGameKey((k) => k + 1); }}
-                className={`${btnBase} ${flashcardMode === "mastery" ? btnActive : btnInactive}`}>
-                {t("flashcard_game.mode_mastery")}
-              </button>
-            </div>
+            <GameModeSelect
+              value={flashcardMode}
+              onChange={(mode) => { setFlashcardMode(mode); setGameKey((k) => k + 1); }}
+              options={FLASHCARD_MODE_OPTIONS}
+              prefixKey="game_page.section_mode"
+              inline
+            />
           </div>
         )}
 

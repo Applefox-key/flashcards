@@ -398,6 +398,8 @@
     "next_btn": "Sig. →",
     "mode_normal": "Normal",
     "mode_mastery": "Dominio",
+    "mode_normal_desc": "Navega por las tarjetas libremente. Califica cada una con estrellas para seguir tu progreso.",
+    "mode_mastery_desc": "Las tarjetas se muestran según tu nivel de conocimiento. Califica cada una como Olvidé, Difícil, Bien o Fácil — las dominadas van desapareciendo hasta completar el mazo.",
     "grade_again": "Olvidé",
     "grade_hard": "Difícil",
     "grade_good": "Bien",

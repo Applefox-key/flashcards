@@ -422,6 +422,8 @@
     "next_btn": "Nast. →",
     "mode_normal": "Normalny",
     "mode_mastery": "Mistrzostwo",
+    "mode_normal_desc": "Przeglądaj karty swobodnie. Oceniaj każdą gwiazdkami, aby śledzić postępy.",
+    "mode_mastery_desc": "Karty są pokazywane na podstawie Twojej wiedzy. Oceniaj każdą jako Nie pamiętam, Trudne, Dobrze lub Łatwe — opanowane karty stopniowo wypadają z talii.",
     "grade_again": "Nie pamiętam",
     "grade_hard": "Trudne",
     "grade_good": "Dobrze",

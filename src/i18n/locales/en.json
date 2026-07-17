@@ -398,6 +398,8 @@
     "next_btn": "Next →",
     "mode_normal": "Normal",
     "mode_mastery": "Mastery",
+    "mode_normal_desc": "Browse all cards freely. Rate each one with stars to track how well you know it.",
+    "mode_mastery_desc": "Cards are shown based on how well you know them. Grade each as Forgot, Hard, Good, or Easy — mastered cards gradually drop out until the deck is complete.",
     "grade_again": "Forgot",
     "grade_hard": "Hard",
     "grade_good": "Good",
