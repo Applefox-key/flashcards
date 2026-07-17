@@ -186,7 +186,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
           ✓ {score.r} &nbsp; ✗ {score.w}
         </span>
       </div>
-      <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+      <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full">
         <div
           className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
           style={{

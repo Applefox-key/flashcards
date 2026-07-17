@@ -273,7 +273,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             <span className="text-sm text-gray-400 shrink-0">
               {index + 1} / {cards.length}
             </span>
-            <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+            <div className="flex-1 bg-gray-300 dark:bg-gray-700 rounded-full h-1.5">
               <div
                 className="bg-indigo-500 rounded-full h-full transition-all duration-300"
                 style={{ width: `${((index + 1) / cards.length) * 100}%` }}
@@ -329,7 +329,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap">
               {t("flashcard_game.mastery_progress", { count: masteredCount, total: initialCards.length })}
             </span>
-            <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+            <div className="flex-1 bg-gray-300 dark:bg-gray-700 rounded-full h-1.5">
               <div
                 className="bg-green-500 rounded-full h-full transition-all duration-500"
                 style={{ width: `${initialCards.length > 0 ? (masteredCount / initialCards.length) * 100 : 0}%` }}

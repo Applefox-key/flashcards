@@ -28,7 +28,7 @@ export function ResultScreen({ score, onPlayAgain, onRetryMistakes, onBack }: Pr
       </div>
 
       {/* Score bar */}
-      <div className="w-full max-w-xs h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div className="w-full max-w-xs h-3 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
         <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
       </div>
 

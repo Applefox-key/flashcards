@@ -91,7 +91,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
         <span>
           {index + 1} / {cards.length}
         </span>
-        <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="w-32 h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-indigo-400 rounded-full transition-all"
             style={{ width: `${((index + 1) / cards.length) * 100}%` }}
