@@ -22,7 +22,7 @@ const DEFAULT_PROB = 10;
 
 export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false, mode = "oneshot" }: Props) {
   const { t } = useTranslation();
-  const { probs, updateProb, resetProb, saveProbs } = useGameProbs(cards, "test0");
+  const { probs, updateProb, resetProb, saveProbs } = useGameProbs(cards, answerFirst ? "test1" : "test0");
 
   const deck = useMemo(() => shuffle(cards), [cards]);
   const [initialized, setInitialized] = useState(false);

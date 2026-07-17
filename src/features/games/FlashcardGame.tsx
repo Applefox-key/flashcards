@@ -54,7 +54,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
   const [editNote, setEditNote] = useState("");
 
   // Mastery probability tracking
-  const { probs, setProb, resetProb, resetAllProbs, saveProbs } = useGameProbs(initialCards, "mastery0");
+  const { probs, setProb, resetProb, resetAllProbs, saveProbs } = useGameProbs(initialCards, answerFirst ? "mastery1" : "mastery0");
 
   const masteredCount = useMemo(
     () => initialCards.filter((c) => (probs[c.id] ?? 10) <= MASTERY_THRESHOLD).length,
