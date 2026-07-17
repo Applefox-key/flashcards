@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/useToast";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
 import { useGameProbs } from "./useGameProbs";
+import { ResultEndless } from "./ResultEndless";
 import type { Content } from "@/types";
 
 interface Props {
@@ -53,7 +54,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
   const [editNote, setEditNote] = useState("");
 
   // Mastery probability tracking
-  const { probs, setProb, resetAllProbs, saveProbs } = useGameProbs(initialCards, "mastery0");
+  const { probs, setProb, resetProb, resetAllProbs, saveProbs } = useGameProbs(initialCards, "mastery0");
 
   const masteredCount = useMemo(
     () => initialCards.filter((c) => (probs[c.id] ?? 10) <= MASTERY_THRESHOLD).length,
@@ -334,6 +335,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
                 style={{ width: `${initialCards.length > 0 ? (masteredCount / initialCards.length) * 100 : 0}%` }}
               />
             </div>
+            <ResultEndless playableCards={initialCards} probs={probs} onResetCard={resetProb} />
           </div>
         </div>
       )}
