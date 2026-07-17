@@ -733,6 +733,20 @@
     "no_cards": "Sin tarjetas",
     "n_cards_one": "{{count}} tarjeta",
     "n_cards_other": "{{count}} tarjetas",
-    "card_stats_title": "Progreso de tarjeta"
+    "card_stats_title": "Progreso de tarjeta",
+    "reset_btn": "Restablecer estadísticas",
+    "reset_modal_title": "Restablecer estadísticas",
+    "reset_scope_collection": "Colección completa",
+    "reset_by_mode": "Por modo de juego",
+    "reset_all_modes": "Todos los modos de juego",
+    "reset_confirm_collection_all": "¿Restablecer todas las estadísticas de juego de esta colección? Esta acción no se puede deshacer.",
+    "reset_confirm_collection_mode": "¿Restablecer las estadísticas de {{name}} para toda la colección? Esta acción no se puede deshacer.",
+    "reset_confirm_card_all": "¿Restablecer todas las estadísticas de juego de esta tarjeta? Esta acción no se puede deshacer.",
+    "reset_confirm_card_mode": "¿Restablecer las estadísticas de {{name}} para esta tarjeta? Esta acción no se puede deshacer.",
+    "reset_confirm_yes": "Restablecer",
+    "reset_back": "Atrás",
+    "reset_card_title": "Restablecer estadísticas de tarjeta",
+    "reset_success": "Estadísticas restablecidas",
+    "reset_error": "Error al restablecer estadísticas"
   }
 }

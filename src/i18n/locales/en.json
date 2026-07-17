@@ -733,6 +733,20 @@
     "no_cards": "No cards",
     "n_cards_one": "{{count}} card",
     "n_cards_other": "{{count}} cards",
-    "card_stats_title": "Card progress"
+    "card_stats_title": "Card progress",
+    "reset_btn": "Reset statistics",
+    "reset_modal_title": "Reset statistics",
+    "reset_scope_collection": "Entire collection",
+    "reset_by_mode": "By game mode",
+    "reset_all_modes": "All game modes",
+    "reset_confirm_collection_all": "Reset all game statistics for this entire collection? This cannot be undone.",
+    "reset_confirm_collection_mode": "Reset {{name}} statistics for the entire collection? This cannot be undone.",
+    "reset_confirm_card_all": "Reset all game statistics for this card? This cannot be undone.",
+    "reset_confirm_card_mode": "Reset {{name}} statistics for this card? This cannot be undone.",
+    "reset_confirm_yes": "Reset",
+    "reset_back": "Back",
+    "reset_card_title": "Reset card statistics",
+    "reset_success": "Statistics reset",
+    "reset_error": "Failed to reset statistics"
   }
 }

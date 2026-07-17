@@ -770,6 +770,20 @@
     "n_cards_few": "{{count}} карточки",
     "n_cards_many": "{{count}} карточек",
     "n_cards_other": "{{count}} карточки",
-    "card_stats_title": "Прогресс карточки"
+    "card_stats_title": "Прогресс карточки",
+    "reset_btn": "Сбросить статистику",
+    "reset_modal_title": "Сброс статистики",
+    "reset_scope_collection": "Вся коллекция",
+    "reset_by_mode": "По режиму игры",
+    "reset_all_modes": "Все режимы игры",
+    "reset_confirm_collection_all": "Сбросить всю игровую статистику для этой коллекции? Это действие нельзя отменить.",
+    "reset_confirm_collection_mode": "Сбросить статистику {{name}} для всей коллекции? Это действие нельзя отменить.",
+    "reset_confirm_card_all": "Сбросить всю игровую статистику для этой карточки? Это действие нельзя отменить.",
+    "reset_confirm_card_mode": "Сбросить статистику {{name}} для этой карточки? Это действие нельзя отменить.",
+    "reset_confirm_yes": "Сбросить",
+    "reset_back": "Назад",
+    "reset_card_title": "Сброс статистики карточки",
+    "reset_success": "Статистика сброшена",
+    "reset_error": "Не удалось сбросить статистику"
   }
 }

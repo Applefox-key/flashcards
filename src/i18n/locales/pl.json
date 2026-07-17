@@ -769,6 +769,20 @@
     "n_cards_few": "{{count}} karty",
     "n_cards_many": "{{count}} kart",
     "n_cards_other": "{{count}} karty",
-    "card_stats_title": "Postęp karty"
+    "card_stats_title": "Postęp karty",
+    "reset_btn": "Resetuj statystyki",
+    "reset_modal_title": "Resetowanie statystyk",
+    "reset_scope_collection": "Cała kolekcja",
+    "reset_by_mode": "Według trybu gry",
+    "reset_all_modes": "Wszystkie tryby gry",
+    "reset_confirm_collection_all": "Zresetować wszystkie statystyki gry dla tej kolekcji? Tej akcji nie można cofnąć.",
+    "reset_confirm_collection_mode": "Zresetować statystyki {{name}} dla całej kolekcji? Tej akcji nie można cofnąć.",
+    "reset_confirm_card_all": "Zresetować wszystkie statystyki gry dla tej karty? Tej akcji nie można cofnąć.",
+    "reset_confirm_card_mode": "Zresetować statystyki {{name}} dla tej karty? Tej akcji nie można cofnąć.",
+    "reset_confirm_yes": "Resetuj",
+    "reset_back": "Wstecz",
+    "reset_card_title": "Resetuj statystyki karty",
+    "reset_success": "Statystyki zresetowane",
+    "reset_error": "Nie udało się zresetować statystyk"
   }
 }

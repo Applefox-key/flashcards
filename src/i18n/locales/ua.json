@@ -771,6 +771,20 @@
     "n_cards_few": "{{count}} картки",
     "n_cards_many": "{{count}} карток",
     "n_cards_other": "{{count}} картки",
-    "card_stats_title": "Прогрес картки"
+    "card_stats_title": "Прогрес картки",
+    "reset_btn": "Скинути статистику",
+    "reset_modal_title": "Скидання статистики",
+    "reset_scope_collection": "Вся колекція",
+    "reset_by_mode": "За режимом гри",
+    "reset_all_modes": "Всі режими гри",
+    "reset_confirm_collection_all": "Скинути всю ігрову статистику для цієї колекції? Цю дію не можна скасувати.",
+    "reset_confirm_collection_mode": "Скинути статистику {{name}} для всієї колекції? Цю дію не можна скасувати.",
+    "reset_confirm_card_all": "Скинути всю ігрову статистику для цієї картки? Цю дію не можна скасувати.",
+    "reset_confirm_card_mode": "Скинути статистику {{name}} для цієї картки? Цю дію не можна скасувати.",
+    "reset_confirm_yes": "Скинути",
+    "reset_back": "Назад",
+    "reset_card_title": "Скидання статистики картки",
+    "reset_success": "Статистику скинуто",
+    "reset_error": "Не вдалося скинути статистику"
   }
 }

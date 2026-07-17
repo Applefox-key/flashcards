@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useCollectionWithContent } from '@/hooks/useCollectionHooks'
 import { gamesApi } from '@/api'
 import { Modal } from '@/components/Modal'
+import { useToast } from '@/hooks/useToast'
 import type { Content, CardProbs, CollectionProbs } from '@/types'
 
 const GAME_MODES = [
@@ -75,25 +76,173 @@ function MasteryDot({ pct, label }: { pct: number | null; label: string }) {
   )
 }
 
+// ── Reset collection stats modal ──────────────────────────────────────────────
+
+type ResetPending = { mode: 'all' | string; name: string }
+
+function ResetCollectionStatsModal({
+  colId,
+  availableModeKeys,
+  open,
+  onClose,
+}: {
+  colId: number
+  availableModeKeys: string[]
+  open: boolean
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const toast = useToast()
+  const [pending, setPending] = useState<ResetPending | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  const handleClose = () => {
+    setPending(null)
+    onClose()
+  }
+
+  const handleReset = async () => {
+    if (!pending) return
+    setBusy(true)
+    try {
+      if (pending.mode === 'all') {
+        await gamesApi.resetCollectionStats(colId)
+      } else {
+        await gamesApi.resetCollectionModeStats(colId, pending.mode)
+      }
+      await queryClient.invalidateQueries({ queryKey: ['collectionProbs', colId] })
+      toast.success(t('stats.reset_success'))
+      handleClose()
+    } catch {
+      toast.error(t('stats.reset_error'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const availableModes = GAME_MODES.filter(m => availableModeKeys.includes(m.key))
+
+  return (
+    <Modal open={open} onClose={handleClose} title={t('stats.reset_modal_title')}>
+      {pending ? (
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            {pending.mode === 'all'
+              ? t('stats.reset_confirm_collection_all')
+              : t('stats.reset_confirm_collection_mode', { name: pending.name })}
+          </p>
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={() => setPending(null)}
+              className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              {t('stats.reset_back')}
+            </button>
+            <button
+              onClick={handleReset}
+              disabled={busy}
+              className="px-3 py-1.5 text-sm rounded-lg bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 transition-colors"
+            >
+              {t('stats.reset_confirm_yes')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+            {t('stats.reset_scope_collection')}
+          </p>
+          <button
+            onClick={() => setPending({ mode: 'all', name: t('stats.reset_all_modes') })}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm text-left transition-colors"
+          >
+            <svg viewBox="0 0 20 20" className="w-4 h-4 shrink-0" fill="currentColor">
+              <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+            </svg>
+            {t('stats.reset_all_modes')}
+          </button>
+
+          {availableModes.length > 0 && (
+            <>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3 mb-1">
+                {t('stats.reset_by_mode')}
+              </p>
+              <div className="space-y-1.5">
+                {availableModes.map(mode => {
+                  const name = `${t(mode.tKey)} ${mode.dir}`
+                  return (
+                    <button
+                      key={mode.key}
+                      onClick={() => setPending({ mode: mode.key, name })}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-sm text-left transition-colors"
+                    >
+                      <span>{mode.icon}</span>
+                      <span>{t(mode.tKey)}</span>
+                      <span className="text-gray-400 text-xs">{mode.dir}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </Modal>
+  )
+}
+
 // ── Card detail modal ─────────────────────────────────────────────────────────
 
 function CardStatsModal({
   card,
   probs,
+  colId,
   open,
   onClose,
 }: {
   card: Content
   probs: CardProbs
+  colId: number
   open: boolean
   onClose: () => void
 }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const toast = useToast()
+  const [cardResetPending, setCardResetPending] = useState<ResetPending | null>(null)
+  const [busy, setBusy] = useState(false)
+
   const overallMastery = avgMastery(probs)
   const hasData = ALL_PROB_KEYS.some(k => probs[k] !== undefined)
+  const playedModes = GAME_MODES.filter(m => probs[m.key] !== undefined)
+
+  const handleCardReset = async () => {
+    if (!cardResetPending) return
+    setBusy(true)
+    try {
+      if (cardResetPending.mode === 'all') {
+        await gamesApi.resetCardStats(card.id)
+      } else {
+        await gamesApi.resetCardModeStats(card.id, cardResetPending.mode)
+      }
+      await queryClient.invalidateQueries({ queryKey: ['collectionProbs', colId] })
+      toast.success(t('stats.reset_success'))
+      setCardResetPending(null)
+    } catch {
+      toast.error(t('stats.reset_error'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleClose = () => {
+    setCardResetPending(null)
+    onClose()
+  }
 
   return (
-    <Modal open={open} onClose={onClose} title={t('stats.card_stats_title')} size="lg">
+    <Modal open={open} onClose={handleClose} title={t('stats.card_stats_title')} size="lg">
       <div className="space-y-4">
         {/* Q / A */}
         <div className="grid grid-cols-2 gap-3">
@@ -159,6 +308,65 @@ function CardStatsModal({
             })
           )}
         </div>
+
+        {/* Reset card statistics */}
+        {hasData && (
+          <div className="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              {t('stats.reset_card_title')}
+            </p>
+            {cardResetPending ? (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  {cardResetPending.mode === 'all'
+                    ? t('stats.reset_confirm_card_all')
+                    : t('stats.reset_confirm_card_mode', { name: cardResetPending.name })}
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => setCardResetPending(null)}
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    {t('stats.reset_back')}
+                  </button>
+                  <button
+                    onClick={handleCardReset}
+                    disabled={busy}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 transition-colors"
+                  >
+                    {t('stats.reset_confirm_yes')}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => setCardResetPending({ mode: 'all', name: t('stats.reset_all_modes') })}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs transition-colors"
+                >
+                  <svg viewBox="0 0 20 20" className="w-3 h-3 shrink-0" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                  </svg>
+                  {t('stats.reset_all_modes')}
+                </button>
+                {playedModes.map(mode => {
+                  const name = `${t(mode.tKey)} ${mode.dir}`
+                  return (
+                    <button
+                      key={mode.key}
+                      onClick={() => setCardResetPending({ mode: mode.key, name })}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-xs transition-colors"
+                    >
+                      <span>{mode.icon}</span>
+                      <span>{t(mode.tKey)}</span>
+                      <span className="text-gray-400">{mode.dir}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Modal>
   )
@@ -172,6 +380,7 @@ export function CollectionStatsPage() {
   const navigate = useNavigate()
   const colId = Number(id)
   const [selectedCard, setSelectedCard] = useState<Content | null>(null)
+  const [resetModalOpen, setResetModalOpen] = useState(false)
 
   const { data: colData, isLoading: colLoading } = useCollectionWithContent(colId)
   const { data: probsMap = {} as CollectionProbs, isLoading: probsLoading } = useQuery({
@@ -225,10 +434,22 @@ export function CollectionStatsPage() {
             <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
           </svg>
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate">{title}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">{t('stats.title')}</p>
         </div>
+        {!isLoading && hasAnyGameData && (
+          <button
+            onClick={() => setResetModalOpen(true)}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-red-300 hover:text-red-500 dark:hover:border-red-800 dark:hover:text-red-400 transition-colors"
+            title={t('stats.reset_btn')}
+          >
+            <svg viewBox="0 0 20 20" className="w-4 h-4" fill="currentColor">
+              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+            </svg>
+            <span className="hidden sm:inline">{t('stats.reset_btn')}</span>
+          </button>
+        )}
       </div>
 
       {isLoading ? (
@@ -418,10 +639,19 @@ export function CollectionStatsPage() {
         <CardStatsModal
           card={selectedCard}
           probs={cardProbs(selectedCard)}
+          colId={colId}
           open={!!selectedCard}
           onClose={() => setSelectedCard(null)}
         />
       )}
+
+      {/* Reset collection stats modal */}
+      <ResetCollectionStatsModal
+        colId={colId}
+        availableModeKeys={modeAverages.map(m => m.key)}
+        open={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+      />
     </div>
   )
 }
