@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useCardImage } from "@/hooks/useCardImage";
 
 interface Props {
@@ -26,17 +27,17 @@ export function ImageThumb({ filename, collectionId, className = "" }: Props) {
         <div className={`h-16 w-24 mx-auto mt-2 rounded bg-gray-100 dark:bg-gray-700 animate-pulse ${className}`} />
       )}
 
-      {open && (
+      {open && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
-          onClick={() => setOpen(false)}>
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center cursor-zoom-out"
+          onClick={(e) => { e.stopPropagation(); setOpen(false); }}>
           <img
             src={src}
             alt=""
             className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
