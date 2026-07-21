@@ -98,6 +98,7 @@ export const PRACTICE_MODE_OPTIONS = [
 ];
 
 export const FLASHCARD_MODE_OPTIONS = [
-  { value: "normal" as const, labelKey: "flashcard_game.mode_normal", descKey: "flashcard_game.mode_normal_desc" },
+  { value: "browse" as const, labelKey: "flashcard_game.mode_browse", descKey: "flashcard_game.mode_browse_desc" },
+  { value: "oneshot" as const, labelKey: "flashcard_game.mode_oneshot", descKey: "flashcard_game.mode_oneshot_desc" },
   { value: "mastery" as const, labelKey: "flashcard_game.mode_mastery", descKey: "flashcard_game.mode_mastery_desc" },
 ];

@@ -28,7 +28,7 @@ export function GamePage() {
   const [answerFirst, setAnswerFirst] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [timedDelay, setTimedDelay] = useState(2);
-  const [flashcardMode, setFlashcardMode] = useState<"normal" | "mastery">("normal");
+  const [flashcardMode, setFlashcardMode] = useState<"browse" | "mastery" | "oneshot">("browse");
   const [partsMode, setPartsMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
   const [writeMode, setWriteMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
   const [testMode, setTestMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
@@ -124,7 +124,7 @@ export function GamePage() {
     answerFirst ||
     isShuffled ||
     rateFilter !== null ||
-    (type === "flashcard" && flashcardMode !== "normal") ||
+    (type === "flashcard" && flashcardMode !== "browse") ||
     (type === "parts" && partsMode !== "oneshot") ||
     (type === "write" && writeMode !== "oneshot") ||
     (type === "test" && testMode !== "oneshot");

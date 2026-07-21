@@ -86,6 +86,10 @@ export function useGameProbs(cards: Content[], gameKey: string) {
     savedRef.current = false
   }
 
+  function resetSaved() {
+    savedRef.current = false
+  }
+
   /** Call this to save probs immediately (e.g. on game end) without waiting for unmount */
   function saveProbs() {
     if (savedRef.current) return
@@ -104,5 +108,5 @@ export function useGameProbs(cards: Content[], gameKey: string) {
     }
   }
 
-  return { probs, updateProb, resetProb, setProb, resetAllProbs, saveProbs }
+  return { probs, updateProb, resetProb, setProb, resetAllProbs, saveProbs, resetSaved }
 }

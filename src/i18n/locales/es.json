@@ -396,9 +396,11 @@
     "no_cards": "No hay tarjetas para mostrar.",
     "prev_btn": "← Ant.",
     "next_btn": "Sig. →",
-    "mode_normal": "Normal",
+    "mode_browse": "Explorar",
+    "mode_browse_desc": "Navega por las tarjetas libremente. Califica cada una con estrellas para seguir tu progreso.",
+    "mode_oneshot": "Una pasada",
+    "mode_oneshot_desc": "Repasa todas las tarjetas exactamente una vez. Voltea y califica qué tan fácil recordaste cada una — los resultados se guardan en tu historial.",
     "mode_mastery": "Dominio",
-    "mode_normal_desc": "Navega por las tarjetas libremente. Califica cada una con estrellas para seguir tu progreso.",
     "mode_mastery_desc": "Las tarjetas se muestran según tu nivel de conocimiento. Califica cada una como Olvidé, Difícil, Bien o Fácil — las dominadas van desapareciendo hasta completar el mazo.",
     "grade_again": "Olvidé",
     "grade_hard": "Difícil",
@@ -408,7 +410,13 @@
     "mastery_flip_hint": "Toca para ver la respuesta",
     "mastery_complete_title": "¡Todas las tarjetas dominadas!",
     "mastery_complete_subtitle": "¡Excelente trabajo! Has memorizado todo el conjunto con éxito.",
-    "mastery_reset": "Empezar de nuevo"
+    "mastery_reset": "Empezar de nuevo",
+    "mastery_reset_confirm": "Tu progreso se restablecerá. ¿Estás seguro?",
+    "mastery_reset_cancel": "Cancelar",
+    "mastery_reset_yes": "Restablecer",
+    "oneshot_complete_title": "¡Sesión completa!",
+    "oneshot_complete_subtitle": "Has repasado las {{total}} tarjetas.",
+    "oneshot_play_again": "Repetir"
   },
   "game_page": {
     "failed_to_load": "Error al cargar las tarjetas.",

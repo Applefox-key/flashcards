@@ -396,9 +396,11 @@
     "no_cards": "No cards to show.",
     "prev_btn": "← Prev",
     "next_btn": "Next →",
-    "mode_normal": "Normal",
+    "mode_browse": "Browse",
+    "mode_browse_desc": "Browse all cards freely. Rate each one with stars to track how well you know it.",
+    "mode_oneshot": "One Shot",
+    "mode_oneshot_desc": "Go through all cards exactly once. Flip each card and grade how easily you recalled it — results are saved to your history.",
     "mode_mastery": "Mastery",
-    "mode_normal_desc": "Browse all cards freely. Rate each one with stars to track how well you know it.",
     "mode_mastery_desc": "Cards are shown based on how well you know them. Grade each as Forgot, Hard, Good, or Easy — mastered cards gradually drop out until the deck is complete.",
     "grade_again": "Forgot",
     "grade_hard": "Hard",
@@ -408,7 +410,13 @@
     "mastery_flip_hint": "Tap to reveal the answer",
     "mastery_complete_title": "All cards mastered!",
     "mastery_complete_subtitle": "Great job! You have successfully memorized the entire set.",
-    "mastery_reset": "Start Over"
+    "mastery_reset": "Start Over",
+    "mastery_reset_confirm": "Your progress will be reset. Are you sure?",
+    "mastery_reset_cancel": "Cancel",
+    "mastery_reset_yes": "Reset",
+    "oneshot_complete_title": "Session complete!",
+    "oneshot_complete_subtitle": "You went through all {{total}} cards.",
+    "oneshot_play_again": "Go Again"
   },
   "game_page": {
     "failed_to_load": "Failed to load cards.",

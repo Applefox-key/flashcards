@@ -4,6 +4,7 @@ import { shuffle, buildTestOptions, weightedRandom, adjustProb } from "@/utils/g
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
 import { ResultEndless } from "./ResultEndless";
+import { ResultOneshotCards } from "./ResultOneshotCards";
 import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
 
@@ -160,12 +161,26 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
       );
     }
     return (
-      <ResultScreen
-        score={score}
-        onPlayAgain={onPlayAgain}
-        onRetryMistakes={onRetryMistakes && wrongCardIds.size > 0 ? () => onRetryMistakes(wrongCardIds) : undefined}
-        onBack={onBack}
-      />
+      <>
+        <ResultScreen
+          score={score}
+          onPlayAgain={onPlayAgain}
+          onRetryMistakes={onRetryMistakes && wrongCardIds.size > 0 ? () => onRetryMistakes(wrongCardIds) : undefined}
+          onBack={onBack}
+        />
+        {mode === "oneshot" && (
+          <div className="flex justify-center pb-8">
+            <ResultOneshotCards
+              cards={cards}
+              rows={cards.map((c) =>
+                wrongCardIds.has(c.id)
+                  ? { cardId: c.id, label: "✗", variant: "red" as const }
+                  : { cardId: c.id, label: "✓", variant: "green" as const }
+              )}
+            />
+          </div>
+        )}
+      </>
     );
   }
 

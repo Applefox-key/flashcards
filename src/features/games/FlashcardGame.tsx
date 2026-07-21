@@ -12,6 +12,7 @@ import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
 import { useGameProbs } from "./useGameProbs";
 import { ResultEndless } from "./ResultEndless";
+import { ResultOneshotCards } from "./ResultOneshotCards";
 import type { Content } from "@/types";
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
   collectionId: number;
   answerFirst: boolean;
   isShuffled: boolean;
-  mode: "normal" | "mastery";
+  mode: "browse" | "mastery" | "oneshot";
 }
 
 const FADE_OUT = 300;
@@ -54,7 +55,14 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
   const [editNote, setEditNote] = useState("");
 
   // Mastery probability tracking
-  const { probs, setProb, resetProb, resetAllProbs, saveProbs } = useGameProbs(initialCards, answerFirst ? "flashcard1" : "flashcard0");
+  const { probs, setProb, resetProb, resetAllProbs, saveProbs, resetSaved } = useGameProbs(initialCards, answerFirst ? "flashcard1" : "flashcard0");
+
+  // Mastery reset confirmation
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  // Oneshot mode tracking
+  const [oneshotDone, setOneshotDone] = useState(false);
+  const [oneshotGrades, setOneshotGrades] = useState<Record<number, "again" | "hard" | "good" | "easy">>({});
 
   const masteredCount = useMemo(
     () => initialCards.filter((c) => (probs[c.id] ?? 10) <= MASTERY_THRESHOLD).length,
@@ -98,7 +106,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
         setFlipped((f) => !f);
         return;
       }
-      if (mode === "mastery") return;
+      if (mode === "mastery" || mode === "oneshot") return;
       if (e.key === "ArrowRight") goNext();
       else if (e.key === "ArrowLeft") goPrev();
     }
@@ -126,6 +134,33 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
     const nextCard = unmastered[nextLocalIdx];
     const nextGlobalIdx = cards.findIndex((c) => c.id === nextCard.id);
     navigateTo(nextGlobalIdx);
+  }
+
+  function handleOneshotGrade(grade: "again" | "hard" | "good" | "easy") {
+    if (!card || isNavigating) return;
+    const deltas: Record<string, number> = { again: 4, hard: 2, good: -1, easy: -3 };
+    const currentProb = probs[card.id] ?? 10;
+    const newProb = Math.max(1, Math.min(20, currentProb + deltas[grade]));
+    setProb(card.id, newProb);
+
+    const newGrades = { ...oneshotGrades, [card.id]: grade };
+    setOneshotGrades(newGrades);
+
+    if (index === cards.length - 1) {
+      saveProbs();
+      setOneshotDone(true);
+      return;
+    }
+    navigateTo(index + 1);
+  }
+
+  function handleOneshotPlayAgain() {
+    setOneshotDone(false);
+    setOneshotGrades({});
+    setIndex(0);
+    setFlipped(false);
+    resetSaved();
+    if (isShuffled) setCards(shuffle([...initialCards]));
   }
 
   function handleRate(cardId: number, star: number) {
@@ -172,16 +207,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
     );
   }
 
-  if (!card) return <p className="text-gray-400 text-center py-16">{t("flashcard_game.no_cards")}</p>;
-
-  const questionLabel = t("collection_detail.question_label");
-  const answerLabel = t("collection_detail.answer_label");
-  const frontLabel = answerFirst ? answerLabel : questionLabel;
-  const backLabel = answerFirst ? questionLabel : answerLabel;
-  const frontText = answerFirst ? card.answer : card.question;
-  const backText = answerFirst ? card.question : card.answer;
-  const frontImg = answerFirst ? card.imgA : card.imgQ;
-  const backImg = answerFirst ? card.imgQ : card.imgA;
+  if (!card && !oneshotDone) return <p className="text-gray-400 text-center py-16">{t("flashcard_game.no_cards")}</p>;
 
   const isNavigating = !visible;
 
@@ -202,14 +228,95 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             {t("flashcard_game.mastery_complete_subtitle")}
           </p>
         </div>
+        {confirmReset ? (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {t("flashcard_game.mastery_reset_confirm")}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmReset(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium transition-colors">
+                {t("flashcard_game.mastery_reset_cancel")}
+              </button>
+              <button
+                onClick={() => { resetAllProbs(); setConfirmReset(false); }}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors">
+                {t("flashcard_game.mastery_reset_yes")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmReset(true)}
+            className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors">
+            {t("flashcard_game.mastery_reset")}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // Oneshot completion screen
+  if (oneshotDone) {
+    const counts = { again: 0, hard: 0, good: 0, easy: 0 };
+    Object.values(oneshotGrades).forEach((g) => counts[g]++);
+    const oneshotRows = cards.map((c) => {
+      const grade = oneshotGrades[c.id] ?? "again";
+      const variantMap = { easy: "green", good: "teal", hard: "orange", again: "red" } as const;
+      return { cardId: c.id, label: t(`flashcard_game.grade_${grade}`), variant: variantMap[grade] };
+    });
+    return (
+      <div className="mx-auto flex flex-col items-center gap-6 py-16 text-center">
+        <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-indigo-500">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+            {t("flashcard_game.oneshot_complete_title")}
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("flashcard_game.oneshot_complete_subtitle", { total: cards.length })}
+          </p>
+        </div>
+        <div className="grid grid-cols-4 gap-3 w-full max-w-xs">
+          <div className="flex flex-col items-center gap-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg py-2 px-1">
+            <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{counts.easy}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{t("flashcard_game.grade_easy")}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 bg-teal-50 dark:bg-teal-900/20 rounded-lg py-2 px-1">
+            <span className="text-lg font-bold text-teal-600 dark:text-teal-400">{counts.good}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{t("flashcard_game.grade_good")}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 bg-orange-50 dark:bg-orange-900/20 rounded-lg py-2 px-1">
+            <span className="text-lg font-bold text-orange-600 dark:text-orange-400">{counts.hard}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{t("flashcard_game.grade_hard")}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 bg-red-50 dark:bg-red-900/20 rounded-lg py-2 px-1">
+            <span className="text-lg font-bold text-red-600 dark:text-red-400">{counts.again}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{t("flashcard_game.grade_again")}</span>
+          </div>
+        </div>
+        <ResultOneshotCards cards={cards} rows={oneshotRows} />
         <button
-          onClick={() => resetAllProbs()}
+          onClick={handleOneshotPlayAgain}
           className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors">
-          {t("flashcard_game.mastery_reset")}
+          {t("flashcard_game.oneshot_play_again")}
         </button>
       </div>
     );
   }
+
+  const questionLabel = t("collection_detail.question_label");
+  const answerLabel = t("collection_detail.answer_label");
+  const frontLabel = answerFirst ? answerLabel : questionLabel;
+  const backLabel = answerFirst ? questionLabel : answerLabel;
+  const frontText = answerFirst ? card!.answer : card!.question;
+  const backText = answerFirst ? card!.question : card!.answer;
+  const frontImg = answerFirst ? card!.imgA : card!.imgQ;
+  const backImg = answerFirst ? card!.imgQ : card!.imgA;
 
   return (
     <div className="mx-auto flex flex-col gap-4">
@@ -231,25 +338,25 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           backText={backText}
           frontImg={frontImg}
           backImg={backImg}
-          note={card.note}
+          note={card!.note}
           collectionId={collectionId}
           flipped={flipped}
           animated={visible}
         />
       </div>
 
-      {/* Star rating — normal mode only */}
-      {mode === "normal" && (
+      {/* Star rating — browse mode only */}
+      {mode === "browse" && (
         <div className="flex items-center justify-center gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
               onClick={(e) => {
                 e.stopPropagation();
-                handleRate(card.id, star);
+                handleRate(card!.id, star);
               }}
               className={`text-2xl transition-colors ${
-                (ratingMap[card.id] ?? 0) >= star
+                (ratingMap[card!.id] ?? 0) >= star
                   ? "text-yellow-400"
                   : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
               }`}>
@@ -260,7 +367,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
       )}
 
       {/* Bottom controls */}
-      {mode === "normal" ? (
+      {mode === "browse" ? (
         <div className="flex items-center justify-between gap-3">
           <button
             onClick={goPrev}
@@ -288,7 +395,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             {t("flashcard_game.next_btn")}
           </button>
         </div>
-      ) : (
+      ) : mode === "mastery" ? (
         <div className="flex flex-col gap-3">
           {/* Grade buttons appear only after flipping */}
           {flipped ? (
@@ -336,6 +443,55 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
               />
             </div>
             <ResultEndless playableCards={initialCards} probs={probs} onResetCard={resetProb} />
+          </div>
+        </div>
+      ) : (
+        /* Oneshot mode controls */
+        <div className="flex flex-col gap-3">
+          {flipped ? (
+            <div className="grid grid-cols-4 gap-2">
+              <button
+                onClick={() => handleOneshotGrade("again")}
+                disabled={isNavigating}
+                className="py-2.5 rounded-lg text-sm font-medium bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/40 disabled:opacity-40 transition-colors">
+                {t("flashcard_game.grade_again")}
+              </button>
+              <button
+                onClick={() => handleOneshotGrade("hard")}
+                disabled={isNavigating}
+                className="py-2.5 rounded-lg text-sm font-medium bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 disabled:opacity-40 transition-colors">
+                {t("flashcard_game.grade_hard")}
+              </button>
+              <button
+                onClick={() => handleOneshotGrade("good")}
+                disabled={isNavigating}
+                className="py-2.5 rounded-lg text-sm font-medium bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/40 disabled:opacity-40 transition-colors">
+                {t("flashcard_game.grade_good")}
+              </button>
+              <button
+                onClick={() => handleOneshotGrade("easy")}
+                disabled={isNavigating}
+                className="py-2.5 rounded-lg text-sm font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-40 transition-colors">
+                {t("flashcard_game.grade_easy")}
+              </button>
+            </div>
+          ) : (
+            <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-1">
+              {t("flashcard_game.mastery_flip_hint")}
+            </p>
+          )}
+
+          {/* Oneshot progress */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400 shrink-0">
+              {index + 1} / {cards.length}
+            </span>
+            <div className="flex-1 bg-gray-300 dark:bg-gray-700 rounded-full h-1.5">
+              <div
+                className="bg-indigo-500 rounded-full h-full transition-all duration-300"
+                style={{ width: `${((index + 1) / cards.length) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
       )}

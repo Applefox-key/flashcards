@@ -420,9 +420,11 @@
     "no_cards": "Brak fiszek do wyświetlenia.",
     "prev_btn": "← Poprz.",
     "next_btn": "Nast. →",
-    "mode_normal": "Normalny",
+    "mode_browse": "Przeglądanie",
+    "mode_browse_desc": "Przeglądaj karty swobodnie. Oceniaj każdą gwiazdkami, aby śledzić postępy.",
+    "mode_oneshot": "Jedno przejście",
+    "mode_oneshot_desc": "Przejrzyj wszystkie karty dokładnie raz. Odwracaj i oceniaj, jak łatwo sobie przypomniałeś — wyniki są zapisywane do historii.",
     "mode_mastery": "Mistrzostwo",
-    "mode_normal_desc": "Przeglądaj karty swobodnie. Oceniaj każdą gwiazdkami, aby śledzić postępy.",
     "mode_mastery_desc": "Karty są pokazywane na podstawie Twojej wiedzy. Oceniaj każdą jako Nie pamiętam, Trudne, Dobrze lub Łatwe — opanowane karty stopniowo wypadają z talii.",
     "grade_again": "Nie pamiętam",
     "grade_hard": "Trudne",
@@ -432,7 +434,13 @@
     "mastery_flip_hint": "Dotknij, aby zobaczyć odpowiedź",
     "mastery_complete_title": "Wszystkie fiszki opanowane!",
     "mastery_complete_subtitle": "Świetna robota! Udało ci się zapamiętać cały zestaw.",
-    "mastery_reset": "Zacznij od nowa"
+    "mastery_reset": "Zacznij od nowa",
+    "mastery_reset_confirm": "Twój postęp zostanie zresetowany. Jesteś pewny?",
+    "mastery_reset_cancel": "Anuluj",
+    "mastery_reset_yes": "Resetuj",
+    "oneshot_complete_title": "Sesja ukończona!",
+    "oneshot_complete_subtitle": "Przejrzałeś wszystkie {{total}} fiszki.",
+    "oneshot_play_again": "Powtórz"
   },
   "game_page": {
     "failed_to_load": "Nie udało się załadować kart.",
