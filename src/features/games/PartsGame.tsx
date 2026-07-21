@@ -282,8 +282,8 @@ export function PartsGame({
         {mode === "oneshot" && (
           <div className="flex justify-center pb-8">
             <ResultOneshotCards
-              cards={cards}
-              rows={cards.map((c) =>
+              cards={playableCards}
+              rows={playableCards.map((c) =>
                 wrongCardIds.has(c.id)
                   ? { cardId: c.id, label: "✗", variant: "red" as const }
                   : { cardId: c.id, label: "✓", variant: "green" as const }
