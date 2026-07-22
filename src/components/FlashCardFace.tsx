@@ -23,7 +23,10 @@ function CardImg({
         <img
           src={src}
           alt=""
-          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
           style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain", borderRadius: 8, cursor: "zoom-in" }}
         />
       ) : (
@@ -38,19 +41,26 @@ function CardImg({
         />
       )}
 
-      {open && createPortal(
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
-          onClick={(e) => { e.stopPropagation(); setOpen(false); }}>
-          <img
-            src={src}
-            alt=""
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
-            onClick={(e) => { e.stopPropagation(); setOpen(false); }}
-          />
-        </div>,
-        document.body
-      )}
+      {open &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(false);
+            }}>
+            <img
+              src={src}
+              alt=""
+              className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+              }}
+            />
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
@@ -61,15 +71,18 @@ function CardContent({
   collectionId,
   dark = false,
   textClass,
+  alignClass,
 }: {
   text: string;
   imgFilename?: string;
   collectionId: number;
   dark?: boolean;
   textClass: string;
+  alignClass?: string;
 }) {
   const hasText = text.trim() !== "";
   const hasImg = !!imgFilename && imgFilename !== "null" && imgFilename !== "";
+  const autoAlign = alignClass ?? (text.length > 100 ? "text-left" : "text-center");
 
   if (hasText && hasImg) {
     return (
@@ -77,9 +90,7 @@ function CardContent({
         <div style={{ width: "35%", flexShrink: 0 }}>
           <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />
         </div>
-        <p className={`flex-1 ${textClass} ${text.length > 100 ? "text-left" : "text-center"}  whitespace-pre-line`}>
-          {text}
-        </p>
+        <p className={`flex-1 ${textClass} ${autoAlign} whitespace-pre-line`}>{text}</p>
       </div>
     );
   }
@@ -88,11 +99,7 @@ function CardContent({
     return <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />;
   }
 
-  return (
-    <p className={`w-full ${textClass} ${text.length > 100 ? "text-left" : "text-center"} whitespace-pre-line`}>
-      {text}
-    </p>
-  );
+  return <p className={`w-full ${textClass} ${autoAlign} whitespace-pre-line`}>{text}</p>;
 }
 
 interface FlashCardFaceProps {
@@ -107,6 +114,7 @@ interface FlashCardFaceProps {
   flipped: boolean;
   /** Whether the flip transition should animate. Default true. */
   animated?: boolean;
+  layout?: "standard" | "document";
 }
 
 function highlightNote(note: string, question: string, answer: string) {
@@ -139,8 +147,51 @@ export function FlashCardFace({
   collectionId,
   flipped,
   animated = true,
+  layout = "standard",
 }: FlashCardFaceProps) {
   const { t } = useTranslation();
+  const isDoc = layout === "document";
+
+  if (isDoc) {
+    return (
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 bg-white dark:bg-gray-800 shadow-lg flex flex-col">
+        <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
+          <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
+          <SpeakButton text={frontText} />
+        </div>
+        <div className="px-6 pb-2">
+          <CardContent
+            text={frontText}
+            imgFilename={frontImg}
+            collectionId={collectionId}
+            textClass="text-base font-normal text-gray-800 dark:text-gray-100 leading-relaxed"
+            alignClass="text-left"
+          />
+        </div>
+
+        <hr className="mx-6 border-gray-200 dark:border-gray-700" />
+
+        <div className="shrink-0 flex items-center justify-between px-6 pt-3 pb-2">
+          <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{backLabel}</span>
+          <SpeakButton text={backText} />
+        </div>
+        <div className="px-6 pb-4">
+          <CardContent
+            text={backText}
+            imgFilename={backImg}
+            collectionId={collectionId}
+            textClass="text-base font-normal text-gray-800 dark:text-gray-100 leading-relaxed"
+            alignClass="text-left"
+          />
+          {note && (
+            <p className="text-sm text-indigo-400 dark:text-indigo-300 italic text-left mt-3">
+              {highlightNote(note, frontText, backText)}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ perspective: "1200px" }}>
@@ -193,7 +244,9 @@ export function FlashCardFace({
                 textClass="text-2xl font-semibold text-white"
               />
               {note && (
-                <p className="text-sm text-indigo-200 italic text-center">{highlightNote(note, frontText, backText)}</p>
+                <p className="text-sm text-indigo-200 italic text-center">
+                  {highlightNote(note, frontText, backText)}
+                </p>
               )}
             </div>
           </div>

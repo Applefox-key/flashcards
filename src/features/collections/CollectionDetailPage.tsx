@@ -143,11 +143,13 @@ function EditCardModal({
   collectionId,
   open,
   onClose,
+  layout = "standard",
 }: {
   card: Content;
   collectionId: number;
   open: boolean;
   onClose: () => void;
+  layout?: "standard" | "document";
 }) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -223,31 +225,35 @@ function EditCardModal({
     }
   }
 
+  const isDoc = layout === "document";
+
   return (
-    <Modal open={open} onClose={onClose} title={t("collection_detail.edit_card_title")} size="lg">
+    <Modal open={open} onClose={onClose} title={t("collection_detail.edit_card_title")} size={isDoc ? "xl" : "lg"}>
       <div className="flex flex-col gap-3">
         <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
             <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
             <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
           </div>
-          <div className="flex flex-col-reverse md:flex-row gap-2">
-            <ImageUploadField
-              currentFilename={clearImgQ ? undefined : card.imgQ}
-              collectionId={collectionId}
-              file={imgQFile}
-              onFileChange={setImgQFile}
-              onClear={() => {
-                setClearImgQ(true);
-                setImgQFile(null);
-              }}
-            />
+          <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-col-reverse md:flex-row"}`}>
+            {!isDoc && (
+              <ImageUploadField
+                currentFilename={clearImgQ ? undefined : card.imgQ}
+                collectionId={collectionId}
+                file={imgQFile}
+                onFileChange={setImgQFile}
+                onClear={() => {
+                  setClearImgQ(true);
+                  setImgQFile(null);
+                }}
+              />
+            )}
             <textarea
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              rows={2}
+              rows={isDoc ? 3 : 2}
               autoFocus
-              className="w-full border border-gray-300 dark:border-gray-600 roundedpx-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
             />
           </div>
         </div>
@@ -270,22 +276,24 @@ function EditCardModal({
               />
             </div>
           </div>
-          <div className="flex flex-col-reverse md:flex-row gap-2">
-            <ImageUploadField
-              currentFilename={clearImgA ? undefined : card.imgA}
-              collectionId={collectionId}
-              file={imgAFile}
-              onFileChange={setImgAFile}
-              onClear={() => {
-                setClearImgA(true);
-                setImgAFile(null);
-              }}
-            />
+          <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-col-reverse md:flex-row"}`}>
+            {!isDoc && (
+              <ImageUploadField
+                currentFilename={clearImgA ? undefined : card.imgA}
+                collectionId={collectionId}
+                file={imgAFile}
+                onFileChange={setImgAFile}
+                onClear={() => {
+                  setClearImgA(true);
+                  setImgAFile(null);
+                }}
+              />
+            )}
             <textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              rows={2}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              rows={isDoc ? 7 : 2}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
             />
           </div>
         </div>
@@ -318,7 +326,15 @@ function EditCardModal({
 
 // ── Add card form ───────────────────────────────────────────────────
 
-function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: () => void }) {
+function AddCardForm({
+  collectionId,
+  onDone,
+  layout = "standard",
+}: {
+  collectionId: number;
+  onDone: () => void;
+  layout?: "standard" | "document";
+}) {
   const { t } = useTranslation();
   const toast = useToast();
   const { speechLangs } = useUserSettings();
@@ -380,13 +396,14 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
   }
 
   const isPending = addCard.isPending || addCardWithImage.isPending;
+  const isDoc = layout === "document";
 
   return (
     <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-4 flex flex-col gap-3 mb-4">
       <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
         {t("collection_detail.new_card_heading")}
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3">
+      <div className={isDoc ? "flex flex-col gap-3" : "grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3"}>
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">{t("collection_detail.question_label")}</label>
@@ -399,16 +416,18 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
             }}
             placeholder={t("collection_detail.question_placeholder")}
-            rows={2}
+            rows={isDoc ? 3 : 2}
             autoFocus
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
           />
-          <ImageUploadField
-            collectionId={collectionId}
-            file={imgQFile}
-            onFileChange={setImgQFile}
-            onClear={() => setImgQFile(null)}
-          />
+          {!isDoc && (
+            <ImageUploadField
+              collectionId={collectionId}
+              file={imgQFile}
+              onFileChange={setImgQFile}
+              onClear={() => setImgQFile(null)}
+            />
+          )}
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
@@ -436,15 +455,17 @@ function AddCardForm({ collectionId, onDone }: { collectionId: number; onDone: (
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
             }}
             placeholder={t("collection_detail.answer_placeholder")}
-            rows={2}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            rows={isDoc ? 8 : 2}
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
           />
-          <ImageUploadField
-            collectionId={collectionId}
-            file={imgAFile}
-            onFileChange={setImgAFile}
-            onClear={() => setImgAFile(null)}
-          />
+          {!isDoc && (
+            <ImageUploadField
+              collectionId={collectionId}
+              file={imgAFile}
+              onFileChange={setImgAFile}
+              onClear={() => setImgAFile(null)}
+            />
+          )}
         </div>
       </div>
       <div>
@@ -499,12 +520,14 @@ function CardListRow({
   index,
   onView,
   onDelete,
+  layout,
 }: {
   card: Content;
   collectionId: number;
   index: number;
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
+  layout?: "standard" | "document";
 }) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
@@ -524,7 +547,13 @@ function CardListRow({
 
   return (
     <>
-      <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
+      <EditCardModal
+        card={card}
+        collectionId={collectionId}
+        open={editing}
+        onClose={() => setEditing(false)}
+        layout={layout}
+      />
       <div className="group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
@@ -605,11 +634,13 @@ function CardItem({
   collectionId,
   onView,
   onDelete,
+  layout,
 }: {
   card: Content;
   collectionId: number;
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
+  layout?: "standard" | "document";
 }) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -640,7 +671,13 @@ function CardItem({
 
   return (
     <>
-      <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
+      <EditCardModal
+        card={card}
+        collectionId={collectionId}
+        open={editing}
+        onClose={() => setEditing(false)}
+        layout={layout}
+      />
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
           <p className="text-xs text-gray-400 mb-1">{t("collection_detail.question_label")}</p>
@@ -703,11 +740,13 @@ function CardItemCompact({
   collectionId,
   onView,
   onDelete,
+  layout,
 }: {
   card: Content;
   collectionId: number;
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
+  layout?: "standard" | "document";
 }) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -738,7 +777,13 @@ function CardItemCompact({
 
   return (
     <>
-      <EditCardModal card={card} collectionId={collectionId} open={editing} onClose={() => setEditing(false)} />
+      <EditCardModal
+        card={card}
+        collectionId={collectionId}
+        open={editing}
+        onClose={() => setEditing(false)}
+        layout={layout}
+      />
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
           <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
@@ -1191,6 +1236,11 @@ export function CollectionDetailPage() {
                       ? `🔓 ${t("collection_detail.public_label")}`
                       : `🔒 ${t("collection_detail.private_label")}`}
                   </button>
+                  {collection?.layout === "document" && (
+                    <span className="border-l border-gray-200 dark:border-gray-700 pl-3 text-teal-600 dark:text-teal-400 text-sm">
+                      📄 {t("collection_detail.layout_document_badge")}
+                    </span>
+                  )}
                 </div>
                 {/* Tags */}
                 <div
@@ -1599,7 +1649,9 @@ export function CollectionDetailPage() {
       </div>
 
       {/* Inline add form */}
-      {addingCard && <AddCardForm collectionId={collectionId} onDone={() => setAddingCard(false)} />}
+      {addingCard && (
+        <AddCardForm collectionId={collectionId} onDone={() => setAddingCard(false)} layout={collection?.layout} />
+      )}
 
       {/* Loading */}
       {isLoading && (
@@ -1638,6 +1690,7 @@ export function CollectionDetailPage() {
               collectionId={collectionId}
               onView={setViewCard}
               onDelete={handleDelete}
+              layout={collection?.layout}
             />
           ))}
         </div>
@@ -1651,6 +1704,7 @@ export function CollectionDetailPage() {
               collectionId={collectionId}
               onView={setViewCard}
               onDelete={handleDelete}
+              layout={collection?.layout}
             />
           ))}
         </div>
@@ -1665,6 +1719,7 @@ export function CollectionDetailPage() {
               index={idx + 1}
               onView={setViewCard}
               onDelete={handleDelete}
+              layout={collection?.layout}
             />
           ))}
         </div>
@@ -1717,6 +1772,16 @@ export function CollectionDetailPage() {
                 )}{" "}
                 <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
                   {t("collection_detail.card", { count: cards.length })}
+                </span>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full ${
+                    collection?.layout === "document"
+                      ? "bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                  }`}>
+                  {collection?.layout === "document"
+                    ? `📄 ${t("collection_detail.layout_document_badge")}`
+                    : `🃏 ${t("collection_detail.layout_standard_badge")}`}
                 </span>
               </div>
             </div>
@@ -1832,7 +1897,7 @@ export function CollectionDetailPage() {
 
       {/* Card preview modal */}
       <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="xxl">
-        {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} />}
+        {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} layout={collection?.layout} />}
       </Modal>
 
       {/* Practice bar — mobile only, fixed above bottom nav */}

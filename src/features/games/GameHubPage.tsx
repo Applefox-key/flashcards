@@ -1,5 +1,6 @@
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 import { useGameCards } from "./useGameCards";
 
 const ACTIVITIES = [
@@ -26,7 +27,14 @@ export function GameHubPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isPlaylist = searchParams.get("src") === "pl";
-  const { cards, title, isLoading, isError } = useGameCards();
+  const { cards, title, layout, isLoading, isError } = useGameCards();
+
+  useEffect(() => {
+    if (!isLoading && layout === "document") {
+      const base = `/play/flashcard/${id}`;
+      navigate(isPlaylist ? `${base}?src=pl` : base, { replace: true });
+    }
+  }, [isLoading, layout, id, isPlaylist, navigate]);
 
   function handleSelect(type: string) {
     const base = `/play/${type}/${id}`;

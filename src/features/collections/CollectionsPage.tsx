@@ -73,7 +73,9 @@ function CollectionCard({
   const { t } = useTranslation();
   const isDemo = useIsDemo();
   const demoContent = useDemoStore((s) => s.content[collection.id]);
-  const demoCardPreviews = (demoContent ?? []).slice(0, 3).map((c) => ({ id: c.id, question: c.question, answer: c.answer }));
+  const demoCardPreviews = (demoContent ?? [])
+    .slice(0, 3)
+    .map((c) => ({ id: c.id, question: c.question, answer: c.answer }));
 
   const { data, isLoading } = useQuery({
     queryKey: ["collections", collection.id, "preview"],
@@ -114,6 +116,7 @@ function CollectionCard({
           </span>
           {!!collection.isFavorite && <span className="text-lg text-rose-400 ">♥</span>}
           {!!collection.isPublic && <span className="text-sm pb-1">🔓</span>}
+          {collection.layout === "document" && <span className="text-xs text-teal-500 dark:text-teal-400">📄</span>}
         </div>
       </div>
       <CollectionProgressBar stats={preview?.stats} variant="minimal" />
@@ -166,7 +169,9 @@ function CollectionListRow({
   const { t } = useTranslation();
   const isDemo = useIsDemo();
   const demoContent = useDemoStore((s) => s.content[collection.id]);
-  const demoCardPreviews = (demoContent ?? []).slice(0, 3).map((c) => ({ id: c.id, question: c.question, answer: c.answer }));
+  const demoCardPreviews = (demoContent ?? [])
+    .slice(0, 3)
+    .map((c) => ({ id: c.id, question: c.question, answer: c.answer }));
 
   const { data } = useQuery({
     queryKey: ["collections", collection.id, "preview"],
@@ -214,7 +219,8 @@ function CollectionListRow({
 
       <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
         {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
-        {!!collection.isPublic && <span className="text-xs">🔓</span>}{" "}
+        {!!collection.isPublic && <span className="text-xs">🔓</span>}
+        {collection.layout === "document" && <span className="text-xs text-teal-500 dark:text-teal-400">📄</span>}{" "}
         {t("collections.card_count", {
           count: preview?.stats
             ? preview.stats.toLearn + preview.stats.inProgress + preview.stats.learned

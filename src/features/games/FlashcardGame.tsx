@@ -21,6 +21,7 @@ interface Props {
   answerFirst: boolean;
   isShuffled: boolean;
   mode: "browse" | "mastery" | "oneshot";
+  layout?: "standard" | "document";
 }
 
 const FADE_OUT = 300;
@@ -29,7 +30,7 @@ const MASTERY_THRESHOLD = 3;
 
 // ── Main component ──────────────────────────────────────────────────
 
-export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, isShuffled, mode }: Props) {
+export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, isShuffled, mode, layout = "standard" }: Props) {
   const { t } = useTranslation();
   const isDemo = useIsDemo();
   const demoStore = useDemoStore();
@@ -342,6 +343,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           collectionId={collectionId}
           flipped={flipped}
           animated={visible}
+          layout={layout}
         />
       </div>
 

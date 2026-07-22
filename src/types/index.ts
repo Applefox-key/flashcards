@@ -35,6 +35,7 @@ export interface Collection {
   categoryid?: number
   isPublic: boolean
   isFavorite: boolean
+  layout?: 'standard' | 'document'
   category?: Category
   cardCount?: number
   tags?: CollectionTag[]
@@ -108,6 +109,7 @@ export interface CollectionCreateRequest {
   name: string
   note?: string
   categoryid?: number
+  layout?: 'standard' | 'document'
 }
 
 export interface CollectionCreateWithCardsRequest extends CollectionCreateRequest {

@@ -19,7 +19,7 @@ export function GamePage() {
   const { t } = useTranslation();
   const { type = "flashcard", id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
-  const { cards, title, isLoading, isError } = useGameCards();
+  const { cards, title, layout, isLoading, isError } = useGameCards();
   const collectionId = Number(id);
 
   const [rateFilter, setRateFilter] = useState<RateFilter>(null);
@@ -236,6 +236,7 @@ export function GamePage() {
               answerFirst={answerFirst}
               isShuffled={isShuffled}
               mode={flashcardMode}
+              layout={layout}
             />
           )}
           {type === "timed" && (

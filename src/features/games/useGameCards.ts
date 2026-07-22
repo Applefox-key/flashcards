@@ -48,11 +48,12 @@ export function useGameCards() {
       const cards = demoPlaylist
         ? demoPlaylist.collections.flatMap((c) => demoContent[c.id] ?? [])
         : []
-      return { cards, title: demoPlaylist?.name ?? '', isLoading: false, isError: false }
+      return { cards, title: demoPlaylist?.name ?? '', layout: 'standard' as const, isLoading: false, isError: false }
     }
     return {
       cards: demoColContent,
       title: demoCol?.name ?? '',
+      layout: (demoCol?.layout ?? 'standard') as 'standard' | 'document',
       isLoading: false,
       isError: false,
     }
@@ -64,6 +65,7 @@ export function useGameCards() {
     return {
       cards: plQuery.data ?? [],
       title: plName ?? '',
+      layout: 'standard' as const,
       isLoading: plQuery.isLoading || plMetaQuery.isLoading,
       isError: plQuery.isError,
     }
@@ -73,6 +75,7 @@ export function useGameCards() {
   return {
     cards: raw?.[0]?.content ?? [],
     title: raw?.[0]?.collection?.name ?? '',
+    layout: (raw?.[0]?.collection?.layout ?? 'standard') as 'standard' | 'document',
     isLoading: colQuery.isLoading,
     isError: colQuery.isError,
   }

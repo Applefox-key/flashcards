@@ -6,14 +6,16 @@ import type { Content } from "@/types";
 interface Props {
   card: Content;
   collectionId: number;
+  layout?: "standard" | "document";
 }
 
-export function FlashCardPreview({ card, collectionId }: Props) {
+export function FlashCardPreview({ card, collectionId, layout }: Props) {
   const { t } = useTranslation();
   const [flipped, setFlipped] = useState(false);
+  const isDoc = layout === "document";
 
   return (
-    <div onClick={() => setFlipped((f) => !f)} className="cursor-pointer select-none">
+    <div onClick={isDoc ? undefined : () => setFlipped((f) => !f)} className={isDoc ? undefined : "cursor-pointer select-none"}>
       <FlashCardFace
         frontLabel={t("collection_detail.question_label")}
         backLabel={t("collection_detail.answer_label")}
@@ -24,6 +26,7 @@ export function FlashCardPreview({ card, collectionId }: Props) {
         note={card.note}
         collectionId={collectionId}
         flipped={flipped}
+        layout={layout}
       />
     </div>
   );
