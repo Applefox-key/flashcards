@@ -521,6 +521,7 @@ function CardListRow({
   onView,
   onDelete,
   layout,
+  compact = true,
 }: {
   card: Content;
   collectionId: number;
@@ -528,6 +529,7 @@ function CardListRow({
   onView: (card: Content) => void;
   onDelete: (id: number) => void;
   layout?: "standard" | "document";
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
@@ -560,10 +562,10 @@ function CardListRow({
             {index}
           </span>
           <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
-            <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{card.question}</span>
-            <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{card.answer}</span>
+            <span className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : ""}`}>{card.question}</span>
+            <span className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : ""}`}>{card.answer}</span>
             {card.note && (
-              <span className="sm:col-span-2 text-xs text-gray-400 truncate bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full truncate italic">
+              <span className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full italic${compact ? " truncate" : ""}`}>
                 {highlightNote(card.note, card.question, card.answer)}
               </span>
             )}
@@ -867,7 +869,8 @@ export function CollectionDetailPage() {
   const deleteAllCards = useDeleteAllCards();
 
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "compact" | "list">("grid");
+  const [displayMode, setDisplayMode] = useState<"cards" | "list">("cards");
+  const [compact, setCompact] = useState(false);
   const [sortField, setSortField] = useState<"question" | "answer" | "note" | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
@@ -1601,40 +1604,44 @@ export function CollectionDetailPage() {
                   )}
                 </div>
                 {/* View toggle */}
-                <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
-                  <button
-                    onClick={() => setViewMode("list")}
-                    title="List view"
-                    className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
-                      viewMode === "list"
-                        ? "bg-indigo-600 text-white"
-                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}>
-                    <PiListBold className="text-[18px]" />{" "}
-                    <span className="hidden lg:inline">{t("collection_detail.view_list")}</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode("compact")}
-                    title="Compact cards view"
-                    className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
-                      viewMode === "compact"
-                        ? "bg-indigo-600 text-white border-l-indigo-600"
-                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}>
-                    <BsGrid className="text-[15px]" />
-                    <span className="hidden lg:inline">{t("collection_detail.view_compact")}</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    title="Cards view"
-                    className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
-                      viewMode === "grid"
-                        ? "bg-indigo-600 text-white border-l-indigo-600"
-                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}>
-                    <BsGridFill className="text-[15px]" />
-                    <span className="hidden lg:inline">{t("collection_detail.view_cards")}</span>
-                  </button>
+                <div className="flex items-center gap-1.5">
+                  <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
+                    <button
+                      onClick={() => setDisplayMode("list")}
+                      title="List view"
+                      className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
+                        displayMode === "list"
+                          ? "bg-indigo-600 text-white"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}>
+                      <PiListBold className="text-[18px]" />
+                      <span className="hidden lg:inline">{t("collection_detail.view_list")}</span>
+                    </button>
+                    <button
+                      onClick={() => setDisplayMode("cards")}
+                      title="Cards view"
+                      className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                        displayMode === "cards"
+                          ? "bg-indigo-600 text-white border-l-indigo-600"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}>
+                      <BsGridFill className="text-[15px]" />
+                      <span className="hidden lg:inline">{t("collection_detail.view_cards")}</span>
+                    </button>
+                  </div>
+                  <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
+                    <button
+                      onClick={() => setCompact((v) => !v)}
+                      title="Compact view"
+                      className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
+                        compact
+                          ? "bg-indigo-600 text-white"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}>
+                      <BsGrid className="text-[15px]" />
+                      <span className="hidden lg:inline">{t("collection_detail.view_compact")}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1681,7 +1688,7 @@ export function CollectionDetailPage() {
       )}
 
       {/* Cards */}
-      {!isLoading && sorted.length > 0 && viewMode === "grid" && (
+      {!isLoading && sorted.length > 0 && displayMode === "cards" && !compact && (
         <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-36 sm:pb-0">
           {sorted.map((card) => (
             <CardItem
@@ -1695,7 +1702,7 @@ export function CollectionDetailPage() {
           ))}
         </div>
       )}
-      {!isLoading && sorted.length > 0 && viewMode === "compact" && (
+      {!isLoading && sorted.length > 0 && displayMode === "cards" && compact && (
         <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-36 sm:pb-0">
           {sorted.map((card) => (
             <CardItemCompact
@@ -1709,7 +1716,7 @@ export function CollectionDetailPage() {
           ))}
         </div>
       )}
-      {!isLoading && sorted.length > 0 && viewMode === "list" && (
+      {!isLoading && sorted.length > 0 && displayMode === "list" && (
         <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-36 sm:pb-0">
           {sorted.map((card, idx) => (
             <CardListRow
@@ -1720,6 +1727,7 @@ export function CollectionDetailPage() {
               onView={setViewCard}
               onDelete={handleDelete}
               layout={collection?.layout}
+              compact={compact}
             />
           ))}
         </div>

@@ -115,6 +115,8 @@ interface FlashCardFaceProps {
   /** Whether the flip transition should animate. Default true. */
   animated?: boolean;
   layout?: "standard" | "document";
+  /** Show both sides flat (no flip). Only for preview, not game. */
+  showBothSides?: boolean;
 }
 
 function highlightNote(note: string, question: string, answer: string) {
@@ -148,11 +150,13 @@ export function FlashCardFace({
   flipped,
   animated = true,
   layout = "standard",
+  showBothSides = false,
 }: FlashCardFaceProps) {
   const { t } = useTranslation();
+
   const isDoc = layout === "document";
 
-  if (isDoc) {
+  if (showBothSides) {
     return (
       <div className="rounded-2xl border border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 bg-white dark:bg-gray-800 shadow-lg flex flex-col">
         <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
@@ -201,7 +205,7 @@ export function FlashCardFace({
           transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
           transition: animated ? "transform 0.5s ease" : "none",
           position: "relative",
-          minHeight: 340,
+          minHeight: isDoc ? 520 : 340,
         }}>
         {/* Front face */}
         <div
@@ -212,12 +216,13 @@ export function FlashCardFace({
             <SpeakButton text={frontText} />
           </div>
           <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2 pt-0">
-            <div className="my-auto w-full flex flex-col items-center gap-3 max-h-[90%]">
+            <div className={`${isDoc ? "w-full pt-1" : "my-auto w-full flex flex-col items-center gap-3 max-h-[90%]"}`}>
               <CardContent
                 text={frontText}
                 imgFilename={frontImg}
                 collectionId={collectionId}
-                textClass="text-2xl font-semibold text-gray-900 dark:text-gray-100"
+                textClass={isDoc ? "text-base font-normal text-gray-800 dark:text-gray-100 leading-relaxed" : "text-2xl font-semibold text-gray-900 dark:text-gray-100"}
+                alignClass={isDoc ? "text-left" : undefined}
               />
             </div>
           </div>
@@ -235,16 +240,17 @@ export function FlashCardFace({
             <SpeakButton text={backText} />
           </div>
           <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2 pt-0">
-            <div className="my-auto w-full flex flex-col items-center gap-3">
+            <div className={`${isDoc ? "w-full pt-1" : "my-auto w-full flex flex-col items-center gap-3"}`}>
               <CardContent
                 text={backText}
                 imgFilename={backImg}
                 collectionId={collectionId}
                 dark
-                textClass="text-2xl font-semibold text-white"
+                textClass={isDoc ? "text-base font-normal text-white leading-relaxed" : "text-2xl font-semibold text-white"}
+                alignClass={isDoc ? "text-left" : undefined}
               />
               {note && (
-                <p className="text-sm text-indigo-200 italic text-center">
+                <p className={`text-sm text-indigo-200 italic ${isDoc ? "text-left mt-3" : "text-center"}`}>
                   {highlightNote(note, frontText, backText)}
                 </p>
               )}

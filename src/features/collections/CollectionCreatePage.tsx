@@ -127,6 +127,11 @@ export function CollectionCreatePage() {
               </button>
             ))}
           </div>
+          {layout === "document" && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+              {t("create_collection.layout_document_note")}
+            </p>
+          )}
         </div>
 
         <div className="flex gap-3 pt-2">

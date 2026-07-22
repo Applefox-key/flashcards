@@ -27,6 +27,7 @@ export function FlashCardPreview({ card, collectionId, layout }: Props) {
         collectionId={collectionId}
         flipped={flipped}
         layout={layout}
+        showBothSides={isDoc}
       />
     </div>
   );
