@@ -190,7 +190,7 @@ function EditCardModal({
           id: card.id,
           question,
           answer,
-          note: note || undefined,
+          note,
           collectionid: collectionId,
           ...(clearImgQ ? { imgQ: "" } : {}),
           ...(clearImgA ? { imgA: "" } : {}),
@@ -212,7 +212,7 @@ function EditCardModal({
       editCard.mutate(
         {
           collectionId,
-          data: { id: card.id, question, answer, note: note || undefined, imgQ: card.imgQ, imgA: card.imgA },
+          data: { id: card.id, question, answer, note, imgQ: card.imgQ, imgA: card.imgA },
         },
         {
           onSuccess: () => {
