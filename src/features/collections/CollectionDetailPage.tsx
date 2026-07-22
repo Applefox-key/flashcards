@@ -556,37 +556,43 @@ function CardListRow({
         onClose={() => setEditing(false)}
         layout={layout}
       />
-      <div className="group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+      <div className="sm:w-[75vw] sm:m-auto group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
             {index}
           </span>
           <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
-            <span className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : ""}`}>{card.question}</span>
-            <span className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : ""}`}>{card.answer}</span>
+            <span className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : ""}`}>
+              {card.question}
+            </span>
+            <span className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : ""}`}>
+              {card.answer}
+            </span>
             {card.note && (
-              <span className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full italic${compact ? " truncate" : ""}`}>
+              <span
+                className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full italic${compact ? " truncate" : ""}`}>
                 {highlightNote(card.note, card.question, card.answer)}
               </span>
             )}
           </div>
         </div>
         {/* Desktop: hover buttons */}
-        <div className="hidden sm:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <div className="hidden sm:flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <button
             onClick={() => onView(card)}
-            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors px-1.5 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             {t("collection_detail.view_btn")}
           </button>
           <button
             onClick={() => setEditing(true)}
-            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors px-1.5 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
             {t("collection_detail.edit_btn")}
           </button>
           <button
             onClick={() => onDelete(card.id)}
-            className="text-xs text-gray-400 hover:text-red-500 transition-colors">
-            {t("collection_detail.delete_btn")}
+            title={t("collection_detail.delete_btn")}
+            className="ml-1 p-1.5 rounded text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+            <IoTrashBinOutline className="text-base" />
           </button>
         </div>
         {/* Mobile: ··· kebab menu */}
