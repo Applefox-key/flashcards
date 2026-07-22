@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/Button";
+import { TagSelect } from "@/components/TagSelect";
 import { useAuthStore } from "@/store/authStore";
 import { useIsDemo } from "@/hooks/useIsDemo";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useCreateCollection } from "@/features/collections/hooks/useCollections";
+import { useSetCollectionTags } from "@/features/collections/hooks/useCollectionTags";
 import { categoriesApi, contentApi } from "@/api";
 
 const UI_LANGS = [
@@ -38,7 +40,7 @@ export function OnboardingWizard() {
 
 // ─── Modal shell ─────────────────────────────────────────────────────────────
 
-type Step = -1 | 0 | 1 | 2 | 3;
+type Step = -1 | 0 | 1 | 2 | 3 | 4;
 
 function WizardModal({ onFinish }: { onFinish: () => void }) {
   const { t } = useTranslation();
@@ -57,9 +59,13 @@ function WizardModal({ onFinish }: { onFinish: () => void }) {
   const [colName, setColName] = useState("");
   const [catName, setCatName] = useState("");
   const [colError, setColError] = useState("");
-  const [colLoading, setColLoading] = useState(false);
 
   // step 2
+  const [tagIds, setTagIds] = useState<number[]>([]);
+  const [colLayout, setColLayout] = useState<"standard" | "document">("standard");
+  const [colLoading, setColLoading] = useState(false);
+
+  // step 3
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [cardError, setCardError] = useState("");
@@ -68,14 +74,19 @@ function WizardModal({ onFinish }: { onFinish: () => void }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const createCollection = useCreateCollection();
+  const setCollectionTags = useSetCollectionTags();
 
-  async function handleCreateCollection(e: React.FormEvent) {
-    e.preventDefault();
+  function handleNextFromStep1() {
     if (!colName.trim()) {
       setColError(t("onboarding.collection_name_required"));
       return;
     }
     setColError("");
+    setStep(2);
+  }
+
+  async function handleCreateCollection(e: React.FormEvent) {
+    e.preventDefault();
     setColLoading(true);
     try {
       let categoryid: number | undefined;
@@ -84,10 +95,13 @@ function WizardModal({ onFinish }: { onFinish: () => void }) {
         categoryid = cat.id;
         void queryClient.invalidateQueries({ queryKey: ["categories"] });
       }
-      const col = await createCollection.mutateAsync({ name: colName.trim(), categoryid });
+      const col = await createCollection.mutateAsync({ name: colName.trim(), categoryid, layout: colLayout });
+      if (tagIds.length > 0) {
+        await setCollectionTags.mutateAsync({ collectionId: col.id, tagIds });
+      }
       setCollectionId(col.id);
       setCollectionName(colName.trim());
-      setStep(2);
+      setStep(3);
     } catch {
       setColError(t("onboarding.collection_create_error"));
     } finally {
@@ -110,7 +124,7 @@ function WizardModal({ onFinish }: { onFinish: () => void }) {
       setCardError(t("onboarding.card_save_error"));
     } finally {
       setCardLoading(false);
-      setStep(3);
+      setStep(4);
     }
   }
 
@@ -126,15 +140,20 @@ function WizardModal({ onFinish }: { onFinish: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        {/* Progress bar — steps 1 and 2 */}
-        {step > 0 && step < 3 && (
-          <div className="h-1 bg-gray-100 dark:bg-gray-700">
-            <div className="h-1 bg-indigo-500 transition-all duration-500" style={{ width: `${(step / 2) * 100}%` }} />
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4">
+        {/* Progress bar — steps 1–3 */}
+        {step > 0 && step < 4 && (
+          <div className="rounded-t-2xl overflow-hidden">
+            <div className="h-1 bg-gray-100 dark:bg-gray-700">
+              <div
+                className="h-1 bg-indigo-500 transition-all duration-500"
+                style={{ width: `${(step / 3) * 100}%` }}
+              />
+            </div>
           </div>
         )}
 
-        <div className="p-8">
+        <div className="p-8 overflow-y-auto max-h-[85vh]">
           {step === -1 && <LangStep onSelect={handleLangSelect} />}
 
           {step === 0 && <WelcomeStep onStart={() => setStep(1)} onSkip={onFinish} />}
@@ -146,13 +165,26 @@ function WizardModal({ onFinish }: { onFinish: () => void }) {
               catName={catName}
               setCatName={setCatName}
               error={colError}
-              loading={colLoading}
-              onSubmit={handleCreateCollection}
+              onNext={handleNextFromStep1}
               onSkip={onFinish}
             />
           )}
 
           {step === 2 && (
+            <OptionsStep
+              tagIds={tagIds}
+              setTagIds={setTagIds}
+              layout={colLayout}
+              setLayout={setColLayout}
+              loading={colLoading}
+              error={colError}
+              onSubmit={handleCreateCollection}
+              onBack={() => setStep(1)}
+              onSkip={onFinish}
+            />
+          )}
+
+          {step === 3 && (
             <CardStep
               collectionName={collectionName}
               question={question}
@@ -162,11 +194,11 @@ function WizardModal({ onFinish }: { onFinish: () => void }) {
               error={cardError}
               loading={cardLoading}
               onSubmit={handleAddCard}
-              onSkip={() => setStep(3)}
+              onSkip={() => setStep(4)}
             />
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <DoneStep
               collectionName={collectionName}
               onGoToCollection={handleGoToCollection}
@@ -250,7 +282,7 @@ function WelcomeStep({ onStart, onSkip }: { onStart: () => void; onSkip: () => v
   );
 }
 
-// ─── Step 1: Create collection ───────────────────────────────────────────────
+// ─── Step 1: Collection name & category ──────────────────────────────────────
 
 interface CollectionStepProps {
   colName: string;
@@ -258,26 +290,16 @@ interface CollectionStepProps {
   catName: string;
   setCatName: (v: string) => void;
   error: string;
-  loading: boolean;
-  onSubmit: (e: React.FormEvent) => void;
+  onNext: () => void;
   onSkip: () => void;
 }
 
-function CollectionStep({
-  colName,
-  setColName,
-  catName,
-  setCatName,
-  error,
-  loading,
-  onSubmit,
-  onSkip,
-}: CollectionStepProps) {
+function CollectionStep({ colName, setColName, catName, setCatName, error, onNext, onSkip }: CollectionStepProps) {
   const { t } = useTranslation();
   return (
     <div>
       <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider mb-1">
-        {t("onboarding.step_1_of_2")}
+        {t("onboarding.step_1_of_3")}
       </p>
       <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
         {t("onboarding.create_collection_title")}
@@ -286,7 +308,12 @@ function CollectionStep({
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
         {t("onboarding.create_collection_subtitle_category")}
       </p>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onNext();
+        }}
+        className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {t("onboarding.collection_name_label")} <span className="text-red-500">*</span>
@@ -315,8 +342,8 @@ function CollectionStep({
         </div>
 
         <div className="flex flex-col gap-2 pt-2">
-          <Button type="submit" loading={loading} disabled={!colName.trim()} className="w-full">
-            {t("onboarding.create_collection_btn")}
+          <Button type="submit" disabled={!colName.trim()} className="w-full">
+            {t("onboarding.next_btn")}
           </Button>
           <button
             type="button"
@@ -330,7 +357,133 @@ function CollectionStep({
   );
 }
 
-// ─── Step 2: Add first card ──────────────────────────────────────────────────
+// ─── Step 2: Tags & layout ───────────────────────────────────────────────────
+
+interface OptionsStepProps {
+  tagIds: number[];
+  setTagIds: (ids: number[]) => void;
+  layout: "standard" | "document";
+  setLayout: (v: "standard" | "document") => void;
+  loading: boolean;
+  error: string;
+  onSubmit: (e: React.FormEvent) => void;
+  onBack: () => void;
+  onSkip: () => void;
+}
+
+function OptionsStep({ tagIds, setTagIds, layout, setLayout, loading, error, onSubmit, onBack, onSkip }: OptionsStepProps) {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider mb-1">
+        {t("onboarding.step_2_of_3")}
+      </p>
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+        {t("onboarding.collection_options_title")}
+      </h2>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        {t("onboarding.collection_options_subtitle")}
+      </p>
+      <form onSubmit={onSubmit} className="flex flex-col gap-5">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("onboarding.tags_label")}{" "}
+            <span className="text-gray-400 font-normal">{t("onboarding.category_optional")}</span>
+          </label>
+          <TagSelect value={tagIds} onChange={setTagIds} />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("onboarding.layout_label")}
+          </label>
+          <div className="grid grid-cols-2 gap-1">
+            {(["standard", "document"] as const).map((val) => (
+              <button
+                key={val}
+                type="button"
+                onClick={() => setLayout(val)}
+                className={`flex flex-col items-center gap-1 p-3 rounded-lg border text-sm transition-colors ${
+                  layout === val
+                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                }`}>
+                {val === "standard" ? (
+                  <svg
+                    width="48"
+                    height="30"
+                    viewBox="0 0 48 30"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    className={layout === val ? "text-indigo-500" : "text-gray-400"}>
+                    <rect x="1" y="1" width="46" height="28" rx="4" />
+                    <line x1="8" y1="10" x2="40" y2="10" />
+                    <line x1="8" y1="16" x2="32" y2="16" />
+                  </svg>
+                ) : (
+                  <svg
+                    width="28"
+                    height="40"
+                    viewBox="0 0 28 40"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    className={layout === val ? "text-indigo-500" : "text-gray-400"}>
+                    <rect x="1" y="1" width="26" height="38" rx="4" />
+                    <line x1="5" y1="9" x2="23" y2="9" />
+                    <line x1="5" y1="15" x2="23" y2="15" />
+                    <line x1="5" y1="21" x2="19" y2="21" />
+                    <line x1="5" y1="27" x2="23" y2="27" />
+                    <line x1="5" y1="33" x2="17" y2="33" />
+                  </svg>
+                )}
+                <span
+                  className={`font-medium text-xs ${layout === val ? "text-indigo-700 dark:text-indigo-300" : "text-gray-700 dark:text-gray-300"}`}>
+                  {t(`onboarding.layout_${val}` as const)}
+                </span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  {t(`onboarding.layout_${val}_desc` as const)}
+                </span>
+              </button>
+            ))}
+          </div>
+          {layout === "document" && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+              {t("onboarding.layout_document_note")}
+            </p>
+          )}
+        </div>
+
+        {error && <p className="text-xs text-red-500">{error}</p>}
+
+        <div className="flex flex-col gap-2 pt-1">
+          <Button type="submit" loading={loading} className="w-full">
+            {t("onboarding.create_collection_btn")}
+          </Button>
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={onBack}
+              className="text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-1">
+              {t("onboarding.back_btn")}
+            </button>
+            <button
+              type="button"
+              onClick={onSkip}
+              className="text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-1">
+              {t("onboarding.skip_tutorial")}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ─── Step 3: Add first card ──────────────────────────────────────────────────
 
 interface CardStepProps {
   collectionName: string;
@@ -359,7 +512,7 @@ function CardStep({
   return (
     <div>
       <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider mb-1">
-        {t("onboarding.step_2_of_2")}
+        {t("onboarding.step_3_of_3")}
       </p>
       <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{t("onboarding.add_card_title")}</h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
@@ -409,7 +562,7 @@ function CardStep({
   );
 }
 
-// ─── Step 3: Done ────────────────────────────────────────────────────────────
+// ─── Step 4: Done ────────────────────────────────────────────────────────────
 
 interface DoneStepProps {
   collectionName: string;
