@@ -562,15 +562,15 @@ function CardListRow({
             {index}
           </span>
           <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
-            <span className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : ""}`}>
+            <span className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : " whitespace-pre-wrap"}`}>
               {card.question}
             </span>
-            <span className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : ""}`}>
+            <span className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : " whitespace-pre-wrap"}`}>
               {card.answer}
             </span>
             {card.note && (
               <span
-                className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full italic${compact ? " truncate" : ""}`}>
+                className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full italic${compact ? " truncate" : " whitespace-pre-wrap"}`}>
                 {highlightNote(card.note, card.question, card.answer)}
               </span>
             )}
