@@ -809,18 +809,32 @@ function CardItemCompact({
         layout={layout}
       />
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
-          <p className="font-medium text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
-            {card.question}
-          </p>
+        <div className="sm:flex sm:items-start sm:gap-2">
+          <div className="sm:flex-1 sm:min-w-0">
+            <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
+            <p className="font-medium text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
+              {card.question}
+            </p>
+          </div>
+          {card.imgQ && card.imgQ !== "null" && card.imgQ !== "" ? (
+            <div className="mt-1 sm:mt-0 sm:shrink-0 sm:w-20">
+              <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
+            </div>
+          ) : null}
         </div>
         <div className="border-t border-gray-100 dark:border-gray-700" />
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.answer_label")}</p>
-          <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
-            {card.answer}
-          </p>
+        <div className="sm:flex sm:items-start sm:gap-2">
+          <div className="sm:flex-1 sm:min-w-0">
+            <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.answer_label")}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
+              {card.answer}
+            </p>
+          </div>
+          {card.imgA && card.imgA !== "null" && card.imgA !== "" ? (
+            <div className="mt-1 sm:mt-0 sm:shrink-0 sm:w-20">
+              <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
+            </div>
+          ) : null}
         </div>
         <div className="flex items-center justify-between">
           <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
