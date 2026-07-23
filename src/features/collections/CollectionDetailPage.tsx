@@ -688,24 +688,37 @@ function CardItem({
         onClose={() => setEditing(false)}
         layout={layout}
       />
-      <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
-        <div>
-          <p className="text-xs text-gray-400 mb-1">{t("collection_detail.question_label")}</p>
-          <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">
-            {card.question}
-          </p>
-          <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
+      {/* <div className="bg-gray-100 dark:bg-gray-900 flex align-center justify-center p-2 rounded-lg"> */}
+      <div className="justify-start bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
+        <div className="sm:flex sm:items-start sm:gap-3">
+          <div className="sm:flex-1 sm:min-w-0">
+            <p className="text-xs text-gray-400 mb-1">{t("collection_detail.question_label")}</p>
+            <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">
+              {card.question}
+            </p>
+          </div>
+          {card.imgQ && card.imgQ !== "null" && card.imgQ !== "" ? (
+            <div className="sm:shrink-0 sm:w-32">
+              <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
+            </div>
+          ) : null}
         </div>
         <div className="border-t border-gray-100 dark:border-gray-700" />
-        <div>
-          <p className="text-xs text-gray-400 mb-1">{t("collection_detail.answer_label")}</p>
-          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{card.answer}</p>
-          <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
-          {card.note && (
-            <p className="text-xs text-gray-400 mt-1 italic">{highlightNote(card.note, card.question, card.answer)}</p>
-          )}
+        <div className="sm:flex sm:items-start sm:gap-3">
+          <div className="sm:flex-1 sm:min-w-0">
+            <p className="text-xs text-gray-400 mb-1">{t("collection_detail.answer_label")}</p>
+            <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{card.answer}</p>
+          </div>
+          {card.imgA && card.imgA !== "null" && card.imgA !== "" ? (
+            <div className="sm:shrink-0 sm:w-32">
+              <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
+            </div>
+          ) : null}
         </div>
-        <div className="flex items-center justify-between">
+        {card.note && (
+          <p className="text-xs text-gray-400 italic">{highlightNote(card.note, card.question, card.answer)}</p>
+        )}
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -739,6 +752,7 @@ function CardItem({
           </div>
         </div>
       </div>
+      {/* </div> */}
     </>
   );
 }
