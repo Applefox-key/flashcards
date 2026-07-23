@@ -85,7 +85,7 @@ function ImageUploadField({
   const hasExisting = !!currentFilename && currentFilename !== "null" && currentFilename !== "" && !file;
 
   return (
-    <div className="flex flex-col gap-1 sm:mt-2">
+    <div className="flex flex-col gap-1">
       {/* <span className="text-xs text-gray-400 md:hidden">{label}</span> */}
       <input
         ref={inputRef}
@@ -562,10 +562,12 @@ function CardListRow({
             {index}
           </span>
           <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
-            <span className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : " whitespace-pre-wrap"}`}>
+            <span
+              className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : " whitespace-pre-wrap"}`}>
               {card.question}
             </span>
-            <span className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : " whitespace-pre-wrap"}`}>
+            <span
+              className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : " whitespace-pre-wrap"}`}>
               {card.answer}
             </span>
             {card.note && (
