@@ -193,7 +193,7 @@
     "save_btn": "Guardar cambios",
     "cancel_btn": "Cancelar",
     "not_found": "Mazo no encontrado.",
-    "danger_zone": "Zona de peligro",
+    "danger_zone": "Eliminar tarjetas o mazo",
     "delete_cards_title": "Eliminar todas las tarjetas",
     "delete_cards_desc": "Elimina todas las tarjetas pero conserva el mazo",
     "delete_cards_btn": "Eliminar tarjetas",

@@ -193,7 +193,7 @@
     "save_btn": "Save changes",
     "cancel_btn": "Cancel",
     "not_found": "Deck not found.",
-    "danger_zone": "Danger zone",
+    "danger_zone": "Delete cards or deck",
     "delete_cards_title": "Delete all cards",
     "delete_cards_desc": "Removes all cards but keeps the deck",
     "delete_cards_btn": "Delete cards",

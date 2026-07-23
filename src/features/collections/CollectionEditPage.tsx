@@ -40,6 +40,7 @@ export function CollectionEditPage() {
   const [tagIds, setTagIds] = useState<number[]>([]);
   const [layout, setLayout] = useState<"standard" | "document">("standard");
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [dangerOpen, setDangerOpen] = useState(false);
 
   const setCollectionTags = useSetCollectionTags();
   const { data: existingTags = [] } = useQuery({
@@ -271,43 +272,54 @@ export function CollectionEditPage() {
 
       {/* Danger zone */}
       <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-900/50 p-5">
-        <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-4">
+        <button
+          type="button"
+          onClick={() => setDangerOpen((o) => !o)}
+          className="flex items-center gap-1.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors w-full text-left">
+          <svg
+            width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            className={`transition-transform duration-200 shrink-0 ${dangerOpen ? "rotate-90" : ""}`}>
+            <polyline points="4,2 8,6 4,10" />
+          </svg>
           {t("edit_collection.danger_zone")}
-        </h2>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {t("edit_collection.delete_cards_title")}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{t("edit_collection.delete_cards_desc")}</p>
+        </button>
+
+        {dangerOpen && (
+          <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-red-100 dark:border-red-900/40">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {t("edit_collection.delete_cards_title")}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("edit_collection.delete_cards_desc")}</p>
+              </div>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleDeleteAllCards}
+                loading={deleteAllCards.isPending}
+                type="button">
+                {t("edit_collection.delete_cards_btn")}
+              </Button>
             </div>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={handleDeleteAllCards}
-              loading={deleteAllCards.isPending}
-              type="button">
-              {t("edit_collection.delete_cards_btn")}
-            </Button>
-          </div>
-          <div className="border-t border-red-100 dark:border-red-900/40 pt-4 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {t("edit_collection.delete_collection_title")}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{t("edit_collection.delete_collection_desc")}</p>
+            <div className="border-t border-red-100 dark:border-red-900/40 pt-4 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {t("edit_collection.delete_collection_title")}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("edit_collection.delete_collection_desc")}</p>
+              </div>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleDeleteCollection}
+                loading={deleteCollection.isPending}
+                type="button">
+                {t("edit_collection.delete_btn")}
+              </Button>
             </div>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={handleDeleteCollection}
-              loading={deleteCollection.isPending}
-              type="button">
-              {t("edit_collection.delete_btn")}
-            </Button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
