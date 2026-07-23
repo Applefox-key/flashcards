@@ -255,29 +255,35 @@ function CollectionListRow({
 
 type VisibleEntry = { category: { id: number; name: string }; collections: Collection[] };
 
-function CompactToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: () => void }) {
+function ViewToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: () => void }) {
   const { t } = useTranslation();
+  const btnBase = "p-1.5 rounded transition-colors";
+  const active = "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400";
+  const inactive = "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300";
   return (
-    <button
-      onClick={onToggle}
-      title={compact ? t("collections.show_preview") : t("collections.compact_view")}
-      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors shrink-0 ${
-        compact
-          ? "bg-indigo-600 border-indigo-600 text-white"
-          : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-600"
-      }`}>
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-        <rect x="0.75" y="0.75" width="11.5" height="11.5" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-        {!compact && (
-          <>
-            <line x1="2.5" y1="4.5" x2="10.5" y2="4.5" stroke="currentColor" strokeWidth="1" />
-            <line x1="2.5" y1="6.5" x2="10.5" y2="6.5" stroke="currentColor" strokeWidth="1" />
-            <line x1="2.5" y1="8.5" x2="7.5" y2="8.5" stroke="currentColor" strokeWidth="1" />
-          </>
-        )}
-      </svg>
-      {t("collections.compact_btn")}
-    </button>
+    <div className="flex items-center gap-0.5 border border-gray-200 dark:border-gray-700 rounded-lg p-0.5 shrink-0">
+      <button
+        onClick={() => compact && onToggle()}
+        title={t("collections.view_tiles")}
+        className={`${btnBase} ${!compact ? active : inactive}`}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+          <rect x="0" y="0" width="6" height="6" rx="1" />
+          <rect x="8" y="0" width="6" height="6" rx="1" />
+          <rect x="0" y="8" width="6" height="6" rx="1" />
+          <rect x="8" y="8" width="6" height="6" rx="1" />
+        </svg>
+      </button>
+      <button
+        onClick={() => !compact && onToggle()}
+        title={t("collections.view_list")}
+        className={`${btnBase} ${compact ? active : inactive}`}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <line x1="1" y1="2.5" x2="13" y2="2.5" />
+          <line x1="1" y1="7" x2="13" y2="7" />
+          <line x1="1" y1="11.5" x2="13" y2="11.5" />
+        </svg>
+      </button>
+    </div>
   );
 }
 
@@ -427,7 +433,7 @@ function AllCollectionsView({ search }: { search: string }) {
         ) : (
           <div />
         )}
-        <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
+        <ViewToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
       </div>
       {totalPages > 1 && (
         <div className="sm:hidden mb-3">
@@ -507,7 +513,7 @@ function CardsView({
   return (
     <div className="flex gap-0 min-h-0">
       {/* Left: category list — desktop only */}
-      <div className="hidden sm:flex flex-col w-44 shrink-0 gap-0.5 border-r border-gray-200 dark:border-gray-700 pr-2 mr-4 bg-white dark:bg-gray-800">
+      <div className="hidden sm:flex flex-col w-52 shrink-0 gap-0.5 rounded-xl p-2 mr-4 bg-gray-100 dark:bg-gray-800/70 self-start">
         <button
           onClick={switchToAll}
           className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
@@ -547,7 +553,7 @@ function CardsView({
         ) : (
           <>
             <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900 ">
-              <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
+              <ViewToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
             </div>
 
             {compact && (
@@ -764,7 +770,7 @@ export function CollectionsPage() {
               <IoIosArrowForward size={14} className="shrink-0 text-indigo-400 dark:text-indigo-500" />
             </button>
 
-            <CompactToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
+            <ViewToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
           </div>
         )}
       </div>
