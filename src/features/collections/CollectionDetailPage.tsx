@@ -28,11 +28,12 @@ import { useCardImage } from "@/hooks/useCardImage";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import type { Content, Collection, CardEditRequest, Category } from "@/types";
 import { PiListBold, PiShootingStarThin } from "react-icons/pi";
-import { IoTrashBinOutline } from "react-icons/io5";
-import { BsGridFill, BsGrid } from "react-icons/bs";
+import { IoTrashBinOutline, IoChevronDown } from "react-icons/io5";
+import { BsGridFill, BsTextLeft } from "react-icons/bs";
 import { SideDrawer } from "@/components/SideDrawer";
 import { FaInfo } from "react-icons/fa6";
 import { BiImageAdd } from "react-icons/bi";
+import { MdShortText } from "react-icons/md";
 
 interface CollectionContentResponse {
   collection: Collection;
@@ -906,7 +907,8 @@ export function CollectionDetailPage() {
 
   const [search, setSearch] = useState("");
   const [displayMode, setDisplayMode] = useState<"cards" | "list">("cards");
-  const [compact, setCompact] = useState(false);
+  const [compact, setCompact] = useState(true);
+  const [compactMenuOpen, setCompactMenuOpen] = useState(false);
   const [sortField, setSortField] = useState<"question" | "answer" | "note" | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
@@ -930,6 +932,7 @@ export function CollectionDetailPage() {
   const addCardDropdownRef = useRef<HTMLDivElement>(null);
   const editDropdownRef = useRef<HTMLDivElement>(null);
   const rateFilterRef = useRef<HTMLDivElement>(null);
+  const compactMenuRef = useRef<HTMLDivElement>(null);
 
   const setCollectionTags = useSetCollectionTags();
   const { data: collectionTags = [] } = useQuery({
@@ -977,6 +980,17 @@ export function CollectionDetailPage() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [sortMenuOpen]);
+
+  useEffect(() => {
+    if (!compactMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (compactMenuRef.current && !compactMenuRef.current.contains(e.target as Node)) {
+        setCompactMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [compactMenuOpen]);
 
   useEffect(() => {
     if (!addCardDropdownOpen) return;
@@ -1639,45 +1653,81 @@ export function CollectionDetailPage() {
                     </div>
                   )}
                 </div>
-                {/* View toggle */}
-                <div className="flex items-center gap-1.5">
-                  <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
-                    <button
-                      onClick={() => setDisplayMode("list")}
-                      title="List view"
-                      className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
-                        displayMode === "list"
-                          ? "bg-indigo-600 text-white"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}>
-                      <PiListBold className="text-[18px]" />
-                      <span className="hidden lg:inline">{t("collection_detail.view_list")}</span>
-                    </button>
-                    <button
-                      onClick={() => setDisplayMode("cards")}
-                      title="Cards view"
-                      className={`px-2.5 py-1 flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
-                        displayMode === "cards"
-                          ? "bg-indigo-600 text-white border-l-indigo-600"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}>
-                      <BsGridFill className="text-[15px]" />
-                      <span className="hidden lg:inline">{t("collection_detail.view_cards")}</span>
-                    </button>
-                  </div>
-                  <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
-                    <button
-                      onClick={() => setCompact((v) => !v)}
-                      title="Compact view"
-                      className={`px-2.5 py-1 flex items-center gap-1 transition-colors ${
-                        compact
-                          ? "bg-indigo-600 text-white"
-                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}>
-                      <BsGrid className="text-[15px]" />
-                      <span className="hidden lg:inline">{t("collection_detail.view_compact")}</span>
-                    </button>
-                  </div>
+                {/* View dropdown */}
+                <div className="relative" ref={compactMenuRef}>
+                  <button
+                    onClick={() => setCompactMenuOpen((v) => !v)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <span className="relative shrink-0">
+                      {displayMode === "list" ? (
+                        <PiListBold className="text-[16px] text-indigo-600 dark:text-indigo-400" />
+                      ) : (
+                        <BsGridFill className="text-[14px] text-indigo-600 dark:text-indigo-400" />
+                      )}
+                      {!compact && <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                    </span>
+                    <span className="hidden lg:inline">
+                      {displayMode === "list" ? t("collection_detail.view_list") : t("collection_detail.view_cards")}
+                    </span>
+                    <IoChevronDown
+                      className={`text-[11px] text-gray-400 transition-transform duration-150 ${compactMenuOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {compactMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1.5 z-50 min-w-[170px]">
+                      <p className="px-3 pt-0.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                        {t("collection_detail.view_group_layout")}
+                      </p>
+                      <button
+                        onClick={() => setDisplayMode("list")}
+                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                          displayMode === "list"
+                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}>
+                        <PiListBold className="text-[15px] shrink-0" />
+                        {t("collection_detail.view_list")}
+                        {displayMode === "list" && <span className="ml-auto">✓</span>}
+                      </button>
+                      <button
+                        onClick={() => setDisplayMode("cards")}
+                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                          displayMode === "cards"
+                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}>
+                        <BsGridFill className="text-[13px] shrink-0" />
+                        {t("collection_detail.view_cards")}
+                        {displayMode === "cards" && <span className="ml-auto">✓</span>}
+                      </button>
+                      <div className="my-1.5 border-t border-gray-100 dark:border-gray-700" />
+                      <p className="px-3 pt-0.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                        {t("collection_detail.view_group_density")}
+                      </p>
+                      <button
+                        onClick={() => setCompact(true)}
+                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                          compact
+                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}>
+                        <MdShortText className="text-[15px] shrink-0" />
+                        {t("collection_detail.view_compact")}
+                        {compact && <span className="ml-auto">✓</span>}
+                      </button>
+                      <button
+                        onClick={() => setCompact(false)}
+                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                          !compact
+                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}>
+                        <BsTextLeft className="text-[13px] shrink-0" />
+                        {t("collection_detail.view_full")}
+                        {!compact && <span className="ml-auto">✓</span>}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1725,7 +1775,7 @@ export function CollectionDetailPage() {
 
       {/* Cards */}
       {!isLoading && sorted.length > 0 && displayMode === "cards" && !compact && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-36 sm:pb-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-36 sm:pb-0 sm:max-w-[1700px] m-auto">
           {sorted.map((card) => (
             <CardItem
               key={card.id}
@@ -1739,7 +1789,7 @@ export function CollectionDetailPage() {
         </div>
       )}
       {!isLoading && sorted.length > 0 && displayMode === "cards" && compact && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3 pb-36 sm:pb-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-36 sm:pb-0 sm:max-w-[1700px] m-auto">
           {sorted.map((card) => (
             <CardItemCompact
               key={card.id}
