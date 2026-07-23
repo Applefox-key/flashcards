@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { RichTextDisplay } from "@/components/RichTextDisplay";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -547,8 +548,8 @@ function PlaylistPanel({
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                         {sortedCards.map((card) => (
                           <tr key={card.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
-                            <td className="px-4 py-3 text-gray-900 dark:text-gray-100 align-top">{card.question}</td>
-                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 align-top">{card.answer}</td>
+                            <td className="px-4 py-3 text-gray-900 dark:text-gray-100 align-top"><RichTextDisplay html={card.question} /></td>
+                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300 align-top"><RichTextDisplay html={card.answer} /></td>
                             <td className="px-4 py-3 align-top">
                               <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 px-2 py-0.5 rounded-full whitespace-nowrap">
                                 {card.collectionname ?? "—"}
@@ -569,11 +570,11 @@ function PlaylistPanel({
                         <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">
                           {t("playlists.panel_col_question")}
                         </p>
-                        <p className="text-sm text-gray-900 dark:text-gray-100 mb-2">{card.question}</p>
+                        <RichTextDisplay html={card.question} className="text-sm text-gray-900 dark:text-gray-100 mb-2" />
                         <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">
                           {t("playlists.panel_col_answer")}
                         </p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{card.answer}</p>
+                        <RichTextDisplay html={card.answer} className="text-sm text-gray-700 dark:text-gray-300 mb-2" />
                         <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 px-2 py-0.5 rounded-full">
                           {card.collectionname ?? "—"}
                         </span>

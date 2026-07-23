@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { RichTextEditor } from "@/components/RichTextEditor";
+import { RichTextDisplay } from "@/components/RichTextDisplay";
+import { stripHtml } from "@/utils/htmlUtils";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -85,7 +88,7 @@ function ImageUploadField({
   const hasExisting = !!currentFilename && currentFilename !== "null" && currentFilename !== "" && !file;
 
   return (
-    <div className="flex flex-col gap-1 sm:mt-2">
+    <div className="flex flex-col gap-1 ">
       {/* <span className="text-xs text-gray-400 md:hidden">{label}</span> */}
       <input
         ref={inputRef}
@@ -95,7 +98,7 @@ function ImageUploadField({
         onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
       />
       {file && previewUrl ? (
-        <div className="flex items-center gap-2 flex-row md:flex-col md:items-center">
+        <div className="flex items-center gap-2 flex-row md:flex-col md:items-center ">
           <img src={previewUrl} alt="" className="max-h-24 object-contain rounded border border-gray-100" />
           <button
             type="button"
@@ -127,7 +130,7 @@ function ImageUploadField({
       ) : (
         <div
           onClick={() => inputRef.current?.click()}
-          className="relative border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
+          className="relative border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500 sm:h-[6rem]">
           <BiImageAdd className="text-xl sm:text-2xl absolute bottom-0 left-0 sm:right-0 sm:left-unset" />{" "}
           {t("collection_detail.img_click_to_add")}
         </div>
@@ -233,7 +236,7 @@ function EditCardModal({
         <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
             <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
-            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
+            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={stripHtml(question)} />
           </div>
           <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-col-reverse md:flex-row"}`}>
             {!isDoc && (
@@ -248,13 +251,7 @@ function EditCardModal({
                 }}
               />
             )}
-            <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              rows={isDoc ? 3 : 2}
-              autoFocus
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
-            />
+            <RichTextEditor value={question} onChange={setQuestion} rows={isDoc ? 3 : 2} autoFocus />
           </div>
         </div>
         <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
@@ -262,7 +259,7 @@ function EditCardModal({
             <label className="text-xs text-gray-400">{t("collection_detail.answer_label")}</label>
             <div className="flex items-center gap-1">
               <TranslateButton
-                sourceText={question}
+                sourceText={stripHtml(question)}
                 srcLang={questionLang}
                 tgtLang={answerLang}
                 onResult={setAnswer}
@@ -272,7 +269,7 @@ function EditCardModal({
                 onResult={setAnswer}
                 defaultLang={initALang}
                 onLangChange={setAnswerLang}
-                speakText={answer}
+                speakText={stripHtml(answer)}
               />
             </div>
           </div>
@@ -289,12 +286,7 @@ function EditCardModal({
                 }}
               />
             )}
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={isDoc ? 7 : 2}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
-            />
+            <RichTextEditor value={answer} onChange={setAnswer} rows={isDoc ? 7 : 2} />
           </div>
         </div>
         <div>
@@ -315,7 +307,7 @@ function EditCardModal({
             size="sm"
             onClick={handleSave}
             loading={editCard.isPending}
-            disabled={!question.trim() || !answer.trim()}>
+            disabled={!stripHtml(question).trim() || !stripHtml(answer).trim()}>
             {t("collection_detail.save_btn")}
           </Button>
         </div>
@@ -352,7 +344,7 @@ function AddCardForm({
   const [imgAFile, setImgAFile] = useState<File | null>(null);
 
   function handleSave() {
-    if (!question.trim() || !answer.trim()) return;
+    if (!stripHtml(question).trim() || !stripHtml(answer).trim()) return;
     if (imgQFile || imgAFile) {
       const fd = new FormData();
       fd.append(
@@ -407,18 +399,14 @@ function AddCardForm({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500 dark:text-gray-400">{t("collection_detail.question_label")}</label>
-            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
+            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={stripHtml(question)} />
           </div>
-          <textarea
+          <RichTextEditor
             value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
-            }}
-            placeholder={t("collection_detail.question_placeholder")}
+            onChange={setQuestion}
             rows={isDoc ? 3 : 2}
             autoFocus
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+            onCtrlEnter={handleSave}
           />
           {!isDoc && (
             <ImageUploadField
@@ -434,7 +422,7 @@ function AddCardForm({
             <label className="text-xs text-gray-500 dark:text-gray-400">{t("collection_detail.answer_label")}</label>
             <div className="flex items-center gap-1">
               <TranslateButton
-                sourceText={question}
+                sourceText={stripHtml(question)}
                 srcLang={questionLang}
                 tgtLang={answerLang}
                 onResult={setAnswer}
@@ -444,20 +432,11 @@ function AddCardForm({
                 onResult={setAnswer}
                 defaultLang={initALang}
                 onLangChange={setAnswerLang}
-                speakText={answer}
+                speakText={stripHtml(answer)}
               />
             </div>
           </div>
-          <textarea
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
-            }}
-            placeholder={t("collection_detail.answer_placeholder")}
-            rows={isDoc ? 8 : 2}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
-          />
+          <RichTextEditor value={answer} onChange={setAnswer} rows={isDoc ? 8 : 2} onCtrlEnter={handleSave} />
           {!isDoc && (
             <ImageUploadField
               collectionId={collectionId}
@@ -484,7 +463,11 @@ function AddCardForm({
         <Button variant="ghost" size="sm" onClick={onDone}>
           {t("collection_detail.cancel_btn")}
         </Button>
-        <Button size="sm" onClick={handleSave} loading={isPending} disabled={!question.trim() || !answer.trim()}>
+        <Button
+          size="sm"
+          onClick={handleSave}
+          loading={isPending}
+          disabled={!stripHtml(question).trim() || !stripHtml(answer).trim()}>
           {t("collection_detail.add_card_btn")}
         </Button>
       </div>
@@ -495,7 +478,7 @@ function AddCardForm({
 // ── Card item ───────────────────────────────────────────────────────
 
 function highlightNote(note: string, question: string, answer: string) {
-  const terms = [question, answer].map((t) => t.trim()).filter(Boolean);
+  const terms = [stripHtml(question), stripHtml(answer)].map((t) => t.trim()).filter(Boolean);
   if (!terms.length) return <>{note}</>;
   const pattern = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
   const parts = note.split(pattern);
@@ -562,12 +545,16 @@ function CardListRow({
             {index}
           </span>
           <div className="flex sm:flex-1 flex-col sm:flex-row min-w-0 sm:grid sm:grid-cols-2 gap-x-4 gap-y-0.5">
-            <span className={`text-sm text-gray-900 dark:text-gray-100${compact ? " truncate" : " whitespace-pre-wrap"}`}>
-              {card.question}
-            </span>
-            <span className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : " whitespace-pre-wrap"}`}>
-              {card.answer}
-            </span>
+            {compact ? (
+              <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{stripHtml(card.question)}</span>
+            ) : (
+              <RichTextDisplay html={card.question} className="text-sm textя-gray-900 dark:text-gray-100" />
+            )}
+            {compact ? (
+              <span className="text-sm text-gray-600 dark:text-gray-300 truncate">{stripHtml(card.answer)}</span>
+            ) : (
+              <RichTextDisplay html={card.answer} className="text-sm text-gray-600 dark:text-gray-300" />
+            )}
             {card.note && (
               <span
                 className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full italic${compact ? " truncate" : " whitespace-pre-wrap"}`}>
@@ -689,15 +676,16 @@ function CardItem({
       <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
         <div>
           <p className="text-xs text-gray-400 mb-1">{t("collection_detail.question_label")}</p>
-          <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">
-            {card.question}
-          </p>
+          <RichTextDisplay
+            html={card.question}
+            className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900"
+          />
           <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
         </div>
         <div className="border-t border-gray-100 dark:border-gray-700" />
         <div>
           <p className="text-xs text-gray-400 mb-1">{t("collection_detail.answer_label")}</p>
-          <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{card.answer}</p>
+          <RichTextDisplay html={card.answer} className="text-gray-800 dark:text-gray-200" />
           <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
           {card.note && (
             <p className="text-xs text-gray-400 mt-1 italic">{highlightNote(card.note, card.question, card.answer)}</p>
@@ -1043,7 +1031,7 @@ export function CollectionDetailPage() {
 
   function handleExport() {
     const name = collection?.name ?? `collection_${collectionId}`;
-    const rows = cards.map((c) => [c.question, c.answer, c.note ?? ""].join(";"));
+    const rows = cards.map((c) => [stripHtml(c.question), stripHtml(c.answer), c.note ?? ""].join(";"));
     const blob = new Blob([rows.join("\n")], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { stripHtml } from "@/utils/htmlUtils";
 import { useTranslation } from "react-i18next";
 import { IoIosArrowForward } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
@@ -125,9 +126,9 @@ function CollectionCard({
           <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
             {preview.cards.map((card) => (
               <div key={card.id} className="grid grid-cols-2 gap-1 text-sm text-gray-400 dark:text-gray-500">
-                <span className="truncate">{card.question ? card.question : <CiImageOn />}</span>
+                <span className="truncate">{card.question ? stripHtml(card.question) : <CiImageOn />}</span>
                 <span className="truncate text-gray-300 dark:text-gray-600">
-                  {card.answer ? card.answer : <CiImageOn />}
+                  {card.answer ? stripHtml(card.answer) : <CiImageOn />}
                 </span>
               </div>
             ))}
@@ -241,8 +242,8 @@ function CollectionListRow({
             <div className="flex flex-col gap-1.5">
               {preview.cards.map((card) => (
                 <div key={card.id} className="grid grid-cols-2 gap-3 text-xs">
-                  <span className="text-gray-700 dark:text-gray-300 truncate">{card.question}</span>
-                  <span className="text-gray-400 dark:text-gray-500 truncate">{card.answer}</span>
+                  <span className="text-gray-700 dark:text-gray-300 truncate">{stripHtml(card.question)}</span>
+                  <span className="text-gray-400 dark:text-gray-500 truncate">{stripHtml(card.answer)}</span>
                 </div>
               ))}
             </div>

@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useCardImage } from "@/hooks/useCardImage";
 import { SpeakButton } from "@/components/SpeakButton";
+import { RichTextDisplay } from "@/components/RichTextDisplay";
+import { stripHtml } from "@/utils/htmlUtils";
 
 function CardImg({
   filename,
@@ -80,9 +82,10 @@ function CardContent({
   textClass: string;
   alignClass?: string;
 }) {
-  const hasText = text.trim() !== "";
+  const plainText = stripHtml(text);
+  const hasText = plainText.trim() !== "";
   const hasImg = !!imgFilename && imgFilename !== "null" && imgFilename !== "";
-  const autoAlign = alignClass ?? (text.length > 100 ? "text-left" : "text-center");
+  const autoAlign = alignClass ?? (plainText.length > 100 ? "text-left" : "text-center");
 
   if (hasText && hasImg) {
     return (
@@ -90,7 +93,7 @@ function CardContent({
         <div style={{ width: "35%", flexShrink: 0 }}>
           <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />
         </div>
-        <p className={`flex-1 ${textClass} ${autoAlign} whitespace-pre-line`}>{text}</p>
+        <RichTextDisplay html={text} className={`flex-1 ${textClass} ${autoAlign}`} />
       </div>
     );
   }
@@ -99,7 +102,7 @@ function CardContent({
     return <CardImg filename={imgFilename} collectionId={collectionId} dark={dark} />;
   }
 
-  return <p className={`w-full ${textClass} ${autoAlign} whitespace-pre-line`}>{text}</p>;
+  return <RichTextDisplay html={text} className={`w-full ${textClass} ${autoAlign}`} />;
 }
 
 interface FlashCardFaceProps {
@@ -120,7 +123,7 @@ interface FlashCardFaceProps {
 }
 
 function highlightNote(note: string, question: string, answer: string) {
-  const terms = [question, answer].map((t) => t.trim()).filter(Boolean);
+  const terms = [stripHtml(question), stripHtml(answer)].map((t) => t.trim()).filter(Boolean);
   if (!terms.length) return <>{note}</>;
   const pattern = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
   const parts = note.split(pattern);
@@ -161,7 +164,7 @@ export function FlashCardFace({
       <div className="rounded-2xl border border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 bg-white dark:bg-gray-800 shadow-lg flex flex-col">
         <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
           <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
-          <SpeakButton text={frontText} />
+          <SpeakButton text={stripHtml(frontText)} />
         </div>
         <div className="px-6 pb-2">
           <CardContent
@@ -177,7 +180,7 @@ export function FlashCardFace({
 
         <div className="shrink-0 flex items-center justify-between px-6 pt-3 pb-2">
           <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{backLabel}</span>
-          <SpeakButton text={backText} />
+          <SpeakButton text={stripHtml(backText)} />
         </div>
         <div className="px-6 pb-4">
           <CardContent
@@ -213,7 +216,7 @@ export function FlashCardFace({
           style={{ backfaceVisibility: "hidden" }}>
           <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
             <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">{frontLabel}</span>
-            <SpeakButton text={frontText} />
+            <SpeakButton text={stripHtml(frontText)} />
           </div>
           <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2 pt-0">
             <div className={`${isDoc ? "w-full pt-1" : "my-auto w-full flex flex-col items-center gap-3 max-h-[90%]"}`}>
@@ -237,7 +240,7 @@ export function FlashCardFace({
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
           <div className="shrink-0 flex items-center justify-between px-6 pt-5 pb-2">
             <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">{backLabel}</span>
-            <SpeakButton text={backText} />
+            <SpeakButton text={stripHtml(backText)} />
           </div>
           <div className="flex-1 overflow-y-auto flex flex-col items-center px-6 py-2 pt-0">
             <div className={`${isDoc ? "w-full pt-1" : "my-auto w-full flex flex-col items-center gap-3"}`}>

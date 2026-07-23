@@ -3,6 +3,7 @@ import { Button } from "@/components/Button";
 import { Modal } from "@/components/Modal";
 import type { Content } from "@/types";
 import { useState } from "react";
+import { stripHtml } from "@/utils/htmlUtils";
 
 interface Props {
   playableCards: Content[];
@@ -31,7 +32,7 @@ export function ResultEndless({ playableCards, probs, onResetCard }: Props) {
                   <div
                     key={c.id}
                     className={`flex items-center gap-2 py-2 px-1 ${prob > 50 ? "bg-green-100 dark:bg-green-900" : "bg-red-100 dark:bg-red-900"}`}>
-                    <span className="flex-1 text-sm truncate">{c.question}</span>
+                    <span className="flex-1 text-sm truncate">{stripHtml(c.question)}</span>
                     <span className="text-sm font-medium shrink-0 w-10 text-right">{prob}%</span>
                     {onResetCard && (
                       <button

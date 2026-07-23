@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/Button";
 import { Modal } from "@/components/Modal";
 import type { Content } from "@/types";
+import { stripHtml } from "@/utils/htmlUtils";
 
 export type RowVariant = "green" | "teal" | "orange" | "red";
 
@@ -54,7 +55,7 @@ export function ResultOneshotCards({ cards, rows }: Props) {
                 <div
                   key={row.cardId}
                   className={`flex items-center gap-3 py-2 px-3 rounded-lg ${BG[row.variant]}`}>
-                  <span className="flex-1 text-sm text-gray-700 dark:text-gray-200">{card.question}</span>
+                  <span className="flex-1 text-sm text-gray-700 dark:text-gray-200">{stripHtml(card.question)}</span>
                   <span className={`text-xs font-semibold shrink-0 ${TEXT[row.variant]}`}>
                     {row.label}
                   </span>

@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { shuffle, normalizeText, weightedRandom } from "@/utils/gameUtils";
+import { RichTextDisplay } from "@/components/RichTextDisplay";
+import { stripHtml } from "@/utils/htmlUtils";
 import { useGameProbs } from "./useGameProbs";
 import { ResultScreen } from "./ResultScreen";
 import { ResultEndless } from "./ResultEndless";
@@ -124,7 +126,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
 
   function handleCheck() {
     if (!current || phase !== "input") return;
-    const correctAnswer = answerFirst ? current.question : current.answer;
+    const correctAnswer = stripHtml(answerFirst ? current.question : current.answer);
     const correct = normalizeText(input) === normalizeText(correctAnswer);
     setIsCorrect(correct);
     setPhase("revealed");
@@ -139,7 +141,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
 
   function handleHint() {
     if (!current || phase !== "input") return;
-    const correctAnswer = answerFirst ? current.question : current.answer;
+    const correctAnswer = stripHtml(answerFirst ? current.question : current.answer);
     const next = correctAnswer.slice(0, hint.length + 1);
     setHint(next);
     setInput(next);
@@ -245,7 +247,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
       {/* Prompt card */}
       <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
         <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("write_game.label_answer") : t("write_game.label_question")}</p>
-        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
+        <RichTextDisplay html={answerFirst ? current.answer : current.question} className="text-lg font-medium text-gray-900 dark:text-gray-100" />
         <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
       </div>
 
@@ -297,7 +299,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
           {!isCorrect && (
             <div>
               <p className="text-xs text-gray-400 mb-0.5">{t("write_game.correct_answer")}</p>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{answerFirst ? current.question : current.answer}</p>
+              <RichTextDisplay html={answerFirst ? current.question : current.answer} className="text-sm font-medium text-gray-800 dark:text-gray-200" />
               <ImageThumb filename={answerFirst ? current.imgQ : current.imgA} collectionId={current.collectionid} />
             </div>
           )}

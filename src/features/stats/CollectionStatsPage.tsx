@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { RichTextDisplay } from '@/components/RichTextDisplay'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -248,11 +249,11 @@ function CardStatsModal({
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
             <p className="text-xs text-gray-400 mb-1">{t('stats.question')}</p>
-            <p className="text-sm text-gray-900 dark:text-white font-medium break-words">{card.question}</p>
+            <RichTextDisplay html={card.question} className="text-sm text-gray-900 dark:text-white font-medium break-words" />
           </div>
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
             <p className="text-xs text-gray-400 mb-1">{t('stats.answer')}</p>
-            <p className="text-sm text-gray-900 dark:text-white font-medium break-words">{card.answer}</p>
+            <RichTextDisplay html={card.answer} className="text-sm text-gray-900 dark:text-white font-medium break-words" />
           </div>
         </div>
 

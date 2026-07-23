@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { RichTextDisplay } from "@/components/RichTextDisplay";
 import { useTranslation } from "react-i18next";
 import { shuffle } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
@@ -127,9 +128,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
                 <span className="text-xs font-medium text-indigo-400 uppercase tracking-widest">
                   {answerFirst ? t("timed_game.label_answer") : t("timed_game.label_question")}
                 </span>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">
-                  {answerFirst ? card.answer : card.question}
-                </p>
+                <RichTextDisplay html={answerFirst ? card.answer : card.question} className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center" />
                 <ImageThumb
                   filename={answerFirst ? card.imgA : card.imgQ}
                   collectionId={card.collectionid}
@@ -145,9 +144,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
                 <span className="text-xs font-medium text-indigo-200 uppercase tracking-widest">
                   {answerFirst ? t("timed_game.label_question") : t("timed_game.label_answer")}
                 </span>
-                <p className="text-2xl font-semibold text-white text-center">
-                  {answerFirst ? card.question : card.answer}
-                </p>
+                <RichTextDisplay html={answerFirst ? card.question : card.answer} className="text-2xl font-semibold text-white text-center" />
                 <ImageThumb
                   filename={answerFirst ? card.imgQ : card.imgA}
                   collectionId={card.collectionid}

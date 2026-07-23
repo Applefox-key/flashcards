@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Rich text editor (TipTap / ProseMirror) */
+.rte-content .ProseMirror {
+  outline: none;
+  min-height: inherit;
+  width: 100%;
+}
+.rte-content .ProseMirror p { margin: 0; }
+.rte-content .ProseMirror p + p { margin-top: 0.2rem; }
+
+/* Rich text display */
+.rte-display p { margin: 0; }
+.rte-display p + p { margin-top: 0.2rem; }
+
+/* Highlight (mark) in dark mode */
+.dark .rte-content mark,
+.dark .rte-display mark {
+  background-color: #78350f;
+  color: #fef3c7;
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;

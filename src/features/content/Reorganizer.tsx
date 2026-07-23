@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { stripHtml } from "@/utils/htmlUtils";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { collectionsApi } from "@/api";
@@ -155,8 +156,8 @@ export function Reorganizer({ cards, collectionId, onClose }: Props) {
                   className="mt-0.5 shrink-0 accent-indigo-600"
                 />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{card.question}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{card.answer}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{stripHtml(card.question)}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{stripHtml(card.answer)}</p>
                 </div>
               </label>
             ))}

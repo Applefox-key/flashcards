@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RichTextDisplay } from "@/components/RichTextDisplay";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pbcollectionsApi } from "@/api";
@@ -40,13 +41,13 @@ function CardItem({ card, collectionId }: { card: Content; collectionId: number 
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3">
       <div>
         <p className="text-xs text-gray-400 mb-1">Question</p>
-        <p className="font-medium text-gray-900 dark:text-gray-100">{card.question}</p>
+        <RichTextDisplay html={card.question} className="font-medium text-gray-900 dark:text-gray-100" />
         <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
       </div>
       <div className="border-t border-gray-100 dark:border-gray-700" />
       <div>
         <p className="text-xs text-gray-400 mb-1">Answer</p>
-        <p className="text-gray-800 dark:text-gray-200">{card.answer}</p>
+        <RichTextDisplay html={card.answer} className="text-gray-800 dark:text-gray-200" />
         <CardImg filename={card.imgA} collectionId={collectionId} alt="answer" />
         {card.note && <p className="text-xs text-gray-400 mt-1 italic">{card.note}</p>}
       </div>
