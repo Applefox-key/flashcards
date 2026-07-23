@@ -2,12 +2,17 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import { useRef, useEffect, useState } from "react";
-import { isHtmlContent } from "@/utils/htmlUtils";
+import { isHtmlContent, stripHtml } from "@/utils/htmlUtils";
 
 function toEditorHtml(value: string): string {
   if (!value) return "<p></p>";
   if (isHtmlContent(value)) return value;
   return value.split("\n").map((line) => `<p>${line || "<br>"}</p>`).join("");
+}
+
+function toEmitValue(html: string): string {
+  if (/<(strong|mark|em|s|u|a|code|ul|ol|li)\b/i.test(html)) return html;
+  return stripHtml(html);
 }
 
 interface Props {
@@ -56,13 +61,14 @@ export function RichTextEditor({ value, onChange, rows = 2, autoFocus = false, o
         },
       },
       onCreate: ({ editor }) => {
-        lastHtml.current = editor.getHTML();
+        lastHtml.current = toEmitValue(editor.getHTML());
         setActiveMarks({ bold: editor.isActive("bold"), highlight: editor.isActive("highlight") });
       },
       onUpdate: ({ editor }) => {
         const html = editor.getHTML();
-        lastHtml.current = html;
-        onChangeRef.current(html);
+        const emitValue = toEmitValue(html);
+        lastHtml.current = emitValue;
+        onChangeRef.current(emitValue);
         setActiveMarks({ bold: editor.isActive("bold"), highlight: editor.isActive("highlight") });
       },
       onSelectionUpdate: ({ editor }) => {
@@ -82,7 +88,7 @@ export function RichTextEditor({ value, onChange, rows = 2, autoFocus = false, o
     const editor = editorRef.current;
     if (!editor || editor.isDestroyed) return;
     if (value !== lastHtml.current) {
-      editor.commands.setContent(toEditorHtml(value), false);
+      editor.commands.setContent(toEditorHtml(value), { emitUpdate: false });
       lastHtml.current = value;
     }
   }, [value]);
