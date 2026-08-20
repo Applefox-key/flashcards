@@ -553,7 +553,8 @@
     "batch": "Batch {{current}} / {{total}}",
     "col_questions": "Questions",
     "col_answers": "Answers",
-    "hint": "Select a question on the left, then its matching answer on the right"
+    "hint": "Select a question on the left, then its matching answer on the right",
+    "matched_pairs": "Matched {{count}}"
   },
   "test_game": {
     "all_learned_title": "All cards are at 100%!",

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "motion/react";
 import { shuffle } from "@/utils/gameUtils";
 import { ResultScreen } from "./ResultScreen";
 import { ImageThumb } from "@/components/ImageThumb";
@@ -12,6 +13,13 @@ interface PairCell {
   img?: string;
   collectionId: number;
   matched: boolean;
+  exiting: boolean;
+}
+
+interface MatchedPair {
+  id: string;
+  q: PairCell;
+  a: PairCell;
 }
 
 interface Props {
@@ -32,6 +40,7 @@ function buildColumns(batch: Content[]): { questions: PairCell[]; answers: PairC
       img: c.imgQ,
       collectionId: c.collectionid,
       matched: false,
+      exiting: false,
     })),
   );
   const answers: PairCell[] = shuffle(
@@ -42,6 +51,7 @@ function buildColumns(batch: Content[]): { questions: PairCell[]; answers: PairC
       img: c.imgA,
       collectionId: c.collectionid,
       matched: false,
+      exiting: false,
     })),
   );
   return { questions, answers };
@@ -58,6 +68,7 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   const [score, setScore] = useState({ r: 0, w: 0, t: 0 });
   const [wrongCardIds, setWrongCardIds] = useState<Set<number>>(new Set());
   const [done, setDone] = useState(false);
+  const [matchedPairsList, setMatchedPairsList] = useState<MatchedPair[]>([]);
 
   const totalBatches = Math.ceil(deck.length / BATCH_SIZE);
   const allCells = [...questions, ...answers];
@@ -73,27 +84,36 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
       setQuestions(q);
       setAnswers(a);
       setSelected(null);
+      setMatchedPairsList([]);
     }
   }
 
-  // Check if current batch is complete
   useEffect(() => {
     if (!allMatched) return;
     const next = batchIndex + 1;
     if (next >= totalBatches) {
-      setDone(true);
+      setTimeout(() => setDone(true), 800);
     } else {
       setTimeout(() => {
         setBatchIndex(next);
         loadNextBatch(next);
-      }, 500);
+      }, 800);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allMatched]);
 
-  function markMatchedCells(cellId1: string, cellId2: string) {
+  function markMatchedCells(cellId1: string, cellId2: string, qSnap: PairCell, aSnap: PairCell) {
     setQuestions((prev) => prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, matched: true } : c)));
     setAnswers((prev) => prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, matched: true } : c)));
+
+    setTimeout(() => {
+      setQuestions((prev) => prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, exiting: true } : c)));
+      setAnswers((prev) => prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, exiting: true } : c)));
+
+      setTimeout(() => {
+        setMatchedPairsList((prev) => [...prev, { id: `${cellId1}-${Date.now()}`, q: qSnap, a: aSnap }]);
+      }, 280);
+    }, 320);
   }
 
   function isTextMatch(qCell: PairCell, aCell: PairCell): boolean {
@@ -117,7 +137,6 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
 
     const firstCell = allCells.find((c) => c.cellId === selected)!;
 
-    // Prevent selecting two questions or two answers
     const firstIsQuestion = firstCell.cellId.startsWith("q-");
     const secondIsQuestion = cell.cellId.startsWith("q-");
     if (firstIsQuestion === secondIsQuestion) {
@@ -129,12 +148,10 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     const aCell = firstIsQuestion ? cell : firstCell;
 
     if (isTextMatch(qCell, aCell)) {
-      // Match!
-      markMatchedCells(qCell.cellId, aCell.cellId);
+      markMatchedCells(qCell.cellId, aCell.cellId, qCell, aCell);
       setScore((s) => ({ r: s.r + 1, w: s.w, t: s.t + 1 }));
       setSelected(null);
     } else {
-      // Wrong
       setWrongPair([selected, cell.cellId]);
       setWrongCardIds((prev) => new Set([...prev, qCell.cardId]));
       setScore((s) => ({ r: s.r, w: s.w + 1, t: s.t + 1 }));
@@ -148,10 +165,10 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
   function getCellClass(cell: PairCell): string {
     const isSelected = selected === cell.cellId;
     const isWrong = wrongPair?.includes(cell.cellId);
-    if (cell.matched) return "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-500 dark:text-green-600 opacity-40 cursor-default";
+    if (cell.matched) return "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-500 dark:text-green-600 cursor-default";
     if (isWrong) return "bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600 text-red-600 dark:text-red-400 animate-pulse";
     if (isSelected) return "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-400 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 scale-105";
-    return "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20";
+    return "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 [@media(hover:hover)]:hover:border-indigo-300 dark:[@media(hover:hover)]:hover:border-indigo-600 [@media(hover:hover)]:hover:bg-indigo-50 dark:[@media(hover:hover)]:hover:bg-indigo-900/20";
   }
 
   if (done) {
@@ -181,20 +198,24 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         <div className="flex flex-col gap-2">
           <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">{t("pairs_game.col_questions")}</p>
           {questions.map((cell) => (
-            <button
+            <motion.div
               key={cell.cellId}
-              onClick={() => handleClick(cell)}
-              disabled={cell.matched}
-              className={`
-                rounded-xl border-2 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 px-3 py-4 text-sm font-medium text-center
-                transition-all duration-200 leading-tight min-h-[60px] shadow-sm
-                ${getCellClass(cell)}
-              `}>
-              {cell.img && (
-                <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />
-              )}
-              {cell.text}
-            </button>
+              animate={cell.exiting ? { opacity: 0, scale: 0.75, y: -8 } : { opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: "easeInOut" }}>
+              <button
+                onClick={() => handleClick(cell)}
+                disabled={cell.matched}
+                className={`
+                  w-full rounded-xl border-2 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 px-3 py-4 text-sm font-medium text-center
+                  transition-all duration-200 leading-tight min-h-[60px] shadow-sm
+                  ${getCellClass(cell)}
+                `}>
+                {cell.img && (
+                  <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />
+                )}
+                {cell.text}
+              </button>
+            </motion.div>
           ))}
         </div>
 
@@ -202,25 +223,63 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
         <div className="flex flex-col gap-2">
           <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">{t("pairs_game.col_answers")}</p>
           {answers.map((cell) => (
-            <button
+            <motion.div
               key={cell.cellId}
-              onClick={() => handleClick(cell)}
-              disabled={cell.matched}
-              className={`
-                rounded-xl border-2 border-t-4 border-t-orange-400 dark:border-t-orange-400 px-3 py-4 text-sm font-medium text-center
-                transition-all duration-200 leading-tight min-h-[60px] shadow-sm
-                ${getCellClass(cell)}
-              `}>
-              {cell.img && (
-                <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />
-              )}
-              {cell.text}
-            </button>
+              animate={cell.exiting ? { opacity: 0, scale: 0.75, y: -8 } : { opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: "easeInOut" }}>
+              <button
+                onClick={() => handleClick(cell)}
+                disabled={cell.matched}
+                className={`
+                  w-full rounded-xl border-2 border-t-4 border-t-orange-400 dark:border-t-orange-400 px-3 py-4 text-sm font-medium text-center
+                  transition-all duration-200 leading-tight min-h-[60px] shadow-sm
+                  ${getCellClass(cell)}
+                `}>
+                {cell.img && (
+                  <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />
+                )}
+                {cell.text}
+              </button>
+            </motion.div>
           ))}
         </div>
       </div>
 
       <p className="text-xs text-gray-400 text-center">{t("pairs_game.hint")}</p>
+
+      {/* Matched pairs tray */}
+      <AnimatePresence>
+        {matchedPairsList.length > 0 && (
+          <motion.div
+            key="tray"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden border-t border-gray-100 dark:border-gray-700 pt-3">
+            <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-2">
+              {t("pairs_game.matched_pairs", { count: matchedPairsList.length })}
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <AnimatePresence>
+                {matchedPairsList.map((pair) => (
+                  <motion.div
+                    key={pair.id}
+                    initial={{ opacity: 0, scale: 0.6, y: -16 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 350, damping: 22 }}
+                    className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg px-2.5 py-1.5 text-xs text-green-700 dark:text-green-300 max-w-full">
+                    <span className="font-medium truncate max-w-[120px]">{pair.q.text}</span>
+                    <span className="text-green-400 dark:text-green-500 shrink-0">→</span>
+                    <span className="truncate max-w-[120px]">{pair.a.text}</span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -553,7 +553,8 @@
     "batch": "Lote {{current}} / {{total}}",
     "col_questions": "Preguntas",
     "col_answers": "Respuestas",
-    "hint": "Selecciona una pregunta a la izquierda y luego su respuesta correcta a la derecha"
+    "hint": "Selecciona una pregunta a la izquierda y luego su respuesta correcta a la derecha",
+    "matched_pairs": "Emparejadas {{count}}"
   },
   "test_game": {
     "all_learned_title": "¡Todas las tarjetas al 100%!",

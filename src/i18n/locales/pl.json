@@ -579,7 +579,8 @@
     "batch": "Partia {{current}} / {{total}}",
     "col_questions": "Pytania",
     "col_answers": "Odpowiedzi",
-    "hint": "Wybierz pytanie po lewej, a następnie pasującą odpowiedź po prawej"
+    "hint": "Wybierz pytanie po lewej, a następnie pasującą odpowiedź po prawej",
+    "matched_pairs": "Dopasowano {{count}}"
   },
   "test_game": {
     "all_learned_title": "Wszystkie karty na 100%!",
