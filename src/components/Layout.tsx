@@ -13,6 +13,8 @@ import { getAvatarUrl } from "@/utils";
 import { DarkModeToggle } from "./DarkModeToggle";
 import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
 import i18n from "@/i18n";
+import { HiOutlineBookmarkSquare } from "react-icons/hi2";
+import { PiShootingStarThin } from "react-icons/pi";
 
 const UI_LANGS = [
   { code: "en", label: "English" },
@@ -32,7 +34,7 @@ const APPS = [
     iconColor: "#4f46e5",
   },
   {
-    name: "Phrasely",
+    name: "SayLoop",
     descKey: "apps.phrasely_desc",
     href: "https://phrasely.learnypie.com",
     current: false,
@@ -87,6 +89,8 @@ export function Layout() {
   }, [user?.settings]);
 
   const isGamePage = /^\/play\/[^/]+\/[^/]+/.test(location.pathname);
+  const isGameHubPage = /^\/play\/[^/]+$/.test(location.pathname);
+  const isCollectionDetailPage = /^\/collections\/(?!new)[^/]+$/.test(location.pathname);
 
   const { myLibrary, publicLibrary, setMyLibrary, setPublicLibrary } = useLibraryUiStore();
   const isPublicLibraryPage = location.pathname === "/library/public";
@@ -147,11 +151,11 @@ export function Layout() {
 
       {/* Navbar — hidden on mobile game pages only */}
       <header
-        className={`shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30${isGamePage ? " hidden sm:block" : ""}`}>
+        className={`shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30${isGamePage || isGameHubPage || isCollectionDetailPage ? " hidden sm:block" : ""}`}>
         <div className="h-14 flex items-center px-4 gap-4 relative">
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
+            className="hidden sm:flex flex-col p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
             aria-label={t("layout.toggle_sidebar")}>
             <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1" />
             <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1" />
@@ -332,7 +336,7 @@ export function Layout() {
 
         {/* Sidebar — overlays on mobile, pushes content on desktop */}
         {sidebarOpen && (
-          <aside className="absolute inset-y-0 left-0 z-50 w-64 sm:relative sm:inset-y-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
+          <aside className="absolute inset-y-0 right-0 z-[55] w-64 sm:relative sm:inset-y-auto sm:right-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 border-l sm:border-l-0 sm:border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
             <p className="text-xs font-semibold text-gray-400 uppercase mb-2">{t("layout.navigation")}</p>
             <nav className="flex flex-col gap-1">
               <div className="flex items-center justify-between py-1">
@@ -431,57 +435,129 @@ export function Layout() {
         )}
 
         {/* Main content — only this scrolls */}
-        <main className={`flex-1 min-w-0 overflow-y-auto ${isGamePage ? "p-3" : "p-3 pt-0 sm:p-6 pb-20 sm:pb-6"}`}>
+        <main className={`flex-1 min-w-0 overflow-y-auto ${isGamePage ? "sm:p-3" : "p-3 pt-0 sm:p-6 pb-20 sm:pb-6"}`}>
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="h-full max-w-[1600px] mx-auto w-full px-3 bg-gray-50 dark:bg-gray-900">
+            className={`h-full max-w-[1600px] mx-auto w-full ${isGamePage ? "sm:px-3" : "px-3"} bg-gray-50 dark:bg-gray-900`}>
             <Outlet />
           </motion.div>
         </main>
       </div>
 
       {/* Mobile bottom navigation — hidden on game pages */}
-      {!isGamePage && (
+      {isCollectionDetailPage ? (
         <nav
-          className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex pb-safe"
+          className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          <NavLink
-            to="/library"
-            className={`flex-1 text-center py-3 text-md font-medium ${activeSection === "library" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-            {t("nav.library")}
-          </NavLink>
-          <NavLink
-            to="/playlists"
-            className={`flex-1 text-center py-3 text-md font-medium ${activeSection === "playlists" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-            {t("nav.playlists")}
-          </NavLink>
-          <NavLink
-            to="/categories"
-            className={`flex-1 text-center py-3 text-md font-medium ${activeSection === "categories" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
-            {t("nav.categories")}
-          </NavLink>
-          <NavLink
-            to="/library/public"
-            className={`flex-1 flex flex-nowrap items-center justify-center py-3 gap-0.5 text-md font-medium ${activeSection === "public" ? "text-indigo-700 dark:text-indigo-400" : "text-gray-500 dark:text-gray-400"}`}>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-gray-400 dark:text-gray-500">
             <svg
-              width="16"
-              height="16"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              <path d="M19 12H5M12 5l-7 7 7 7" />
             </svg>
-            {t("layout.public")}
+            <span className="text-[10px] leading-none font-medium">{t("nav.library")}</span>
+          </button>
+          <NavLink
+            to={`/play/${location.pathname.split("/").pop()}`}
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
+            <PiShootingStarThin className="text-[22px]" />
+            <span className="text-[10px] leading-none font-medium">{t("collection_detail.practice_btn")}</span>
           </NavLink>
+          <button
+            onClick={toggleSidebar}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${sidebarOpen ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <line x1="4" y1="7" x2="20" y2="7" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="17" x2="20" y2="17" />
+            </svg>
+            <span className="text-[10px] leading-none font-medium">{t("nav.more")}</span>
+          </button>
         </nav>
-      )}
+      ) : !isGamePage ? (
+        <nav
+          className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          <NavLink
+            to="/library"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "library" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" />
+              <path d="M16 7V5a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v2" />
+            </svg>
+            <span className="text-[10px] leading-none font-medium">{t("nav.library")}</span>
+          </NavLink>
+          <NavLink
+            to="/playlists"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "playlists" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+            <span className="text-[10px] leading-none font-medium">{t("nav.playlists")}</span>
+          </NavLink>
+          <NavLink
+            to="/categories"
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "categories" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
+            <HiOutlineBookmarkSquare className="text-[22px]" strokeWidth="1.8" />
+            <span className="text-[10px] leading-none font-medium">{t("nav.categories")}</span>
+          </NavLink>
+          <button
+            onClick={toggleSidebar}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${sidebarOpen ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <line x1="4" y1="7" x2="20" y2="7" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="17" x2="20" y2="17" />
+            </svg>
+            <span className="text-[10px] leading-none font-medium">{t("nav.more")}</span>
+          </button>
+        </nav>
+      ) : null}
 
       <OnboardingWizard />
       <Toaster />

@@ -9,7 +9,8 @@
     "about": "O aplikacji",
     "profile": "Profil",
     "admin": "Admin",
-    "logout": "Wyloguj"
+    "logout": "Wyloguj",
+    "more": "Więcej"
   },
   "layout": {
     "demo_banner": "Tryb demo — zmiany nie są zapisywane i zostaną utracone po odświeżeniu.",
@@ -135,7 +136,10 @@
     "dot_no_data": "Brak danych postępu",
     "filter_all": "Wszystkie",
     "filter_favorites": "Ulubione",
-    "filter_public": "Publiczne"
+    "filter_public": "Publiczne",
+    "recently_visited": "Kontynuuj naukę",
+    "recent_nav": "Ostatnie",
+    "no_recents": "Brak ostatnio odwiedzonych zestawów"
   },
   "paste_cards": {
     "title": "Wklej karty",
@@ -289,10 +293,10 @@
     "clear_cards_btn": "Wyczyść fiszki",
     "delete_collection_btn": "Usuń zestaw",
     "delete_btn_short": "Usuń",
-    "card_one": "fiszka",
-    "card_few": "fiszki",
-    "card_many": "fiszek",
-    "card_other": "fiszki",
+    "card_one": "{{count}} fiszka",
+    "card_few": "{{count}} fiszki",
+    "card_many": "{{count}} fiszek",
+    "card_other": "{{count}} fiszek",
     "fav_remove_title": "Usuń z ulubionych",
     "fav_add_title": "Dodaj do ulubionych",
     "fav_label": "ulubione",
@@ -312,8 +316,8 @@
     "add_card_btn_short": "+ Dodaj fiszkę",
     "sort_btn": "Sortuj",
     "filter_btn": "Filtruj",
-    "sort_asc": "↑ Rosnąco",
-    "sort_desc": "↓ Malejąco",
+    "sort_asc": "Rosnąco",
+    "sort_desc": "Malejąco",
     "sort_clear": "× Wyczyść sortowanie",
     "sort_question": "Pytanie",
     "sort_answer": "Odpowiedź",

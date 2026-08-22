@@ -28,12 +28,14 @@ import { useCardImage } from "@/hooks/useCardImage";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import type { Content, Collection, CardEditRequest, Category } from "@/types";
 import { PiListBold, PiShootingStarThin } from "react-icons/pi";
+import { useRecentCollectionsStore } from "@/store/recentCollectionsStore";
 import { IoTrashBinOutline, IoChevronDown } from "react-icons/io5";
 import { BsGridFill, BsTextLeft } from "react-icons/bs";
 import { SideDrawer } from "@/components/SideDrawer";
 import { FaInfo } from "react-icons/fa6";
 import { BiImageAdd } from "react-icons/bi";
-import { MdShortText } from "react-icons/md";
+import { MdOutlineSortByAlpha, MdShortText } from "react-icons/md";
+import { RiSortAlphabetAsc, RiSortAlphabetDesc } from "react-icons/ri";
 
 interface CollectionContentResponse {
   collection: Collection;
@@ -813,7 +815,7 @@ function CardItemCompact({
         <div className="sm:flex sm:items-start sm:gap-2">
           <div className="sm:flex-1 sm:min-w-0">
             <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
-            <p className="font-medium text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
+            <p className="p-1 font-medium text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
               {card.question}
             </p>
           </div>
@@ -827,7 +829,7 @@ function CardItemCompact({
         <div className="sm:flex sm:items-start sm:gap-2">
           <div className="sm:flex-1 sm:min-w-0">
             <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.answer_label")}</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
+            <p className="p-1 text-sm text-gray-800 dark:text-gray-200 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
               {card.answer}
             </p>
           </div>
@@ -897,8 +899,13 @@ export function CollectionDetailPage() {
   const navigate = useNavigate();
   const collectionId = Number(id);
   const toast = useToast();
+  const trackVisit = useRecentCollectionsStore((s) => s.trackVisit);
 
   const { data: rawData, isLoading, isError } = useCollectionWithContent(collectionId);
+
+  useEffect(() => {
+    if (collectionId) trackVisit(collectionId);
+  }, [collectionId]); // eslint-disable-line react-hooks/exhaustive-deps
   const deleteCard = useDeleteCard();
   const toggleFavorite = useToggleFavorite();
   const togglePublic = useTogglePublic();
@@ -1102,12 +1109,12 @@ export function CollectionDetailPage() {
   }
 
   return (
-    <div>
+    <div className="sm:pt-0">
       {/* ── Sticky header + action bar ── */}
       <div className="sticky top-0 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 border-b border-gray-200 dark:border-gray-700 mb-2">
-        <div className="mb-2">
+        <div className="mb-2 pt-3">
           {/* Title row */}
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-2 border-b border-gray-200 dark:border-gray-700 sm:border-none sm:mb-0">
             <button
               onClick={() => navigate(-1)}
               className="p-2 -ml-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 shrink-0">
@@ -1234,128 +1241,127 @@ export function CollectionDetailPage() {
 
           {/* Meta row— desktop only (sm and above) */}
           {!isLoading && (
-            <div>
-              <div className="hidden sm:flex gap-3 ml-8 mb-2 text-sm text-gray-400">
-                <div className="flex items-center flex-rows gap-1.5 justify-center">
-                  <span>{t("collection_detail.card", { count: cards.length })}</span>
-                  {collection?.category && (
-                    <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
-                      {typeof collection.category === "object"
-                        ? (collection.category as Category).name
-                        : (collection.category as unknown as string)}
-                    </span>
+            <div className="hidden sm:flex gap-3 ml-8 mb-2 text-sm text-gray-400">
+              <div className="flex items-center flex-rows gap-1.5 justify-center">
+                <span>{t("collection_detail.card", { count: cards.length })}</span>
+
+                {collection?.category && (
+                  <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
+                    {typeof collection.category === "object"
+                      ? (collection.category as Category).name
+                      : (collection.category as unknown as string)}
+                  </span>
+                )}
+              </div>
+              <div className="border-l ms-3 flex flex-rows gap-1.5 justify-center items-center">
+                <button
+                  onClick={() =>
+                    toggleFavorite.mutate(
+                      { id: collectionId, isFavorite: !collection?.isFavorite },
+                      { onError: () => toast.error(t("collection_detail.toast_fav_error")) },
+                    )
+                  }
+                  disabled={toggleFavorite.isPending}
+                  title={
+                    collection?.isFavorite
+                      ? t("collection_detail.fav_remove_title")
+                      : t("collection_detail.fav_add_title")
+                  }
+                  className={`border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
+                    collection?.isFavorite
+                      ? "text-rose-400 hover:text-rose-300"
+                      : "text-gray-300 dark:text-gray-600 hover:text-rose-400"
+                  }`}>
+                  ♥ {collection?.isFavorite ? t("collection_detail.fav_label") : t("collection_detail.fav_add_label")}
+                </button>
+                <button
+                  onClick={() =>
+                    togglePublic.mutate(
+                      { id: collectionId, isPublic: !collection?.isPublic },
+                      { onError: () => toast.error(t("collection_detail.toast_visibility_error")) },
+                    )
+                  }
+                  disabled={togglePublic.isPending}
+                  title={
+                    collection?.isPublic
+                      ? t("collection_detail.make_private_title")
+                      : t("collection_detail.make_public_title")
+                  }
+                  className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
+                    collection?.isPublic
+                      ? "text-green-500 hover:text-red-400"
+                      : "text-gray-300 dark:text-gray-600 hover:text-green-500"
+                  }`}>
+                  {collection?.isPublic
+                    ? `🔓 ${t("collection_detail.public_label")}`
+                    : `🔒 ${t("collection_detail.private_label")}`}
+                </button>
+                {collection?.layout === "document" && (
+                  <span className="border-l border-gray-200 dark:border-gray-700 pl-3 text-teal-600 dark:text-teal-400 text-sm">
+                    📄 {t("collection_detail.layout_document_badge")}
+                  </span>
+                )}
+              </div>
+              {/* Tags */}
+              <div
+                className="border-l ms-3 flex border-gray-200 dark:border-gray-700 pl-3 relative"
+                ref={tagPopoverDesktopRef}>
+                <div className="flex items-center gap-2 flex-wrap ">
+                  {collectionTags.length > 0 ? (
+                    collectionTags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
+                        {tag.name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-300 dark:text-gray-600 text-xs">{t("collection_detail.no_tags")}</span>
                   )}
-                </div>
-                <div className="border-l ms-3 flex flex-rows gap-1.5 justify-center items-center">
                   <button
-                    onClick={() =>
-                      toggleFavorite.mutate(
-                        { id: collectionId, isFavorite: !collection?.isFavorite },
-                        { onError: () => toast.error(t("collection_detail.toast_fav_error")) },
-                      )
-                    }
-                    disabled={toggleFavorite.isPending}
-                    title={
-                      collection?.isFavorite
-                        ? t("collection_detail.fav_remove_title")
-                        : t("collection_detail.fav_add_title")
-                    }
-                    className={`border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
-                      collection?.isFavorite
-                        ? "text-rose-400 hover:text-rose-300"
-                        : "text-gray-300 dark:text-gray-600 hover:text-rose-400"
-                    }`}>
-                    ♥ {collection?.isFavorite ? t("collection_detail.fav_label") : t("collection_detail.fav_add_label")}
+                    onClick={() => setEditingTags(true)}
+                    title={t("collection_detail.edit_tags_title")}
+                    className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+                    ✏️
                   </button>
-                  <button
-                    onClick={() =>
-                      togglePublic.mutate(
-                        { id: collectionId, isPublic: !collection?.isPublic },
-                        { onError: () => toast.error(t("collection_detail.toast_visibility_error")) },
-                      )
-                    }
-                    disabled={togglePublic.isPending}
-                    title={
-                      collection?.isPublic
-                        ? t("collection_detail.make_private_title")
-                        : t("collection_detail.make_public_title")
-                    }
-                    className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
-                      collection?.isPublic
-                        ? "text-green-500 hover:text-red-400"
-                        : "text-gray-300 dark:text-gray-600 hover:text-green-500"
-                    }`}>
-                    {collection?.isPublic
-                      ? `🔓 ${t("collection_detail.public_label")}`
-                      : `🔒 ${t("collection_detail.private_label")}`}
-                  </button>
-                  {collection?.layout === "document" && (
-                    <span className="border-l border-gray-200 dark:border-gray-700 pl-3 text-teal-600 dark:text-teal-400 text-sm">
-                      📄 {t("collection_detail.layout_document_badge")}
-                    </span>
-                  )}
                 </div>
-                {/* Tags */}
-                <div
-                  className="border-l ms-3 flex border-gray-200 dark:border-gray-700 pl-3 relative"
-                  ref={tagPopoverDesktopRef}>
-                  <div className="flex items-center gap-2 flex-wrap ">
-                    {collectionTags.length > 0 ? (
-                      collectionTags.map((tag) => (
-                        <span
-                          key={tag.id}
-                          className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
-                          {tag.name}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-300 dark:text-gray-600 text-xs">{t("collection_detail.no_tags")}</span>
-                    )}
-                    <button
-                      onClick={() => setEditingTags(true)}
-                      title={t("collection_detail.edit_tags_title")}
-                      className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-                      ✏️
-                    </button>
-                  </div>
-                  {editingTags && (
-                    <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                          {t("collection_detail.edit_tags_heading")}
-                        </span>
-                        <button
-                          onClick={() => {
-                            setEditingTags(false);
-                            setEditedTagIds(null);
-                          }}
-                          className="text-gray-400 hover:text-gray-600 text-lg leading-none">
-                          ×
-                        </button>
-                      </div>
-                      <TagSelect value={pendingTagIds} onChange={setEditedTagIds} />
-                      <div className="mt-3 flex justify-end">
-                        <button
-                          onClick={() =>
-                            setCollectionTags.mutate(
-                              { collectionId, tagIds: pendingTagIds },
-                              {
-                                onSuccess: () => {
-                                  toast.success(t("collection_detail.toast_tags_updated"));
-                                  setEditingTags(false);
-                                },
-                                onError: () => toast.error(t("collection_detail.toast_tags_error")),
-                              },
-                            )
-                          }
-                          disabled={setCollectionTags.isPending}
-                          className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-                          {t("collection_detail.save_btn")}
-                        </button>
-                      </div>
+                {editingTags && (
+                  <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                        {t("collection_detail.edit_tags_heading")}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setEditingTags(false);
+                          setEditedTagIds(null);
+                        }}
+                        className="text-gray-400 hover:text-gray-600 text-lg leading-none">
+                        ×
+                      </button>
                     </div>
-                  )}
-                </div>
+                    <TagSelect value={pendingTagIds} onChange={setEditedTagIds} />
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        onClick={() =>
+                          setCollectionTags.mutate(
+                            { collectionId, tagIds: pendingTagIds },
+                            {
+                              onSuccess: () => {
+                                toast.success(t("collection_detail.toast_tags_updated"));
+                                setEditingTags(false);
+                              },
+                              onError: () => toast.error(t("collection_detail.toast_tags_error")),
+                            },
+                          )
+                        }
+                        disabled={setCollectionTags.isPending}
+                        className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                        {t("collection_detail.save_btn")}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1363,7 +1369,7 @@ export function CollectionDetailPage() {
         {/* Actions + search + view toggle (sticky on mobile) */}
         {!isLoading && (
           //    {/* Desktop action buttons */}
-          <div className="flex items-center gap-2 py-2">
+          <div className="flex items-center gap-2 py-2 min-h-[54px]">
             <div className="hidden sm:flex items-center gap-2 flex-wrap ml-6">
               {/* ── DESKTOP Practice──*/}
               <Link to={`/play/${id}`}>
@@ -1522,13 +1528,22 @@ export function CollectionDetailPage() {
                         ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
                         : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}>
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    {/* <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                       <path d="M1 3h11M3 6.5h7M5 10h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
+                    </svg> */}
+                    {/* <BiSort className="text-[13px]" /> */}
+
+                    {sortDir === null ? (
+                      <MdOutlineSortByAlpha className="text-[14px]" />
+                    ) : sortDir === "asc" ? (
+                      <RiSortAlphabetAsc className="text-[14px]" />
+                    ) : (
+                      <RiSortAlphabetDesc className="text-[14px]" />
+                    )}
                     {sortField ? (
                       <span>
                         {sortField === "question" ? "Q" : sortField === "answer" ? "A" : "N"}{" "}
-                        {sortDir === "asc" ? "↑" : "↓"}
+                        {/* {sortDir === "asc" ? "↑" : "↓"} */}
                       </span>
                     ) : (
                       <span className="hidden lg:inline">{t("collection_detail.sort_btn")}</span>
@@ -1563,7 +1578,7 @@ export function CollectionDetailPage() {
                             ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
                             : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                         }`}>
-                        {t("collection_detail.sort_asc")}
+                        <RiSortAlphabetAsc className="text-lg" /> {t("collection_detail.sort_asc")}
                       </button>
                       <button
                         onClick={() => {
@@ -1575,7 +1590,7 @@ export function CollectionDetailPage() {
                             ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
                             : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                         }`}>
-                        {t("collection_detail.sort_desc")}
+                        <RiSortAlphabetDesc className="text-lg" /> {t("collection_detail.sort_desc")}
                       </button>
                       {sortField && (
                         <>
@@ -1845,8 +1860,8 @@ export function CollectionDetailPage() {
         open={infoOpen}
         onClose={() => setInfoOpen(false)}
         onOpen={() => setInfoOpen(true)}
-        topValue="top-[125px]"
-        tabLabel="info"
+        topValue="top-[80px]"
+        tabLabel=""
         tabIcon={<FaInfo />}
         title={collection?.name ?? `Collection #${id}`}>
         {!isLoading && (
@@ -1855,10 +1870,11 @@ export function CollectionDetailPage() {
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                 {t("collection_detail.drawer_details")}
               </p>
+
               <div className="flex flex-col flex-wrap gap-2">
                 {collection?.category && (
                   <span className="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-2 py-0.5">
-                    {" "}
+                    {t("category_collections.category_label")}{" "}
                     {typeof collection.category === "object"
                       ? (collection.category as Category).name
                       : (collection.category as unknown as string)}
@@ -1994,17 +2010,6 @@ export function CollectionDetailPage() {
         {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} layout={collection?.layout} />}
       </Modal>
 
-      {/* Practice bar — mobile only, fixed above bottom nav */}
-      {!isLoading && (
-        <div className="sm:hidden fixed bottom-10 left-0 right-0 z-40 py-2 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700">
-          <Link to={`/play/${id}`} className="block">
-            <Button className="w-full  rounded-none justify-center" size="md">
-              <PiShootingStarThin className="w-8 h-8 mr-2" /> {t("collection_detail.practice_btn").toUpperCase()}
-            </Button>
-          </Link>
-        </div>
-      )}
-
       {/* FAB — mobile only */}
       {!isLoading && !addingCard && (
         <button
@@ -2012,7 +2017,7 @@ export function CollectionDetailPage() {
             setAddingCard(true);
             document.querySelector("main")?.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="fixed bottom-[100px] right-2 z-50 sm:hidden w-14 h-14 rounded-full bg-indigo-600 text-white font-light shadow-lg hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center">
+          className="fixed bottom-[72px] right-3 z-50 sm:hidden w-14 h-14 rounded-full bg-indigo-600 text-white font-light shadow-lg hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z" />
           </svg>

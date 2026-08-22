@@ -117,6 +117,8 @@ interface FlashCardFaceProps {
   layout?: "standard" | "document";
   /** Show both sides flat (no flip). Only for preview, not game. */
   showBothSides?: boolean;
+  /** Stretch card to fill parent height (used in mobile full-screen layout). */
+  fillHeight?: boolean;
 }
 
 function highlightNote(note: string, question: string, answer: string) {
@@ -151,6 +153,7 @@ export function FlashCardFace({
   animated = true,
   layout = "standard",
   showBothSides = false,
+  fillHeight = false,
 }: FlashCardFaceProps) {
   const { t } = useTranslation();
 
@@ -198,7 +201,7 @@ export function FlashCardFace({
   }
 
   return (
-    <div style={{ perspective: "1200px" }}>
+    <div style={{ perspective: "1200px" }} className={fillHeight ? "h-full mb-[45px] flex flex-col" : ""}>
       <div
         style={{
           transformStyle: "preserve-3d",
@@ -206,6 +209,7 @@ export function FlashCardFace({
           transition: animated ? "transform 0.5s ease" : "none",
           position: "relative",
           minHeight: isDoc ? 520 : 340,
+          ...(fillHeight ? { flex: 1 } : {}),
         }}>
         {/* Front face */}
         <div
@@ -221,7 +225,11 @@ export function FlashCardFace({
                 text={frontText}
                 imgFilename={frontImg}
                 collectionId={collectionId}
-                textClass={isDoc ? "text-base font-normal text-gray-800 dark:text-gray-100 leading-relaxed" : "text-2xl font-semibold text-gray-900 dark:text-gray-100"}
+                textClass={
+                  isDoc
+                    ? "text-base font-normal text-gray-800 dark:text-gray-100 leading-relaxed"
+                    : "text-2xl font-semibold text-gray-900 dark:text-gray-100"
+                }
                 alignClass={isDoc ? "text-left" : undefined}
               />
             </div>
@@ -246,7 +254,9 @@ export function FlashCardFace({
                 imgFilename={backImg}
                 collectionId={collectionId}
                 dark
-                textClass={isDoc ? "text-base font-normal text-white leading-relaxed" : "text-2xl font-semibold text-white"}
+                textClass={
+                  isDoc ? "text-base font-normal text-white leading-relaxed" : "text-2xl font-semibold text-white"
+                }
                 alignClass={isDoc ? "text-left" : undefined}
               />
               {note && (

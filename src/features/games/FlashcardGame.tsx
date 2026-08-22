@@ -14,6 +14,7 @@ import { useGameProbs } from "./useGameProbs";
 import { ResultEndless } from "./ResultEndless";
 import { ResultOneshotCards } from "./ResultOneshotCards";
 import type { Content } from "@/types";
+import { GrEdit } from "react-icons/gr";
 
 interface Props {
   cards: Content[];
@@ -30,7 +31,14 @@ const MASTERY_THRESHOLD = 3;
 
 // ── Main component ──────────────────────────────────────────────────
 
-export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, isShuffled, mode, layout = "standard" }: Props) {
+export function FlashcardGame({
+  cards: initialCards,
+  collectionId,
+  answerFirst,
+  isShuffled,
+  mode,
+  layout = "standard",
+}: Props) {
   const { t } = useTranslation();
   const isDemo = useIsDemo();
   const demoStore = useDemoStore();
@@ -56,7 +64,10 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
   const [editNote, setEditNote] = useState("");
 
   // Mastery probability tracking
-  const { probs, setProb, resetProb, resetAllProbs, saveProbs, resetSaved } = useGameProbs(initialCards, answerFirst ? "flashcard1" : "flashcard0");
+  const { probs, setProb, resetProb, resetAllProbs, saveProbs, resetSaved } = useGameProbs(
+    initialCards,
+    answerFirst ? "flashcard1" : "flashcard0",
+  );
 
   // Mastery reset confirmation
   const [confirmReset, setConfirmReset] = useState(false);
@@ -192,7 +203,17 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
   function handleEditSave() {
     if (!card || !editQuestion.trim() || !editAnswer.trim()) return;
     editCard.mutate(
-      { collectionId, data: { id: card.id, question: editQuestion, answer: editAnswer, note: editNote || undefined, imgQ: card.imgQ, imgA: card.imgA } },
+      {
+        collectionId,
+        data: {
+          id: card.id,
+          question: editQuestion,
+          answer: editAnswer,
+          note: editNote || undefined,
+          imgQ: card.imgQ,
+          imgA: card.imgA,
+        },
+      },
       {
         onSuccess: () => {
           setCards((prev) =>
@@ -217,7 +238,14 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
     return (
       <div className="mx-auto flex flex-col items-center gap-6 py-16 text-center">
         <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-green-500">
+          <svg
+            viewBox="0 0 24 24"
+            width="32"
+            height="32"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            className="text-green-500">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -225,15 +253,11 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
             {t("flashcard_game.mastery_complete_title")}
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t("flashcard_game.mastery_complete_subtitle")}
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("flashcard_game.mastery_complete_subtitle")}</p>
         </div>
         {confirmReset ? (
           <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t("flashcard_game.mastery_reset_confirm")}
-            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t("flashcard_game.mastery_reset_confirm")}</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmReset(false)}
@@ -241,7 +265,10 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
                 {t("flashcard_game.mastery_reset_cancel")}
               </button>
               <button
-                onClick={() => { resetAllProbs(); setConfirmReset(false); }}
+                onClick={() => {
+                  resetAllProbs();
+                  setConfirmReset(false);
+                }}
                 className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors">
                 {t("flashcard_game.mastery_reset_yes")}
               </button>
@@ -270,7 +297,14 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
     return (
       <div className="mx-auto flex flex-col items-center gap-6 py-16 text-center">
         <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-indigo-500">
+          <svg
+            viewBox="0 0 24 24"
+            width="32"
+            height="32"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            className="text-indigo-500">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -320,7 +354,36 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
   const backImg = answerFirst ? card!.imgQ : card!.imgA;
 
   return (
-    <div className="mx-auto flex flex-col gap-4">
+    <div className="mx-0 sm:mx-auto flex flex-col gap-3 flex-1 min-h-0">
+      {/* Progress — mobile only, above card */}
+      <div className="shrink-0 sm:hidden flex items-center gap-2 px-4 pt-3">
+        {mode === "mastery" ? (
+          <>
+            <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap">
+              {t("flashcard_game.mastery_progress", { count: masteredCount, total: initialCards.length })}
+            </span>
+            <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div
+                className="bg-green-500 rounded-full h-full transition-all duration-500"
+                style={{ width: `${initialCards.length > 0 ? (masteredCount / initialCards.length) * 100 : 0}%` }}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="text-xs text-gray-400 tabular-nums shrink-0">
+              {index + 1}/{cards.length}
+            </span>
+            <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div
+                className="bg-indigo-500 rounded-full h-full transition-all duration-300"
+                style={{ width: `${((index + 1) / cards.length) * 100}%` }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
       {/* Card wrapper */}
       <div
         style={{
@@ -331,7 +394,7 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
         onClick={() => {
           if (!isNavigating) setFlipped((f) => !f);
         }}
-        className="cursor-pointer select-none">
+        className="mx-4 cursor-pointer select-none flex-1 flex flex-col">
         <FlashCardFace
           frontLabel={frontLabel}
           backLabel={backLabel}
@@ -344,63 +407,110 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
           flipped={flipped}
           animated={visible}
           layout={layout}
+          fillHeight
         />
       </div>
 
-      {/* Star rating — browse mode only */}
+      {/* Browse mode: nav with stars inline */}
       {mode === "browse" && (
-        <div className="flex items-center justify-center gap-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRate(card!.id, star);
-              }}
-              className={`text-2xl transition-colors ${
-                (ratingMap[card!.id] ?? 0) >= star
-                  ? "text-yellow-400"
-                  : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
-              }`}>
-              ★
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Bottom controls */}
-      {mode === "browse" ? (
-        <div className="flex items-center justify-between gap-3">
+        <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent flex items-center  gap-2 px-3 py-3 sm:px-0 sm:py-0 sm:gap-1.5">
           <button
             onClick={goPrev}
             disabled={index === 0 || isNavigating}
-            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+            className="hidden sm:block px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">
             {t("flashcard_game.prev_btn")}
           </button>
 
-          <div className="flex items-center gap-2 flex-1">
-            <span className="text-sm text-gray-400 shrink-0">
-              {index + 1} / {cards.length}
+          <div className="flex items-center gap-0.5 shrink-0">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRate(card!.id, star);
+                }}
+                className={`text-4xl sm:text-xl leading-none transition-colors ${
+                  (ratingMap[card!.id] ?? 0) >= star
+                    ? "text-yellow-400"
+                    : "text-gray-200 dark:text-gray-600 hover:text-yellow-300"
+                }`}>
+                ★
+              </button>
+            ))}{" "}
+            <button
+              onClick={openEditModal}
+              title={t("collection_detail.edit_card_title")}
+              className="sm:hidden shrink-0 p-0 pt-2 ms-4 text-gray-300 hover:text-indigo-500 dark:text-gray-600 dark:hover:text-indigo-400 transition-colors">
+              <GrEdit className="text-2xl" />
+            </button>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-1.5 flex-1 min-w-0">
+            <span className="text-xs text-gray-400 tabular-nums shrink-0">
+              {index + 1}/{cards.length}
             </span>
-            <div className="flex-1 bg-gray-300 dark:bg-gray-700 rounded-full h-1.5">
+            <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
               <div
                 className="bg-indigo-500 rounded-full h-full transition-all duration-300"
                 style={{ width: `${((index + 1) / cards.length) * 100}%` }}
               />
             </div>
           </div>
+          <div className="flex-1 sm:hidden" />
+          <button
+            onClick={openEditModal}
+            title={t("collection_detail.edit_card_title")}
+            className="hidden sm:block shrink-0 p-2 text-gray-300 hover:text-indigo-500 dark:text-gray-600 dark:hover:text-indigo-400 transition-colors">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M11.5 1.5a1.5 1.5 0 0 1 2.121 2.121l-8.5 8.5a.5.5 0 0 1-.192.121l-3 1a.5.5 0 0 1-.636-.636l1-3a.5.5 0 0 1 .121-.192l8.5-8.5z" />
+            </svg>
+          </button>
 
+          <button
+            onClick={goPrev}
+            disabled={index === 0 || isNavigating}
+            className="sm:hidden px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">
+            {t("flashcard_game.prev_btn")}
+          </button>
           <button
             onClick={goNext}
             disabled={index === cards.length - 1 || isNavigating}
-            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-sm font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">
             {t("flashcard_game.next_btn")}
           </button>
         </div>
-      ) : mode === "mastery" ? (
-        <div className="flex flex-col gap-3">
-          {/* Grade buttons appear only after flipping */}
-          {flipped ? (
+      )}
+
+      {/* Mastery mode controls */}
+      {mode === "mastery" && (
+        <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent flex flex-col gap-3 px-3 pt-3 pb-3 sm:px-0 sm:pt-0 sm:pb-0">
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              onClick={() => handleMasteryGrade("again")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_again")}
+            </button>
+            <button
+              onClick={() => handleMasteryGrade("hard")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_hard")}
+            </button>
+            <button
+              onClick={() => handleMasteryGrade("good")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_good")}
+            </button>
+            <button
+              onClick={() => handleMasteryGrade("easy")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_easy")}
+            </button>
+          </div>
+          {/* {flipped ? (
             <div className="grid grid-cols-4 gap-2">
               <button
                 onClick={() => handleMasteryGrade("again")}
@@ -431,10 +541,8 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-1">
               {t("flashcard_game.mastery_flip_hint")}
             </p>
-          )}
-
-          {/* Mastery progress bar */}
-          <div className="flex items-center gap-2">
+          )} */}
+          <div className="hidden sm:flex items-center gap-2">
             <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap">
               {t("flashcard_game.mastery_progress", { count: masteredCount, total: initialCards.length })}
             </span>
@@ -447,10 +555,38 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             <ResultEndless playableCards={initialCards} probs={probs} onResetCard={resetProb} />
           </div>
         </div>
-      ) : (
-        /* Oneshot mode controls */
-        <div className="flex flex-col gap-3">
-          {flipped ? (
+      )}
+
+      {/* Oneshot mode controls */}
+      {mode === "oneshot" && (
+        <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent flex flex-col gap-3 px-3 pt-3 pb-3 sm:px-0 sm:pt-0 sm:pb-0">
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              onClick={() => handleOneshotGrade("again")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_again")}
+            </button>
+            <button
+              onClick={() => handleOneshotGrade("hard")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_hard")}
+            </button>
+            <button
+              onClick={() => handleOneshotGrade("good")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_good")}
+            </button>
+            <button
+              onClick={() => handleOneshotGrade("easy")}
+              disabled={!flipped}
+              className="py-2.5 rounded-lg text-sm font-medium bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-40 transition-colors">
+              {t("flashcard_game.grade_easy")}
+            </button>
+          </div>
+          {/* {flipped ? (
             <div className="grid grid-cols-4 gap-2">
               <button
                 onClick={() => handleOneshotGrade("again")}
@@ -481,12 +617,10 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
             <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-1">
               {t("flashcard_game.mastery_flip_hint")}
             </p>
-          )}
-
-          {/* Oneshot progress */}
-          <div className="flex items-center gap-2">
+          )} */}
+          <div className="hidden sm:flex items-center gap-2">
             <span className="text-sm text-gray-400 shrink-0">
-              {index + 1} / {cards.length}
+              {index + 1}/{cards.length}
             </span>
             <div className="flex-1 bg-gray-300 dark:bg-gray-700 rounded-full h-1.5">
               <div
@@ -498,20 +632,12 @@ export function FlashcardGame({ cards: initialCards, collectionId, answerFirst, 
         </div>
       )}
 
-      {/* Edit button */}
-      <div className="flex justify-center">
-        <button
-          onClick={openEditModal}
-          className="text-xs text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
-            <path d="M11.5 1.5a1.5 1.5 0 0 1 2.121 2.121l-8.5 8.5a.5.5 0 0 1-.192.121l-3 1a.5.5 0 0 1-.636-.636l1-3a.5.5 0 0 1 .121-.192l8.5-8.5z" />
-          </svg>
-          {t("collection_detail.edit_card_title")}
-        </button>
-      </div>
-
       {/* Edit modal */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title={t("collection_detail.edit_card_title")} size="lg">
+      <Modal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        title={t("collection_detail.edit_card_title")}
+        size="lg">
         <div className="flex flex-col gap-4">
           <div>
             <label className="text-xs text-gray-400 block mb-1">{t("collection_detail.question_label")}</label>

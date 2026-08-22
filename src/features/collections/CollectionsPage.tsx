@@ -17,8 +17,9 @@ import { MobileFab } from "@/components/MobileFab";
 import type { Collection, CollectionTag, CollectionStats } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
 import { SideDrawer } from "@/components/SideDrawer";
-import { IoFilter } from "react-icons/io5";
 import { CiImageOn } from "react-icons/ci";
+import { HiOutlineBookmarkSquare } from "react-icons/hi2";
+import { useRecentCollectionsStore } from "@/store/recentCollectionsStore";
 
 const ALL_LIMIT = 30;
 
@@ -277,7 +278,14 @@ function ViewToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: () =
         onClick={() => !compact && onToggle()}
         title={t("collections.view_list")}
         className={`${btnBase} ${compact ? active : inactive}`}>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round">
           <line x1="1" y1="2.5" x2="13" y2="2.5" />
           <line x1="1" y1="7" x2="13" y2="7" />
           <line x1="1" y1="11.5" x2="13" y2="11.5" />
@@ -482,11 +490,13 @@ function AllCollectionsView({ search }: { search: string }) {
 }
 
 function CardsView({
+  allCollections,
   visibleCategories,
   search,
   effectiveId,
   totalCollections,
 }: {
+  allCollections: Collection[];
   visibleCategories: VisibleEntry[];
   search: string;
   effectiveId: number | null;
@@ -494,13 +504,18 @@ function CardsView({
 }) {
   const { t } = useTranslation();
   const { myLibrary, setMyLibrary } = useLibraryUiStore();
+  const recents = useRecentCollectionsStore((s) => s.recents);
   const compact = myLibrary.compactCards ?? false;
-  const viewMode = myLibrary.viewMode ?? "by-category";
+  const viewMode = myLibrary.viewMode ?? "recent";
 
   const selectedCollections =
     viewMode === "by-category" && effectiveId !== null
       ? (visibleCategories.find((e) => e.category.id === effectiveId)?.collections ?? [])
       : [];
+
+  function switchToRecent() {
+    setMyLibrary({ viewMode: "recent" });
+  }
 
   function switchToAll() {
     setMyLibrary({ viewMode: "all", allPage: 1 });
@@ -514,6 +529,18 @@ function CardsView({
     <div className="flex gap-0 min-h-0">
       {/* Left: category list — desktop only */}
       <div className="hidden sm:flex flex-col w-52 shrink-0 gap-0.5 rounded-xl p-2 mr-4 bg-gray-100 dark:bg-gray-800/70 self-start">
+        {recents.length > 0 && (
+          <button
+            onClick={switchToRecent}
+            className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+              viewMode === "recent"
+                ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            }`}>
+            <span className="truncate">{t("collections.recent_nav")}</span>
+          </button>
+        )}
+
         <button
           onClick={switchToAll}
           className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
@@ -550,6 +577,13 @@ function CardsView({
       <div className="flex-1 min-w-0">
         {viewMode === "all" ? (
           <AllCollectionsView search={search} />
+        ) : viewMode === "recent" ? (
+          <>
+            <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900">
+              <ViewToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
+            </div>
+            <RecentView allCollections={allCollections} search={search} compact={compact} />
+          </>
         ) : (
           <>
             <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900 ">
@@ -583,6 +617,50 @@ function CardsView({
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function RecentView({
+  allCollections,
+  search,
+  compact,
+}: {
+  allCollections: Collection[];
+  search: string;
+  compact: boolean;
+}) {
+  const { t } = useTranslation();
+  const recents = useRecentCollectionsStore((s) => s.recents);
+
+  const recentCollections = recents
+    .map((r) => allCollections.find((c) => c.id === r.id))
+    .filter((c): c is Collection => !!c)
+    .filter((c) => !search || c.name.toLowerCase().includes(search));
+
+  if (recentCollections.length === 0) {
+    return (
+      <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">
+        {t("collections.no_recents")}
+      </p>
+    );
+  }
+
+  if (compact) {
+    return (
+      <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800">
+        {recentCollections.map((col) => (
+          <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 content-start">
+      {recentCollections.map((col) => (
+        <CollectionCard key={col.id} collection={col} search={search} tags={col.tags ?? []} compact={false} />
+      ))}
     </div>
   );
 }
@@ -807,6 +885,7 @@ export function CollectionsPage() {
 
         {showContent && (
           <CardsView
+            allCollections={allCollections}
             visibleCategories={visibleCategories}
             search={search.toLowerCase().trim()}
             effectiveId={effectiveId}
@@ -822,11 +901,13 @@ export function CollectionsPage() {
         onOpen={() => setFilterOpen(true)}
         tabLabel={
           viewMode === "all"
-            ? `${t("collections.all_collections_count", { count: totalCollections })} ❯`
-            : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} ❯`
+            ? `${t("collections.all_collections_count", { count: totalCollections })} `
+            : viewMode === "recent"
+            ? `${t("collections.recent_nav")} `
+            : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} `
         }
-        tabIcon={<IoFilter />}
-        topValue="top-[100px] w-full flex flex-row nowrap"
+        tabIcon={<HiOutlineBookmarkSquare className="text-[22px]" strokeWidth="1.8" />}
+        topValue="top-[100px] w-72 flex flex-row nowrap"
         title={t("collections.filters_title")}
         hasActiveIndicator={
           activeFilter !== "All" ||
@@ -860,6 +941,18 @@ export function CollectionsPage() {
             collapsed={categoriesCollapsed}
             onToggle={() => setCategoriesCollapsed((v) => !v)}>
             <div className="flex flex-col gap-0.5">
+              <button
+                onClick={() => {
+                  setMyLibrary({ viewMode: "recent" });
+                  setFilterOpen(false);
+                }}
+                className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  viewMode === "recent"
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}>
+                <span className="truncate">{t("collections.recent_nav")}</span>
+              </button>
               <button
                 onClick={() => {
                   setMyLibrary({ viewMode: "all", allPage: 1 });

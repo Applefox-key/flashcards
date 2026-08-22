@@ -14,7 +14,7 @@ const APPS = [
     iconColor: "#4f46e5",
   },
   {
-    name: "Phrasely",
+    name: "SayLoop",
     descKey: "apps.phrasely_desc" as const,
     href: "https://phrasely.learnypie.com",
     current: false,

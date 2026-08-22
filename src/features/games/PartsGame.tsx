@@ -286,7 +286,7 @@ export function PartsGame({
               rows={playableCards.map((c) =>
                 wrongCardIds.has(c.id)
                   ? { cardId: c.id, label: "✗", variant: "red" as const }
-                  : { cardId: c.id, label: "✓", variant: "green" as const }
+                  : { cardId: c.id, label: "✓", variant: "green" as const },
               )}
             />
           </div>
@@ -308,112 +308,136 @@ export function PartsGame({
     );
   }
 
-  return (
-    <div className="max-w-lg mx-auto flex flex-col gap-4">
-      {/* Progress */}
-      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        {mode !== "oneshot" ? (
-          <span>
-            {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
-          </span>
-        ) : (
-          <span>
-            {score.t + 1} / {playableCards.length}
-          </span>
-        )}
+  const progressCounter = (
+    <div className="flex items-center justify-between ps-5 text-sm text-gray-500 dark:text-gray-400">
+      {mode !== "oneshot" ? (
         <span>
-          ✓ {score.r} &nbsp; ✗ {score.w}
+          {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
         </span>
-      </div>
-      <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full">
-        <div
-          className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
-          style={{
-            width:
-              mode !== "oneshot"
-                ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
-                : `${(score.t / playableCards.length) * 100}%`,
-          }}
-        />
-      </div>
+      ) : (
+        <span>
+          {score.t + 1} / {playableCards.length}
+        </span>
+      )}
+      <span>
+        ✓ {score.r} &nbsp; ✗ {score.w}
+      </span>
+    </div>
+  );
 
-      {/* Prompt */}
-      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("parts_game.label_answer") : t("parts_game.label_question")}</p>
-        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
-          {answerFirst ? current.answer : current.question}
-        </p>
-        <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
-      </div>
+  const progressBar = (
+    <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full">
+      <div
+        className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
+        style={{
+          width:
+            mode !== "oneshot"
+              ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
+              : `${(score.t / playableCards.length) * 100}%`,
+        }}
+      />
+    </div>
+  );
 
-      {/* Build area */}
-      <div className="min-h-[52px] bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center flex-wrap gap-1">
-        {clicked.length === 0 ? (
-          <span className="text-sm text-gray-300 dark:text-gray-600">{t("parts_game.build_placeholder")}</span>
-        ) : (
-          clicked.map((part, i) => (
-            <span
-              key={i}
-              className={`px-3 py-1.5 rounded-lg text-2xl font-medium transition-colors ${
-                wrongIndex === i
-                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-300 dark:border-red-700"
-                  : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
-              }`}>
-              {part === " " ? "⎵" : part}
-            </span>
-          ))
-        )}
+  const controls = (
+    <div className="flex justify-between gap-2">
+      <div className="flex gap-2">
+        <button
+          onClick={handleUndo}
+          disabled={clicked.length === 0 || wrongIndex !== null}
+          className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
+          {t("parts_game.undo_btn")}
+        </button>
+        <button
+          onClick={handleHint}
+          disabled={wrongIndex !== null}
+          className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
+          {t("parts_game.hint_btn")}
+        </button>
       </div>
-
-      {/* Part buttons */}
-      <div className="flex flex-wrap gap-3">
-        {shuffledParts.map((part, i) => {
-          const isUsed = usedIndices.has(i);
-          return (
-            <button
-              key={`${part}-${i}`}
-              onClick={() => handlePartClick(part, i)}
-              disabled={isUsed || wrongIndex !== null}
-              className={`px-5 py-3 rounded-xl border-2 text-3xl md:text-lg font-medium transition-all duration-150 ${
-                isUsed
-                  ? "border-gray-100 dark:border-gray-700 text-gray-50 dark:text-gray-900 bg-gray-50 dark:bg-gray-900/50 cursor-default"
-                  : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-              }`}>
-              {part === " " ? "⎵" : part}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Controls */}
-      <div className="flex justify-between gap-2">
-        <div>
+      {mode !== "oneshot" && (
+        <div className="flex gap-2">
+          <ResultEndless playableCards={playableCards} probs={probs} onResetCard={resetProb} />
           <button
-            onClick={handleUndo}
-            disabled={clicked.length === 0 || wrongIndex !== null}
-            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            {t("parts_game.undo_btn")}
-          </button>
-          <button
-            onClick={handleHint}
-            disabled={wrongIndex !== null}
-            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            {t("parts_game.hint_btn")}
+            onClick={handleFinish}
+            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+            {t("parts_game.finish_btn")}
           </button>
         </div>
-        <div>
-          {mode !== "oneshot" && <ResultEndless playableCards={playableCards} probs={probs} onResetCard={resetProb} />}
-          {mode !== "oneshot" && (
-            <button
-              onClick={handleFinish}
-              className="ml-auto text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-              {t("parts_game.finish_btn")}
-            </button>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="max-w-lg mx-0 sm:mx-auto flex flex-col flex-1 min-h-0">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-4 sm:px-0 py-0">
+        {/* Progress — desktop only */}
+        <div className="hidden sm:block">{progressCounter}</div>
+        <div className="hidden sm:block">{progressBar}</div>
+
+        {/* Prompt */}
+        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
+          <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
+            {answerFirst ? t("parts_game.label_answer") : t("parts_game.label_question")}
+          </p>
+          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {answerFirst ? current.answer : current.question}
+          </p>
+          <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
+        </div>
+
+        {/* Build area */}
+        <div className="min-h-[52px] bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center flex-wrap gap-1">
+          {clicked.length === 0 ? (
+            <span className="text-sm text-gray-300 dark:text-gray-600">{t("parts_game.build_placeholder")}</span>
+          ) : (
+            clicked.map((part, i) => (
+              <span
+                key={i}
+                className={`px-3 py-1.5 rounded-lg text-2xl font-medium transition-colors ${
+                  wrongIndex === i
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-300 dark:border-red-700"
+                    : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                }`}>
+                {part === " " ? "⎵" : part}
+              </span>
+            ))
           )}
         </div>
+
+        {/* Part buttons */}
+        <div className="flex flex-wrap gap-3">
+          {shuffledParts.map((part, i) => {
+            const isUsed = usedIndices.has(i);
+            return (
+              <button
+                key={`${part}-${i}`}
+                onClick={() => handlePartClick(part, i)}
+                disabled={isUsed || wrongIndex !== null}
+                className={`px-5 py-3 rounded-xl border-2 text-3xl md:text-lg font-medium transition-all duration-150 ${
+                  isUsed
+                    ? "border-gray-100 dark:border-gray-700 text-gray-50 dark:text-gray-900 bg-gray-50 dark:bg-gray-900/50 cursor-default"
+                    : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                }`}>
+                {part === " " ? "⎵" : part}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Controls — desktop only */}
+        <div className="hidden sm:block">{controls}</div>
+
+        {current.note && <p className="text-xs text-gray-400 italic text-center">{current.note}</p>}
       </div>
 
-      {current.note && <p className="text-xs text-gray-400 italic text-center">{current.note}</p>}
+      {/* Fixed bottom panel — mobile only */}
+      <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent flex flex-col gap-2 px-4 py-3 sm:px-0 sm:py-0 sm:mt-2">
+        <div className="sm:hidden">{progressCounter}</div>
+        <div className="sm:hidden">{progressBar}</div>
+        <div className="sm:hidden">{controls}</div>
+      </div>
     </div>
   );
 }

@@ -10,6 +10,14 @@ interface Props {
 
 const OPTIONS = [null, "not5", 0, 5, 4, 3, 2, 1] as const;
 
+export function DifficultyFilterValueToLabel({ value }: { value: RateFilter }) {
+  const { t } = useTranslation();
+  if (value === null) return "★ " + t("collection_detail.filter_all");
+  if (value === "not5") return "★ " + t("collection_detail.filter_not_mastered");
+  if (value === 0) return "★ " + t("collection_detail.filter_not_rated");
+  return `${value}★`;
+}
+
 export function DifficultyFilter({ value, onChange }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -36,11 +44,12 @@ export function DifficultyFilter({ value, onChange }: Props) {
             ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
             : "border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500"
         }`}>
-        <span className="text-sm leading-none">★</span>
-        {value === null && <span className="hidden sm:inline">{t("difficulty_filter.label")}</span>}
+        {/* <span className="text-sm leading-none">★</span> */}
+        <DifficultyFilterValueToLabel value={value} />
+        {/* {value === null && <span className="hidden sm:inline">{t("difficulty_filter.label")}</span>}
         {value === 0 && <span>—</span>}
         {value === "not5" && <span>≠5★</span>}
-        {typeof value === "number" && value > 0 && <span>{value}★</span>}
+        {typeof value === "number" && value > 0 && <span>{value}★</span>} */}
       </button>
       {open && (
         <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[180px] py-1">

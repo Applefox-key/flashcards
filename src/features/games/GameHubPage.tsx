@@ -5,20 +5,50 @@ import { useGameCards } from "./useGameCards";
 
 const ACTIVITIES = [
   { type: "flashcard", icon: "🃏", minCards: 1, color: "indigo" },
-  { type: "test",      icon: "✓",  minCards: 4, color: "green"  },
-  { type: "write",     icon: "✏️", minCards: 1, color: "blue"   },
-  { type: "pairs",     icon: "⇄",  minCards: 2, color: "purple" },
-  { type: "timed",     icon: "⏱", minCards: 1, color: "amber"  },
-  { type: "parts",     icon: "🔤", minCards: 1, color: "coral"  },
+  { type: "test", icon: "✓", minCards: 4, color: "green" },
+  { type: "write", icon: "✏️", minCards: 1, color: "blue" },
+  { type: "pairs", icon: "⇄", minCards: 2, color: "purple" },
+  { type: "timed", icon: "⏱", minCards: 1, color: "amber" },
+  { type: "parts", icon: "🔤", minCards: 1, color: "coral" },
 ];
 
 const COLOR_MAP: Record<string, { bg: string; border: string; icon: string; text: string }> = {
-  indigo: { bg: "bg-indigo-50 dark:bg-indigo-900/20", border: "border-indigo-200 dark:border-indigo-700", icon: "text-indigo-500 dark:text-indigo-400", text: "text-indigo-700 dark:text-indigo-400" },
-  green:  { bg: "bg-green-50 dark:bg-green-900/20",   border: "border-green-200 dark:border-green-700",   icon: "text-green-500 dark:text-green-400",   text: "text-green-700 dark:text-green-400"   },
-  blue:   { bg: "bg-blue-50 dark:bg-blue-900/20",     border: "border-blue-200 dark:border-blue-700",     icon: "text-blue-500 dark:text-blue-400",     text: "text-blue-700 dark:text-blue-400"     },
-  purple: { bg: "bg-purple-50 dark:bg-purple-900/20", border: "border-purple-200 dark:border-purple-700", icon: "text-purple-500 dark:text-purple-400", text: "text-purple-700 dark:text-purple-400" },
-  amber:  { bg: "bg-amber-50 dark:bg-amber-900/20",   border: "border-amber-200 dark:border-amber-700",   icon: "text-amber-500 dark:text-amber-400",   text: "text-amber-700 dark:text-amber-400"   },
-  coral:  { bg: "bg-orange-50 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-700", icon: "text-orange-500 dark:text-orange-400", text: "text-orange-700 dark:text-orange-400" },
+  indigo: {
+    bg: "bg-indigo-50 dark:bg-indigo-900/20",
+    border: "border-indigo-200 dark:border-indigo-700",
+    icon: "text-indigo-500 dark:text-indigo-400",
+    text: "text-indigo-700 dark:text-indigo-400",
+  },
+  green: {
+    bg: "bg-green-50 dark:bg-green-900/20",
+    border: "border-green-200 dark:border-green-700",
+    icon: "text-green-500 dark:text-green-400",
+    text: "text-green-700 dark:text-green-400",
+  },
+  blue: {
+    bg: "bg-blue-50 dark:bg-blue-900/20",
+    border: "border-blue-200 dark:border-blue-700",
+    icon: "text-blue-500 dark:text-blue-400",
+    text: "text-blue-700 dark:text-blue-400",
+  },
+  purple: {
+    bg: "bg-purple-50 dark:bg-purple-900/20",
+    border: "border-purple-200 dark:border-purple-700",
+    icon: "text-purple-500 dark:text-purple-400",
+    text: "text-purple-700 dark:text-purple-400",
+  },
+  amber: {
+    bg: "bg-amber-50 dark:bg-amber-900/20",
+    border: "border-amber-200 dark:border-amber-700",
+    icon: "text-amber-500 dark:text-amber-400",
+    text: "text-amber-700 dark:text-amber-400",
+  },
+  coral: {
+    bg: "bg-orange-50 dark:bg-orange-900/20",
+    border: "border-orange-200 dark:border-orange-700",
+    icon: "text-orange-500 dark:text-orange-400",
+    text: "text-orange-700 dark:text-orange-400",
+  },
 };
 
 export function GameHubPage() {
@@ -49,7 +79,9 @@ export function GameHubPage() {
     return (
       <div className="text-center py-16 text-red-500">
         <p>{t("game_hub.load_error")}</p>
-        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mt-2 underline">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mt-2 underline">
           {t("game_hub.go_back")}
         </button>
       </div>
@@ -68,44 +100,82 @@ export function GameHubPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-1">
-        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
+    <div className="max-w-3xl mx-auto pt-14 sm:pt-0">
+      {/* Mobile top bar — replaces global header */}
+      <div className="sm:hidden fixed top-0 left-0 right-0 z-40 h-14 flex items-center px-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
           </svg>
         </button>
         {isLoading ? (
-          <div className="h-7 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto" />
         ) : (
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title || `Set #${id}`}</h1>
+          <h1 className="flex-1 text-center text-lg font-bold text-gray-900 dark:text-white truncate px-2">
+            {title || `Set #${id}`}
+          </h1>
         )}
-        {!isLoading && (
-          <span className="text-xs text-gray-400 ml-1">
-            {t("collections.card_count", { count: cards.length })}
-          </span>
-        )}
-        {!isLoading && !isPlaylist && (
+        {!isLoading && !isPlaylist ? (
           <button
             onClick={handleStats}
             title={t("stats.title")}
-            className="ml-auto text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
-          >
+            className="p-2 text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
               <path d="M3 3h2v18H3V3zm4 9h2v9H7v-9zm4-5h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
             </svg>
           </button>
+        ) : (
+          <div className="w-10" />
         )}
       </div>
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 ml-8 mb-6">{t("game_hub.choose_activity")}</p>
+      {/* Header — desktop only */}
+      <div className="hidden sm:block">
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
+            </svg>
+          </button>
+          {isLoading ? (
+            <div className="h-7 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          ) : (
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title || `Set #${id}`}</h1>
+          )}
+        </div>
+      </div>
 
+      {/* Subtitle row */}
+      <div className="flex items-center justify-between gap-3 sm:ml-8 mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("game_hub.choose_activity")}</p>
+        <div className="flex items-center gap-3">
+          {!isLoading && (
+            <span className="text-xs text-gray-400">{t("collections.card_count", { count: cards.length })}</span>
+          )}
+          {!isLoading && !isPlaylist && (
+            <button
+              onClick={handleStats}
+              title={t("stats.title")}
+              className="hidden sm:block text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M3 3h2v18H3V3zm4 9h2v9H7v-9zm4-5h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
       {/* Activity grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {isLoading
           ? Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 animate-pulse h-24" />
+              <div
+                key={i}
+                className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 animate-pulse h-24"
+              />
             ))
           : ACTIVITIES.map((activity) => {
               const enough = cards.length >= activity.minCards;

@@ -9,7 +9,8 @@
     "about": "About",
     "profile": "Profile",
     "admin": "Admin",
-    "logout": "Logout"
+    "logout": "Logout",
+    "more": "More"
   },
   "layout": {
     "demo_banner": "Demo mode — changes are not saved and will be lost on refresh.",
@@ -133,7 +134,10 @@
     "dot_no_data": "No progress data",
     "filter_all": "All",
     "filter_favorites": "Favorites",
-    "filter_public": "Public"
+    "filter_public": "Public",
+    "recently_visited": "Continue studying",
+    "recent_nav": "Recent",
+    "no_recents": "No recently visited decks"
   },
   "paste_cards": {
     "title": "Paste cards",
@@ -283,8 +287,8 @@
     "clear_cards_btn": "Clear cards",
     "delete_collection_btn": "Delete deck",
     "delete_btn_short": "Delete",
-    "card_one": "card",
-    "card_other": "cards",
+    "card_one": "{{count}} card",
+    "card_other": "{{count}} cards",
     "fav_remove_title": "Remove from favorites",
     "fav_add_title": "Add to favorites",
     "fav_label": "favorite",
@@ -304,8 +308,8 @@
     "add_card_btn_short": "+ Add card",
     "sort_btn": "Sort",
     "filter_btn": "Filter",
-    "sort_asc": "↑ Ascending",
-    "sort_desc": "↓ Descending",
+    "sort_asc": "Ascending",
+    "sort_desc": "Descending",
     "sort_clear": "× Clear sort",
     "sort_question": "Question",
     "sort_answer": "Answer",

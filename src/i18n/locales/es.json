@@ -9,7 +9,8 @@
     "about": "Acerca de",
     "profile": "Perfil",
     "admin": "Admin",
-    "logout": "Salir"
+    "logout": "Salir",
+    "more": "Más"
   },
   "layout": {
     "demo_banner": "Modo demo — los cambios no se guardan y se perderán al recargar.",
@@ -133,7 +134,10 @@
     "dot_no_data": "Sin datos de progreso",
     "filter_all": "Todas",
     "filter_favorites": "Favoritas",
-    "filter_public": "Públicas"
+    "filter_public": "Públicas",
+    "recently_visited": "Continuar estudiando",
+    "recent_nav": "Recientes",
+    "no_recents": "No hay mazos visitados recientemente"
   },
   "paste_cards": {
     "title": "Pegar tarjetas",
@@ -283,8 +287,8 @@
     "clear_cards_btn": "Borrar tarjetas",
     "delete_collection_btn": "Eliminar mazo",
     "delete_btn_short": "Eliminar",
-    "card_one": "tarjeta",
-    "card_other": "tarjetas",
+    "card_one": "{{count}} tarjeta",
+    "card_other": "{{count}} tarjetas",
     "fav_remove_title": "Quitar de favoritos",
     "fav_add_title": "Añadir a favoritos",
     "fav_label": "favorito",
@@ -304,8 +308,8 @@
     "add_card_btn_short": "+ Añadir tarjeta",
     "sort_btn": "Ordenar",
     "filter_btn": "Filtrar",
-    "sort_asc": "↑ Ascendente",
-    "sort_desc": "↓ Descendente",
+    "sort_asc": "Ascendente",
+    "sort_desc": "Descendente",
     "sort_clear": "× Quitar orden",
     "sort_question": "Pregunta",
     "sort_answer": "Respuesta",

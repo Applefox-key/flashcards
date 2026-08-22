@@ -27,20 +27,17 @@ export function GamePage() {
   const [gameKey, setGameKey] = useState(0);
   const [answerFirst, setAnswerFirst] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
+  const [shuffleCount, setShuffleCount] = useState(0);
   const [timedDelay, setTimedDelay] = useState(2);
   const [flashcardMode, setFlashcardMode] = useState<"browse" | "mastery" | "oneshot">("browse");
-  const [partsMode, setPartsMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
-  const [writeMode, setWriteMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
-  const [testMode, setTestMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
+  const [practiceMode, setPracticeMode] = useState<"oneshot" | "endless" | "endless-skip">("oneshot");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const filtered = useMemo<Content[]>(() => {
     if (mistakeIds) return cards.filter((c) => mistakeIds.has(c.id));
 
     if (rateFilter !== null) {
-      return cards.filter((c) =>
-        rateFilter === "not5" ? (c.rate ?? 0) < 5 : (c.rate ?? 0) === rateFilter
-      );
+      return cards.filter((c) => (rateFilter === "not5" ? (c.rate ?? 0) < 5 : (c.rate ?? 0) === rateFilter));
     }
     return cards;
   }, [cards, rateFilter, mistakeIds]);
@@ -56,18 +53,15 @@ export function GamePage() {
   function handleToggleAnswerFirst() {
     setAnswerFirst((a) => !a);
     // Endless modes handle direction changes internally without a full remount
-    if (
-      !(type === "parts" && partsMode !== "oneshot") &&
-      !(type === "write" && writeMode !== "oneshot") &&
-      !(type === "test" && testMode !== "oneshot")
-    ) {
+    if (!(["parts", "write", "test"].includes(type) && practiceMode !== "oneshot")) {
       setGameKey((k) => k + 1);
     }
   }
 
-  function handleToggleShuffle() {
-    setIsShuffled((s) => !s);
+  function handleShuffle() {
+    setIsShuffled(true);
     setGameKey((k) => k + 1);
+    setShuffleCount((c) => c + 1);
   }
 
   function handlePlayAgain() {
@@ -122,19 +116,24 @@ export function GamePage() {
 
   const hasActiveSettings =
     answerFirst ||
-    isShuffled ||
     rateFilter !== null ||
     (type === "flashcard" && flashcardMode !== "browse") ||
-    (type === "parts" && partsMode !== "oneshot") ||
-    (type === "write" && writeMode !== "oneshot") ||
-    (type === "test" && testMode !== "oneshot");
+    (["parts", "write", "test"].includes(type) && practiceMode !== "oneshot");
 
   const directionLabel = answerFirst ? t("game_page.direction_a_to_q") : t("game_page.direction_q_to_a");
 
+  const isCardGame =
+    type === "flashcard" ||
+    type === "timed" ||
+    type === "write" ||
+    type === "test" ||
+    type === "pairs" ||
+    type === "parts";
+
   return (
-    <div className="max-w-2xl md:max-w-2lg   mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
+    <div className={`max-w-2xl md:max-w-2lg mx-auto ${isCardGame ? "flex flex-col h-full sm:h-auto sm:block" : ""}`}>
+      {/* Header DESKTOP*/}
+      <div className="hidden sm:flex shrink-0  items-center gap-3 mb-3 flex-wrap px-4 pt-3 sm:px-0 sm:pt-0">
         <button
           onClick={handleBack}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
@@ -153,12 +152,33 @@ export function GamePage() {
           </span>
         )}
       </div>
+      {/* Header MOBILE*/}
+      <div className="block sm:hidden shrink-0 flex justify-between items-center gap-3 mb-3 flex-wrap px-4 pt-3 sm:px-0 sm:pt-0">
+        <button
+          onClick={handleBack}
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M11 5L2 12l9 7v-4h11V9H11V5z" />
+          </svg>
+        </button>
+
+        <p className="text-xl text-gray-400 uppercase tracking-wide">{gameLabel}</p>
+        <GameModeHelp type={type} />
+
+        {mistakeIds && (
+          <span className="text-xs bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full">
+            {t("game_page.retrying", { count: mistakeIds.size })}
+          </span>
+        )}
+      </div>
 
       {/* Desktop inline controls — hidden on mobile (shown in drawer) */}
       {!isLoading && (
-        <div className="hidden sm:flex mb-5 items-center gap-3 flex-wrap">
+        <div className="shrink-0 hidden sm:flex mb-5 items-center gap-3 flex-wrap">
           {type !== "pairs" && (
-            <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive} flex items-center gap-1.5`}>
+            <button
+              onClick={handleToggleAnswerFirst}
+              className={`${btnBase} ${answerFirst ? btnActive : btnInactive} flex items-center gap-1.5`}>
               <span className="opacity-60">{t("game_page.section_direction")}:</span>
               {directionLabel}
             </button>
@@ -167,35 +187,28 @@ export function GamePage() {
             <>
               <GameModeSelect
                 value={flashcardMode}
-                onChange={(mode) => { setFlashcardMode(mode); setGameKey((k) => k + 1); }}
+                onChange={(mode) => {
+                  setFlashcardMode(mode);
+                  setGameKey((k) => k + 1);
+                }}
                 options={FLASHCARD_MODE_OPTIONS}
                 prefixKey="game_page.section_mode"
               />
-              <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
+              <button
+                key={shuffleCount}
+                onClick={handleShuffle}
+                className={`${btnBase} ${btnInactive} ${shuffleCount > 0 ? "btn-shake" : ""}`}>
                 {t("game_page.shuffle")}
               </button>
             </>
           )}
-          {type === "parts" && (
+          {["parts", "write", "test"].includes(type) && (
             <GameModeSelect
-              value={partsMode}
-              onChange={(mode) => { setPartsMode(mode); setGameKey((k) => k + 1); }}
-              options={PRACTICE_MODE_OPTIONS}
-              prefixKey="game_page.section_mode"
-            />
-          )}
-          {type === "write" && (
-            <GameModeSelect
-              value={writeMode}
-              onChange={(mode) => { setWriteMode(mode); setGameKey((k) => k + 1); }}
-              options={PRACTICE_MODE_OPTIONS}
-              prefixKey="game_page.section_mode"
-            />
-          )}
-          {type === "test" && (
-            <GameModeSelect
-              value={testMode}
-              onChange={(mode) => { setTestMode(mode); setGameKey((k) => k + 1); }}
+              value={practiceMode}
+              onChange={(mode) => {
+                setPracticeMode(mode);
+                setGameKey((k) => k + 1);
+              }}
               options={PRACTICE_MODE_OPTIONS}
               prefixKey="game_page.section_mode"
             />
@@ -223,40 +236,58 @@ export function GamePage() {
       )}
 
       {/* Game dispatcher */}
+      <div className={isCardGame ? "flex-1 flex flex-col min-h-0 sm:block" : ""}>
+        {!activeCards.length ? (
+          <p className="text-gray-400 text-center py-16">{t("flashcard_game.no_cards")}</p>
+        ) : (
+          <>
+            {type === "flashcard" && (
+              <FlashcardGame
+                key={gameKey}
+                cards={activeCards}
+                collectionId={collectionId}
+                answerFirst={answerFirst}
+                isShuffled={isShuffled}
+                mode={flashcardMode}
+                layout={layout}
+              />
+            )}
+            {type === "timed" && (
+              <TimedGame key={gameKey} {...commonProps} answerFirst={answerFirst} delay={timedDelay} />
+            )}
+            {type === "pairs" && <PairsGame key={gameKey} {...commonProps} />}
+            {type === "test" && (
+              <TestGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={practiceMode} />
+            )}
+            {type === "write" && (
+              <WriteGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={practiceMode} />
+            )}
+            {type === "parts" && (
+              <PartsGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={practiceMode} />
+            )}
+          </>
+        )}
+      </div>
+      {/* <div className="flex sm:hidden italic absolute bottom-[80px] gap-4 w-[100vw] opacity-60  text-[12px] font-bold leading-none px-[1rem] tracking-wide">
+        <DifficultyFilterValueToLabel value={rateFilter} />
 
-      {!activeCards.length ? (
-        <p className="text-gray-400 text-center py-16">{t("flashcard_game.no_cards")}</p>
-      ) : (
-        <>
-          {type === "flashcard" && (
-            <FlashcardGame
-              key={gameKey}
-              cards={activeCards}
-              collectionId={collectionId}
-              answerFirst={answerFirst}
-              isShuffled={isShuffled}
-              mode={flashcardMode}
-              layout={layout}
-            />
-          )}
-          {type === "timed" && (
-            <TimedGame key={gameKey} {...commonProps} answerFirst={answerFirst} delay={timedDelay} />
-          )}
-          {type === "pairs" && <PairsGame key={gameKey} {...commonProps} />}
-          {type === "test" && <TestGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={testMode} />}
-          {type === "write" && <WriteGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={writeMode} />}
-          {type === "parts" && <PartsGame key={gameKey} {...commonProps} answerFirst={answerFirst} mode={partsMode} />}
-        </>
-      )}
-
+        <div className="flex items-center gap-1">
+          <span>{t("game_page.section_mode")}:</span>
+          <span>
+            {type === "flashcard" && t(FLASHCARD_MODE_OPTIONS.find((o) => o.value === flashcardMode)?.labelKey || "")}
+            {["parts", "write", "test"].includes(type) &&
+              t(PRACTICE_MODE_OPTIONS.find((o) => o.value === practiceMode)?.labelKey || "")}{" "}
+          </span>
+        </div>
+      </div> */}
       {/* Settings drawer */}
       <SideDrawer
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         onOpen={() => setSettingsOpen(true)}
-        side="right"
-        topValue="bottom-0"
-        tabLabel={t("game_page.settings_tab")}
+        side="left"
+        topValue="bottom-[47px]"
+        tabLabel={""}
         tabIcon={<FiSettings size={14} />}
         title={t("game_page.settings_title")}
         hasActiveIndicator={hasActiveSettings}>
@@ -266,7 +297,9 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_direction")}
             </p>
-            <button onClick={handleToggleAnswerFirst} className={`${btnBase} ${answerFirst ? btnActive : btnInactive} flex items-center gap-1.5`}>
+            <button
+              onClick={handleToggleAnswerFirst}
+              className={`${btnBase} ${answerFirst ? btnActive : btnInactive} flex items-center gap-1.5`}>
               <span className="opacity-60">{t("game_page.section_direction")}:</span>
               {directionLabel}
             </button>
@@ -282,44 +315,17 @@ export function GamePage() {
         </div>
 
         {/* Mode — parts / write / test */}
-        {type === "parts" && (
+        {["parts", "write", "test"].includes(type) && (
           <div>
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_mode")}
             </p>
             <GameModeSelect
-              value={partsMode}
-              onChange={(mode) => { setPartsMode(mode); setGameKey((k) => k + 1); }}
-              options={PRACTICE_MODE_OPTIONS}
-              prefixKey="game_page.section_mode"
-              inline
-            />
-          </div>
-        )}
-
-        {type === "write" && (
-          <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              {t("game_page.section_mode")}
-            </p>
-            <GameModeSelect
-              value={writeMode}
-              onChange={(mode) => { setWriteMode(mode); setGameKey((k) => k + 1); }}
-              options={PRACTICE_MODE_OPTIONS}
-              prefixKey="game_page.section_mode"
-              inline
-            />
-          </div>
-        )}
-
-        {type === "test" && (
-          <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              {t("game_page.section_mode")}
-            </p>
-            <GameModeSelect
-              value={testMode}
-              onChange={(mode) => { setTestMode(mode); setGameKey((k) => k + 1); }}
+              value={practiceMode}
+              onChange={(mode) => {
+                setPracticeMode(mode);
+                setGameKey((k) => k + 1);
+              }}
               options={PRACTICE_MODE_OPTIONS}
               prefixKey="game_page.section_mode"
               inline
@@ -333,9 +339,13 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_mode")}
             </p>
+
             <GameModeSelect
               value={flashcardMode}
-              onChange={(mode) => { setFlashcardMode(mode); setGameKey((k) => k + 1); }}
+              onChange={(mode) => {
+                setFlashcardMode(mode);
+                setGameKey((k) => k + 1);
+              }}
               options={FLASHCARD_MODE_OPTIONS}
               prefixKey="game_page.section_mode"
               inline
@@ -349,7 +359,10 @@ export function GamePage() {
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               {t("game_page.section_card_order")}
             </p>
-            <button onClick={handleToggleShuffle} className={`${btnBase} ${isShuffled ? btnActive : btnInactive}`}>
+            <button
+              key={shuffleCount}
+              onClick={handleShuffle}
+              className={`${btnBase} ${btnInactive} ${shuffleCount > 0 ? "btn-shake" : ""}`}>
               {t("game_page.shuffle")}
             </button>
           </div>

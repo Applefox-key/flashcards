@@ -10,7 +10,7 @@ interface MyLibraryState {
   expanded: number[]
   compactCards: boolean
   selectedCategoryId: number | null
-  viewMode: 'by-category' | 'all'
+  viewMode: 'by-category' | 'all' | 'recent'
   allPage: number
 }
 
@@ -43,7 +43,7 @@ export const useLibraryUiStore = create<LibraryUiState>()(
         expanded: [],
         compactCards: false,
         selectedCategoryId: null,
-        viewMode: 'all',
+        viewMode: 'recent',
         allPage: 1,
       },
       publicLibrary: {

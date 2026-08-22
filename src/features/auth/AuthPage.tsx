@@ -116,13 +116,13 @@ export function AuthPage() {
   const { user } = useAuthStore();
   const initialTab: AuthTab = (location.state as { tab?: AuthTab } | null)?.tab ?? "login";
   const [tab, setTab] = useState<AuthTab>(initialTab);
-
-  if (user) return <Navigate to="/library" replace />;
   const [showLoginPwd, setShowLoginPwd] = useState(false);
   const [showRegisterPwd, setShowRegisterPwd] = useState(false);
   const navigate = useNavigate();
   const loginMutation = useLogin();
   const registerMutation = useRegister();
+
+  if (user) return <Navigate to="/library" replace />;
 
   function handleDemoLogin() {
     useAuthStore.getState().enterDemo();

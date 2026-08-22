@@ -22,7 +22,14 @@ type Phase = "input" | "revealed";
 
 const DEFAULT_PROB = 10;
 
-export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false, mode = "oneshot" }: Props) {
+export function WriteGame({
+  cards,
+  onPlayAgain,
+  onRetryMistakes,
+  onBack,
+  answerFirst = false,
+  mode = "oneshot",
+}: Props) {
   const { t } = useTranslation();
   const { probs, updateProb, resetProb, saveProbs } = useGameProbs(cards, "write0");
 
@@ -49,8 +56,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
     if (initialized || Object.keys(probs).length === 0) return;
     setInitialized(true);
     if (mode === "endless" || mode === "endless-skip") {
-      const pool =
-        mode === "endless-skip" ? cards.filter((c) => (probs[c.id] ?? DEFAULT_PROB) > 1) : cards;
+      const pool = mode === "endless-skip" ? cards.filter((c) => (probs[c.id] ?? DEFAULT_PROB) > 1) : cards;
       if (pool.length === 0) {
         setDone(true);
         return;
@@ -86,10 +92,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
         setPhase("input");
         return;
       }
-      const pool =
-        mode === "endless-skip"
-          ? cards.filter((c) => (probsRef.current[c.id] ?? DEFAULT_PROB) > 1)
-          : cards;
+      const pool = mode === "endless-skip" ? cards.filter((c) => (probsRef.current[c.id] ?? DEFAULT_PROB) > 1) : cards;
       if (pool.length === 0) {
         setDone(true);
         saveProbs();
@@ -204,7 +207,7 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
               rows={cards.map((c) =>
                 wrongCardIds.has(c.id)
                   ? { cardId: c.id, label: "✗", variant: "red" as const }
-                  : { cardId: c.id, label: "✓", variant: "green" as const }
+                  : { cardId: c.id, label: "✓", variant: "green" as const },
               )}
             />
           </div>
@@ -214,44 +217,49 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
   }
 
   return (
-    <div className="max-w-lg mx-auto flex flex-col gap-4">
-      {/* Progress */}
-      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        {mode !== "oneshot" ? (
+    <div className="mx-0 sm:mx-auto flex flex-col flex-1 min-h-0">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-4 sm:px-0 py-0">
+        {/* Progress */}
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+          {mode !== "oneshot" ? (
+            <span>
+              {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
+            </span>
+          ) : (
+            <span>
+              {score.t + 1} / {cards.length}
+            </span>
+          )}
           <span>
-            {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
+            ✓ {score.r} &nbsp; ✗ {score.w}
           </span>
-        ) : (
-          <span>
-            {score.t + 1} / {cards.length}
-          </span>
-        )}
-        <span>
-          ✓ {score.r} &nbsp; ✗ {score.w}
-        </span>
-      </div>
-      <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full">
-        <div
-          className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
-          style={{
-            width:
-              mode !== "oneshot"
-                ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
-                : `${(score.t / cards.length) * 100}%`,
-          }}
-        />
-      </div>
+        </div>
+        <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full">
+          <div
+            className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
+            style={{
+              width:
+                mode !== "oneshot"
+                  ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
+                  : `${(score.t / cards.length) * 100}%`,
+            }}
+          />
+        </div>
 
-      {/* Prompt card */}
-      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("write_game.label_answer") : t("write_game.label_question")}</p>
-        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
-        <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
-      </div>
+        {/* Prompt card */}
+        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
+          <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
+            {answerFirst ? t("write_game.label_answer") : t("write_game.label_question")}
+          </p>
+          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {answerFirst ? current.answer : current.question}
+          </p>
+          <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
+        </div>
 
-      {/* Input phase */}
-      {phase === "input" && (
-        <div className="flex flex-col gap-2">
+        {/* Input phase: textarea under question */}
+        {phase === "input" && (
           <textarea
             ref={inputRef}
             value={input}
@@ -261,6 +269,53 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
             rows={3}
             className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
+        )}
+
+        {/* Revealed: result feedback block */}
+        {phase === "revealed" && (
+          <div
+            className={`border-2 rounded-xl p-5 flex flex-col gap-2 ${isCorrect ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700" : "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"}`}>
+            <p
+              className={`font-semibold text-sm ${isCorrect ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
+              {isCorrect ? t("write_game.result_correct") : t("write_game.result_wrong")}
+            </p>
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">{t("write_game.your_answer")}</p>
+              <p
+                className={`text-sm ${isCorrect ? "text-green-800 dark:text-green-300" : "text-red-700 dark:text-red-400 line-through"}`}>
+                {input || t("write_game.empty")}
+              </p>
+            </div>
+            {!isCorrect && (
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">{t("write_game.correct_answer")}</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {answerFirst ? current.question : current.answer}
+                </p>
+                <ImageThumb filename={answerFirst ? current.imgQ : current.imgA} collectionId={current.collectionid} />
+              </div>
+            )}
+            {current.note && <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">{current.note}</p>}
+          </div>
+        )}
+      </div>
+
+      {/* Fixed bottom controls panel */}
+      <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent flex flex-col gap-2 px-4 py-3 sm:px-0 sm:py-0 sm:mt-4">
+        {/* Endless controls — above action buttons */}
+        {mode !== "oneshot" && (
+          <div className="flex justify-end gap-2">
+            <ResultEndless playableCards={cards} probs={probs} onResetCard={resetProb} />
+            <button
+              onClick={handleFinish}
+              className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+              {t("write_game.finish_btn")}
+            </button>
+          </div>
+        )}
+
+        {/* Input phase: action buttons */}
+        {phase === "input" && (
           <div className="flex gap-2">
             <button
               onClick={handleHint}
@@ -278,50 +333,18 @@ export function WriteGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerF
               {t("write_game.check_btn")}
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Revealed phase */}
-      {phase === "revealed" && (
-        <div
-          className={`border-2 rounded-xl p-5 flex flex-col gap-2 ${isCorrect ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700" : "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"}`}>
-          <p className={`font-semibold text-sm ${isCorrect ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
-            {isCorrect ? t("write_game.result_correct") : t("write_game.result_wrong")}
-          </p>
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">{t("write_game.your_answer")}</p>
-            <p className={`text-sm ${isCorrect ? "text-green-800 dark:text-green-300" : "text-red-700 dark:text-red-400 line-through"}`}>
-              {input || t("write_game.empty")}
-            </p>
-          </div>
-          {!isCorrect && (
-            <div>
-              <p className="text-xs text-gray-400 mb-0.5">{t("write_game.correct_answer")}</p>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{answerFirst ? current.question : current.answer}</p>
-              <ImageThumb filename={answerFirst ? current.imgQ : current.imgA} collectionId={current.collectionid} />
-            </div>
-          )}
-          {current.note && <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">{current.note}</p>}
+        {/* Revealed phase: next button */}
+        {phase === "revealed" && (
           <button
             ref={nextRef}
             onClick={pickNext}
-            className="mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+            className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
             {t("write_game.next_btn")}
           </button>
-        </div>
-      )}
-
-      {/* Endless controls */}
-      {mode !== "oneshot" && (
-        <div className="flex justify-end gap-2">
-          <ResultEndless playableCards={cards} probs={probs} onResetCard={resetProb} />
-          <button
-            onClick={handleFinish}
-            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-            {t("write_game.finish_btn")}
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

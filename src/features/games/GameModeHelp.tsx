@@ -43,9 +43,7 @@ export function GameModeHelp({ type }: Props) {
       ],
     },
     pairs: {
-      modes: [
-        { name: t("game_mode_help.match_name"), description: t("game_mode_help.match_desc") },
-      ],
+      modes: [{ name: t("game_mode_help.match_name"), description: t("game_mode_help.match_desc") }],
     },
     test: {
       modes: [
@@ -84,7 +82,7 @@ export function GameModeHelp({ type }: Props) {
         onClick={() => setOpen(true)}
         title={t("game_mode_help.button_title")}
         className="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
-        <FiHelpCircle size={15} />
+        <FiHelpCircle className="text-xl " />
       </button>
 
       <Modal open={open} onClose={() => setOpen(false)} title={t("game_mode_help.modal_title")} size="md">

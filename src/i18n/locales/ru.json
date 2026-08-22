@@ -9,7 +9,8 @@
     "about": "О приложении",
     "profile": "Профиль",
     "admin": "Админ",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "more": "Ещё"
   },
   "layout": {
     "demo_banner": "Демо-режим — изменения не сохраняются и будут сброшены при обновлении.",
@@ -136,7 +137,10 @@
     "dot_no_data": "Нет данных о прогрессе",
     "filter_all": "Все",
     "filter_favorites": "Избранное",
-    "filter_public": "Публичные"
+    "filter_public": "Публичные",
+    "recently_visited": "Продолжить обучение",
+    "recent_nav": "Недавние",
+    "no_recents": "Нет недавно просмотренных колод"
   },
   "paste_cards": {
     "title": "Вставить карточки",
@@ -290,10 +294,10 @@
     "clear_cards_btn": "Очистить карточки",
     "delete_collection_btn": "Удалить колоду",
     "delete_btn_short": "Удалить",
-    "card_one": "карточка",
-    "card_few": "карточки",
-    "card_many": "карточек",
-    "card_other": "карточки",
+    "card_one": "{{count}} карточка",
+    "card_few": "{{count}} карточки",
+    "card_many": "{{count}} карточек",
+    "card_other": "{{count}} карточек",
     "fav_remove_title": "Удалить из избранного",
     "fav_add_title": "Добавить в избранное",
     "fav_label": "избранное",
@@ -313,8 +317,8 @@
     "add_card_btn_short": "+ Добавить карточку",
     "sort_btn": "Сортировка",
     "filter_btn": "Фильтр",
-    "sort_asc": "↑ По возрастанию",
-    "sort_desc": "↓ По убыванию",
+    "sort_asc": "По возрастанию",
+    "sort_desc": "По убыванию",
     "sort_clear": "× Сбросить сортировку",
     "sort_question": "Вопрос",
     "sort_answer": "Ответ",

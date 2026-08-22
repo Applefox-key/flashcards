@@ -85,13 +85,14 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
   if (!card) return null;
 
   return (
-    <div className="max-w-lg mx-auto flex flex-col gap-4">
+    <div className="sm:mx-auto flex flex-col gap-4 flex-1 min-h-0">
       {/* Progress */}
-      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+      <div className=" mx-[1rem]  shrink-0 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>
           {index + 1} / {cards.length}
         </span>
-        <div className="w-32 h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
+        {/* <div className="w-32 h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden"> */}
+        <div className="w-[90%] h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-indigo-400 rounded-full transition-all"
             style={{ width: `${((index + 1) / cards.length) * 100}%` }}
@@ -106,11 +107,11 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
           transform: visible ? "scale(1)" : "scale(0.97)",
           transition: `opacity ${visible ? FADE_IN : FADE_OUT}ms ease, transform ${visible ? FADE_IN : FADE_OUT}ms ease`,
         }}
-        className="cursor-pointer select-none"
+        className="mx-[1rem] cursor-pointer select-none flex-1 flex flex-col"
         onClick={() => {
           if (!running) setFlipped((f) => !f);
         }}>
-        <div style={{ perspective: "1200px" }}>
+        <div style={{ perspective: "1200px" }} className="h-full mb-[45px] flex flex-col">
           <div
             style={{
               transformStyle: "preserve-3d",
@@ -118,6 +119,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
               transition: visible ? "transform 0.5s ease" : "none",
               position: "relative",
               minHeight: 340,
+              flex: 1,
             }}>
             {/* Front face */}
             <div
@@ -130,10 +132,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
                 <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 text-center">
                   {answerFirst ? card.answer : card.question}
                 </p>
-                <ImageThumb
-                  filename={answerFirst ? card.imgA : card.imgQ}
-                  collectionId={card.collectionid}
-                />
+                <ImageThumb filename={answerFirst ? card.imgA : card.imgQ} collectionId={card.collectionid} />
               </div>
             </div>
 
@@ -148,10 +147,7 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
                 <p className="text-2xl font-semibold text-white text-center">
                   {answerFirst ? card.question : card.answer}
                 </p>
-                <ImageThumb
-                  filename={answerFirst ? card.imgQ : card.imgA}
-                  collectionId={card.collectionid}
-                />
+                <ImageThumb filename={answerFirst ? card.imgQ : card.imgA} collectionId={card.collectionid} />
                 {card.note && <p className="text-sm text-indigo-200 mt-2 italic text-center">{card.note}</p>}
               </div>
             </div>
@@ -159,40 +155,45 @@ export function TimedGame({ cards: initialCards, onPlayAgain, onBack, answerFirs
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => setRunning((r) => !r)}
-          className={`px-5 py-2 rounded-lg font-medium text-sm transition-colors ${
-            running
-              ? "bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30"
-              : "bg-indigo-600 text-white hover:bg-indigo-700"
-          }`}>
-          {running ? t("timed_game.pause_btn") : t("timed_game.start_btn")}
-        </button>
-        <span className="text-xs text-gray-400 dark:text-gray-500">{t("timed_game.per_side", { value: delay })}</span>
-      </div>
+      {/* <div className="flex justify-between pb-3 items-center gap-4 flex-wrap sm:flex-nowrap "> */}
+      <div className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent flex items-center justify-between gap-2 py-3 sm:px-0 sm:py-0 sm:gap-1.5">
+        {/* Manual navigation when paused */}
+        {!running ? (
+          <div className="shrink-0 flex gap-2 justify-center px-4 sm:px-0 sm:pb-0">
+            <button
+              onClick={() => goToCard(Math.max(0, index - 1))}
+              disabled={index === 0}
+              className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
+              {t("timed_game.prev_btn")}
+            </button>
+            <button
+              onClick={() => {
+                if (index + 1 >= cards.length) setDone(true);
+                else goToCard(index + 1);
+              }}
+              disabled={index === cards.length - 1}
+              className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
+              {t("timed_game.next_btn")}
+            </button>
+          </div>
+        ) : (
+          <div />
+        )}
 
-      {/* Manual navigation when paused */}
-      {!running && (
-        <div className="flex gap-2 justify-center">
+        {/* Controls */}
+        <div className="shrink-0 flex items-center gap-4 px-4 sm:px-0">
+          <span className="text-xs text-gray-400 dark:text-gray-500">{t("timed_game.per_side", { value: delay })}</span>
           <button
-            onClick={() => goToCard(Math.max(0, index - 1))}
-            disabled={index === 0}
-            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            {t("timed_game.prev_btn")}
-          </button>
-          <button
-            onClick={() => {
-              if (index + 1 >= cards.length) setDone(true);
-              else goToCard(index + 1);
-            }}
-            disabled={index === cards.length - 1}
-            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30">
-            {t("timed_game.next_btn")}
+            onClick={() => setRunning((r) => !r)}
+            className={`px-5 py-2 rounded-lg font-medium text-sm transition-colors ${
+              running
+                ? "bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30"
+                : "bg-indigo-600 text-white hover:bg-indigo-700"
+            }`}>
+            {running ? t("timed_game.pause_btn") : t("timed_game.start_btn")}
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

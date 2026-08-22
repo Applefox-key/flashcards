@@ -21,7 +21,14 @@ type AnswerState = "idle" | "correct" | "wrong";
 
 const DEFAULT_PROB = 10;
 
-export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFirst = false, mode = "oneshot" }: Props) {
+export function TestGame({
+  cards,
+  onPlayAgain,
+  onRetryMistakes,
+  onBack,
+  answerFirst = false,
+  mode = "oneshot",
+}: Props) {
   const { t } = useTranslation();
   const { probs, updateProb, resetProb, saveProbs } = useGameProbs(cards, answerFirst ? "test1" : "test0");
 
@@ -41,8 +48,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
     if (initialized || Object.keys(probs).length === 0) return;
     setInitialized(true);
     if (mode === "endless" || mode === "endless-skip") {
-      const pool =
-        mode === "endless-skip" ? cards.filter((c) => (probs[c.id] ?? DEFAULT_PROB) > 1) : cards;
+      const pool = mode === "endless-skip" ? cards.filter((c) => (probs[c.id] ?? DEFAULT_PROB) > 1) : cards;
       if (pool.length === 0) {
         setDone(true);
         return;
@@ -61,10 +67,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
 
   function pickNext(rem: Content[], currentProbs: Record<number, number>) {
     if (mode !== "oneshot") {
-      const pool =
-        mode === "endless-skip"
-          ? cards.filter((c) => (currentProbs[c.id] ?? DEFAULT_PROB) > 1)
-          : cards;
+      const pool = mode === "endless-skip" ? cards.filter((c) => (currentProbs[c.id] ?? DEFAULT_PROB) > 1) : cards;
       if (pool.length === 0) {
         setDone(true);
         saveProbs();
@@ -175,7 +178,7 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
               rows={cards.map((c) =>
                 wrongCardIds.has(c.id)
                   ? { cardId: c.id, label: "✗", variant: "red" as const }
-                  : { cardId: c.id, label: "✓", variant: "green" as const }
+                  : { cardId: c.id, label: "✓", variant: "green" as const },
               )}
             />
           </div>
@@ -184,86 +187,109 @@ export function TestGame({ cards, onPlayAgain, onRetryMistakes, onBack, answerFi
     );
   }
 
-  return (
-    <div className="max-w-lg mx-auto flex flex-col gap-4">
-      {/* Progress */}
-      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        {mode !== "oneshot" ? (
-          <span>
-            {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
-          </span>
-        ) : (
-          <span>
-            {score.t + 1} / {cards.length}
-          </span>
-        )}
+  const progressCounter = (
+    <div className="flex items-center justify-between pl-8 sm:pl-0 text-sm text-gray-500 dark:text-gray-400">
+      {mode !== "oneshot" ? (
         <span>
-          ✓ {score.r} &nbsp; ✗ {score.w}
+          {Math.round(Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100)}%
         </span>
-      </div>
-      <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full">
-        <div
-          className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
-          style={{
-            width:
-              mode !== "oneshot"
-                ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
-                : `${(score.t / cards.length) * 100}%`,
-          }}
-        />
-      </div>
-
-      {/* Prompt card */}
-      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
-        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{answerFirst ? t("test_game.label_answer") : t("test_game.label_question")}</p>
-        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{answerFirst ? current.answer : current.question}</p>
-        <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
-      </div>
-
-      {/* Options */}
-      <div className="flex flex-col gap-2">
-        {options.map((opt) => {
-          const isChosen = chosen === opt.id;
-          const correctText = (answerFirst ? current.question : current.answer).trim();
-          const isCorrectOpt = (answerFirst ? opt.question : opt.answer).trim() === correctText;
-          let cls =
-            "bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20";
-          if (answerState !== "idle") {
-            if (isCorrectOpt)
-              cls = "bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-600 text-green-800 dark:text-green-400";
-            else if (isChosen)
-              cls = "bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600 text-red-800 dark:text-red-400";
-            else cls = "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 opacity-60";
-          }
-          const optImg = answerFirst ? opt.imgQ : opt.imgA;
-          return (
-            <button
-              key={opt.id}
-              onClick={() => handleAnswer(opt)}
-              disabled={answerState !== "idle"}
-              className={`w-full rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${optImg ? "flex flex-col items-center gap-1 text-center" : "text-left"} ${cls}`}>
-              {optImg && <ImageThumb filename={optImg} collectionId={opt.collectionid} />}
-              {answerFirst ? opt.question : opt.answer}
-            </button>
-          );
-        })}
-      </div>
-
-      {answerState !== "idle" && current.note && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">{current.note}</p>
+      ) : (
+        <span>
+          {score.t + 1} / {cards.length}
+        </span>
       )}
+      <span>
+        ✓ {score.r} &nbsp; ✗ {score.w}
+      </span>
+    </div>
+  );
 
-      {/* Endless controls */}
-      {mode !== "oneshot" && (
-        <div className="flex justify-end gap-2">
-          <ResultEndless playableCards={cards} probs={probs} onResetCard={resetProb} />
-          <button
-            onClick={handleFinish}
-            className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-            {t("test_game.finish_btn")}
-          </button>
+  const progressBar = (
+    <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full">
+      <div
+        className={`h-full rounded-full transition-all ${mode !== "oneshot" ? "bg-emerald-500" : "bg-indigo-500"}`}
+        style={{
+          width:
+            mode !== "oneshot"
+              ? `${Math.max(0, (DEFAULT_PROB - (probs[current.id] ?? DEFAULT_PROB)) / (DEFAULT_PROB - 1)) * 100}%`
+              : `${(score.t / cards.length) * 100}%`,
+        }}
+      />
+    </div>
+  );
+
+  return (
+    <div className="mx-0 sm:mx-auto flex flex-col flex-1 min-h-0">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-4 sm:px-0 py-0">
+        {/* Progress — desktop only */}
+        <div className="hidden sm:block">{progressCounter}</div>
+        <div className="hidden sm:block">{progressBar}</div>
+
+        {/* Prompt card */}
+        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 rounded-xl p-6 text-center shadow-lg">
+          <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
+            {answerFirst ? t("test_game.label_answer") : t("test_game.label_question")}
+          </p>
+          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {answerFirst ? current.answer : current.question}
+          </p>
+          <ImageThumb filename={answerFirst ? current.imgA : current.imgQ} collectionId={current.collectionid} />
         </div>
-      )}
+
+        {/* Options */}
+        <div className="flex flex-col gap-2">
+          {options.map((opt) => {
+            const isChosen = chosen === opt.id;
+            const correctText = (answerFirst ? current.question : current.answer).trim();
+            const isCorrectOpt = (answerFirst ? opt.question : opt.answer).trim() === correctText;
+            let cls =
+              "bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20";
+            if (answerState !== "idle") {
+              if (isCorrectOpt)
+                cls =
+                  "bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-600 text-green-800 dark:text-green-400";
+              else if (isChosen)
+                cls = "bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600 text-red-800 dark:text-red-400";
+              else cls = "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 opacity-60";
+            }
+            const optImg = answerFirst ? opt.imgQ : opt.imgA;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => handleAnswer(opt)}
+                disabled={answerState !== "idle"}
+                className={`w-full rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${optImg ? "flex flex-col items-center gap-1 text-center" : "text-left"} ${cls}`}>
+                {optImg && <ImageThumb filename={optImg} collectionId={opt.collectionid} />}
+                {answerFirst ? opt.question : opt.answer}
+              </button>
+            );
+          })}
+        </div>
+
+        {answerState !== "idle" && current.note && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">{current.note}</p>
+        )}
+      </div>
+
+      {/* Fixed bottom panel */}
+      <div className="shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent flex flex-col gap-2 px-4 py-3 sm:px-0 sm:py-0 sm:mt-2">
+        {/* Progress — mobile only */}
+        <div className="sm:hidden">{progressCounter}</div>
+        <div className="sm:hidden">{progressBar}</div>
+
+        {/* Endless controls */}
+        {mode !== "oneshot" && (
+          <div className="flex justify-end gap-2">
+            <ResultEndless playableCards={cards} probs={probs} onResetCard={resetProb} />
+            <button
+              onClick={handleFinish}
+              className="text-sm px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+              {t("test_game.finish_btn")}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

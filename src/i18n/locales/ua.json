@@ -9,7 +9,8 @@
     "about": "Про застосунок",
     "profile": "Профіль",
     "admin": "Адмін",
-    "logout": "Вийти"
+    "logout": "Вийти",
+    "more": "Ще"
   },
   "layout": {
     "demo_banner": "Демо-режим — зміни не зберігаються і будуть скинуті при оновленні.",
@@ -136,7 +137,10 @@
     "dot_no_data": "Немає даних про прогрес",
     "filter_all": "Всі",
     "filter_favorites": "Обрані",
-    "filter_public": "Публічні"
+    "filter_public": "Публічні",
+    "recently_visited": "Продовжити навчання",
+    "recent_nav": "Недавні",
+    "no_recents": "Немає нещодавно переглянутих колод"
   },
   "paste_cards": {
     "title": "Вставити картки",
@@ -290,10 +294,10 @@
     "clear_cards_btn": "Очистити картки",
     "delete_collection_btn": "Видалити колоду",
     "delete_btn_short": "Видалити",
-    "card_one": "картка",
-    "card_few": "картки",
-    "card_many": "карток",
-    "card_other": "картки",
+    "card_one": "{{count}} картка",
+    "card_few": "{{count}} картки",
+    "card_many": "{{count}} карток",
+    "card_other": "{{count}} карток",
     "fav_remove_title": "Видалити з обраного",
     "fav_add_title": "Додати до обраного",
     "fav_label": "обране",
@@ -313,8 +317,8 @@
     "add_card_btn_short": "+ Додати картку",
     "sort_btn": "Сортування",
     "filter_btn": "Фільтр",
-    "sort_asc": "↑ За зростанням",
-    "sort_desc": "↓ За спаданням",
+    "sort_asc": "За зростанням",
+    "sort_desc": "За спаданням",
     "sort_clear": "× Скинути сортування",
     "sort_question": "Питання",
     "sort_answer": "Відповідь",
