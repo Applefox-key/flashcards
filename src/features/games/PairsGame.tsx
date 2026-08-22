@@ -13,7 +13,6 @@ interface PairCell {
   img?: string;
   collectionId: number;
   matched: boolean;
-  exiting: boolean;
 }
 
 interface MatchedPair {
@@ -40,7 +39,6 @@ function buildColumns(batch: Content[]): { questions: PairCell[]; answers: PairC
       img: c.imgQ,
       collectionId: c.collectionid,
       matched: false,
-      exiting: false,
     })),
   );
   const answers: PairCell[] = shuffle(
@@ -51,7 +49,6 @@ function buildColumns(batch: Content[]): { questions: PairCell[]; answers: PairC
       img: c.imgA,
       collectionId: c.collectionid,
       matched: false,
-      exiting: false,
     })),
   );
   return { questions, answers };
@@ -106,20 +103,15 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
     setQuestions((prev) =>
       prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, matched: true } : c)),
     );
-    setAnswers((prev) => prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, matched: true } : c)));
+    setAnswers((prev) =>
+      prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, matched: true } : c)),
+    );
 
     setTimeout(() => {
-      setQuestions((prev) =>
-        prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, exiting: true } : c)),
-      );
-      setAnswers((prev) =>
-        prev.map((c) => (c.cellId === cellId1 || c.cellId === cellId2 ? { ...c, exiting: true } : c)),
-      );
-
-      setTimeout(() => {
-        setMatchedPairsList((prev) => [...prev, { id: `${cellId1}-${Date.now()}`, q: qSnap, a: aSnap }]);
-      }, 280);
-    }, 320);
+      setQuestions((prev) => prev.filter((c) => c.cellId !== cellId1 && c.cellId !== cellId2));
+      setAnswers((prev) => prev.filter((c) => c.cellId !== cellId1 && c.cellId !== cellId2));
+      setMatchedPairsList((prev) => [...prev, { id: `${cellId1}-${Date.now()}`, q: qSnap, a: aSnap }]);
+    }, 350);
   }
 
   function isTextMatch(qCell: PairCell, aCell: PairCell): boolean {
@@ -214,24 +206,28 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
             <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">
               {t("pairs_game.col_questions")}
             </p>
-            {questions.map((cell) => (
-              <motion.div
-                key={cell.cellId}
-                animate={cell.exiting ? { opacity: 0, scale: 0.75, y: -8 } : { opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.28, ease: "easeInOut" }}>
-                <button
-                  onClick={() => handleClick(cell)}
-                  disabled={cell.matched}
-                  className={`
-                    w-full rounded-xl border-2 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 px-3 py-4 text-sm font-medium text-center
-                    transition-all duration-200 leading-tight min-h-[60px] shadow-sm
-                    ${getCellClass(cell)}
-                  `}>
-                  {cell.img && <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />}
-                  {cell.text}
-                </button>
-              </motion.div>
-            ))}
+            <AnimatePresence>
+              {questions.map((cell) => (
+                <motion.div
+                  key={cell.cellId}
+                  layout
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.75, transition: { duration: 0.28, ease: "easeInOut" } }}
+                  transition={{ layout: { type: "spring", stiffness: 400, damping: 30 }, duration: 0.28, ease: "easeInOut" }}>
+                  <button
+                    onClick={() => handleClick(cell)}
+                    disabled={cell.matched}
+                    className={`
+                      w-full rounded-xl border-2 border-t-4 border-t-indigo-500 dark:border-t-indigo-400 px-3 py-4 text-sm font-medium text-center
+                      transition-all duration-200 leading-tight min-h-[60px] shadow-sm
+                      ${getCellClass(cell)}
+                    `}>
+                    {cell.img && <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />}
+                    {cell.text}
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           {/* Answers column */}
@@ -239,24 +235,28 @@ export function PairsGame({ cards: allCards, onPlayAgain, onRetryMistakes, onBac
             <p className="text-xs text-gray-400 uppercase tracking-wide text-center mb-1">
               {t("pairs_game.col_answers")}
             </p>
-            {answers.map((cell) => (
-              <motion.div
-                key={cell.cellId}
-                animate={cell.exiting ? { opacity: 0, scale: 0.75, y: -8 } : { opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.28, ease: "easeInOut" }}>
-                <button
-                  onClick={() => handleClick(cell)}
-                  disabled={cell.matched}
-                  className={`
-                    w-full rounded-xl border-2 border-t-4 border-t-orange-400 dark:border-t-orange-400 px-3 py-4 text-sm font-medium text-center
-                    transition-all duration-200 leading-tight min-h-[60px] shadow-sm
-                    ${getCellClass(cell)}
-                  `}>
-                  {cell.img && <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />}
-                  {cell.text}
-                </button>
-              </motion.div>
-            ))}
+            <AnimatePresence>
+              {answers.map((cell) => (
+                <motion.div
+                  key={cell.cellId}
+                  layout
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.75, transition: { duration: 0.28, ease: "easeInOut" } }}
+                  transition={{ layout: { type: "spring", stiffness: 400, damping: 30 }, duration: 0.28, ease: "easeInOut" }}>
+                  <button
+                    onClick={() => handleClick(cell)}
+                    disabled={cell.matched}
+                    className={`
+                      w-full rounded-xl border-2 border-t-4 border-t-orange-400 dark:border-t-orange-400 px-3 py-4 text-sm font-medium text-center
+                      transition-all duration-200 leading-tight min-h-[60px] shadow-sm
+                      ${getCellClass(cell)}
+                    `}>
+                    {cell.img && <ImageThumb filename={cell.img} collectionId={cell.collectionId} className="mb-1" />}
+                    {cell.text}
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
 
