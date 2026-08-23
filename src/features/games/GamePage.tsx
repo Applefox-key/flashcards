@@ -311,7 +311,7 @@ export function GamePage() {
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
             {t("game_page.section_difficulty")}
           </p>
-          <DifficultyFilter value={rateFilter} onChange={handleFilterChange} />
+          <DifficultyFilter value={rateFilter} onChange={handleFilterChange} inline />
         </div>
 
         {/* Mode — parts / write / test */}

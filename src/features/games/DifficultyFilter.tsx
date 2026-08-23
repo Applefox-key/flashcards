@@ -6,6 +6,7 @@ export type RateFilter = null | 0 | 1 | 2 | 3 | 4 | 5 | "not5";
 interface Props {
   value: RateFilter;
   onChange: (val: RateFilter) => void;
+  inline?: boolean;
 }
 
 const OPTIONS = [null, "not5", 0, 5, 4, 3, 2, 1] as const;
@@ -18,7 +19,7 @@ export function DifficultyFilterValueToLabel({ value }: { value: RateFilter }) {
   return `${value}★`;
 }
 
-export function DifficultyFilter({ value, onChange }: Props) {
+export function DifficultyFilter({ value, onChange, inline }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -33,6 +34,31 @@ export function DifficultyFilter({ value, onChange }: Props) {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
+
+  if (inline) {
+    const INLINE_OPTIONS = [null, "not5", 0, 1, 2, 3, 4, 5] as const;
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {INLINE_OPTIONS.map((opt) => (
+          <button
+            key={String(opt)}
+            onClick={() => onChange(opt as RateFilter)}
+            className={`px-2.5 py-1.5 rounded-lg border text-xs transition-colors ${
+              value === opt
+                ? "border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400"
+                : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+            }`}>
+            {opt === null && t("collection_detail.filter_all")}
+            {opt === "not5" && t("collection_detail.filter_not_mastered")}
+            {opt === 0 && t("collection_detail.filter_not_rated")}
+            {typeof opt === "number" && opt > 0 && (
+              <span className="text-yellow-400">{"★".repeat(opt)}</span>
+            )}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="relative" ref={ref}>
@@ -82,10 +108,7 @@ export function DifficultyFilter({ value, onChange }: Props) {
                   </>
                 )}
                 {typeof opt === "number" && opt > 0 && (
-                  <>
-                    <span className="text-yellow-400">{"★".repeat(opt)}</span>
-                    <span className="text-gray-300 dark:text-gray-600">{"★".repeat(5 - opt)}</span>
-                  </>
+                  <span className="text-yellow-400">{"★".repeat(opt)}</span>
                 )}
               </button>
             </div>
