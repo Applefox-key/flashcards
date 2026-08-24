@@ -231,7 +231,7 @@ function EditCardModal({
   const isDoc = layout === "document";
 
   return (
-    <Modal open={open} onClose={onClose} title={t("collection_detail.edit_card_title")} size={isDoc ? "xl" : "lg"}>
+    <Modal open={open} onClose={onClose} title={t("collection_detail.edit_card_title")} size={isDoc ? "xl" : "lg"} mobileFullscreen>
       <div className="flex flex-col gap-3">
         <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
           <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
@@ -310,12 +310,15 @@ function EditCardModal({
             className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
         </div>
-        <div className="flex gap-2 justify-end">
-          <Button variant="secondary" size="sm" onClick={onClose}>
+        <div className="flex gap-3 justify-center sm:justify-end">
+          <Button
+            variant="secondary"
+            className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
+            onClick={onClose}>
             {t("collection_detail.cancel_btn")}
           </Button>
           <Button
-            size="sm"
+            className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
             onClick={handleSave}
             loading={editCard.isPending}
             disabled={!question.trim() || !answer.trim()}>

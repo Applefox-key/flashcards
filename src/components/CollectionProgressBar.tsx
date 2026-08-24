@@ -1,16 +1,18 @@
 import type { CollectionStats } from "@/types";
+import { getStatusColor } from "@/components/StudyDot";
 
 interface Props {
   stats?: CollectionStats | null;
   variant?: "minimal" | "full";
   className?: string;
+  size?: "sm" | "md";
 }
 
 const EMPTY_BAR = (className: string) => (
   <div className={`rounded-full h-1.5 bg-gray-200 dark:bg-gray-700 ${className}`} />
 );
 
-export function CollectionProgressBar({ stats, variant = "minimal", className = "" }: Props) {
+export function CollectionProgressBar({ stats, variant = "minimal", className = "", size = "sm" }: Props) {
   const total = stats ? stats.toLearn + stats.inProgress + stats.learned : 0;
   if (!stats || total === 0) {
     return variant === "minimal" ? (
@@ -20,10 +22,18 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
     );
   }
 
+  const learnedBg: Record<string, string> = {
+    gray:   "bg-gray-300 dark:bg-gray-500",
+    orange: "bg-orange-400",
+    violet: "bg-violet-500",
+    teal:   "bg-teal-500",
+    green:  "bg-green-400",
+  };
+
   const segments = [
     stats.learned > 0 && {
       width: (stats.learned / total) * 100,
-      color: "bg-green-500 dark:bg-green-400",
+      color: learnedBg[getStatusColor(stats)],
       label: `${stats.learned} learned`,
     },
     stats.inProgress > 0 && {
@@ -38,8 +48,9 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
     },
   ].filter(Boolean) as { width: number; color: string; label: string }[];
 
+  const barHeight = size === "md" ? "h-1.5" : "h-[1px] sm:h-[3px]";
   const bar = (
-    <div className={`flex h-[1px] sm:h-[3px] bg-gray-100 dark:bg-gray-700 rounded-full ${className}`}>
+    <div className={`flex ${barHeight} bg-gray-100 dark:bg-gray-700 rounded-full ${className}`}>
       {segments.map((seg, i) => (
         <div
           key={seg.label}
@@ -59,7 +70,7 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
     <div className="flex flex-col gap-1.5">
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 shrink-0" />
+          <span className={`w-2 h-2 rounded-full shrink-0 ${learnedBg[getStatusColor(stats)]}`} />
           {stats.learned} learned
         </span>
         <span className="flex items-center gap-1">

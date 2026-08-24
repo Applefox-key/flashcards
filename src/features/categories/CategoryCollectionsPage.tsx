@@ -77,7 +77,7 @@ function TagFilterBar({ active, onChange }: { active: FilterTag; onChange: (t: F
           className={`px-3 py-1 text-xs rounded-full border transition-colors ${
             active === tag
               ? "bg-indigo-600 border-indigo-600 text-white"
-              : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-600"
+              : "border-transparent bg-gray-100 dark:bg-gray-800/60 text-gray-400 dark:text-gray-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400"
           }`}>
           {labels[tag]}
         </button>

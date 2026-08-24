@@ -12,7 +12,7 @@ import { useCollections, useCollectionsPaginated } from "@/hooks/useCollectionHo
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
 import { useLibraryUiStore } from "@/store/libraryUiStore";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
-import { StudyDot } from "@/components/StudyDot";
+import { StudyDot, getAccentBorderClass } from "@/components/StudyDot";
 import { MobileFab } from "@/components/MobileFab";
 import type { Collection, CollectionTag, CollectionStats } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
@@ -99,58 +99,81 @@ function CollectionCard({
 
   if (!isDemo && isLoading) return <CollectionCardSkeleton />;
 
-  const cardCount = preview?.stats
-    ? preview.stats.toLearn + preview.stats.inProgress + preview.stats.learned
-    : (collection.cardCount ?? 0);
+  const stats = preview?.stats;
+  const cardCount = stats ? stats.toLearn + stats.inProgress + stats.learned : (collection.cardCount ?? 0);
+  const learnedPct = stats && cardCount > 0 ? Math.round((stats.learned / cardCount) * 100) : null;
 
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
-      className="group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-1 sm:p-4 flex flex-col gap-1 sm:gap-2 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all">
-      <StudyDot stats={preview?.stats} className="absolute top-2 right-2 w-2.5 h-2.5 shadow-sm" />
-      <div className="font-medium  text-gray-800 dark:text-gray-100 text-sm leading-snug">
-        <div className="flex justify-start uppercase truncate">{highlight(collection.name, search)}</div>
+      className={`group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-l-[5px] ${getAccentBorderClass(stats)} p-4 flex flex-col gap-2 cursor-pointer hover:shadow-md transition-all`}>
+      <StudyDot stats={stats} className="absolute top-3 right-3 w-3.5 h-3.5 shadow-sm" />
 
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 pb-0.5 pt-0.5">
+      {/* Name + count */}
+      <div className="pr-6">
+        <div className="font-semibold text-gray-800 dark:text-gray-100 text-md uppercase tracking-wide truncate">
+          {highlight(collection.name, search)}
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-xs text-gray-400 dark:text-gray-500">
             {t("collections.card_count", { count: cardCount })}
           </span>
-          {!!collection.isFavorite && <span className="text-lg text-rose-400 ">♥</span>}
-          {!!collection.isPublic && <span className="text-sm pb-1">🔓</span>}
+          {!!collection.isFavorite && <span className="text-base text-rose-400">♥</span>}
+          {!!collection.isPublic && <span className="text-sm leading-none">🔓</span>}
           {collection.layout === "document" && <span className="text-xs text-teal-500 dark:text-teal-400">📄</span>}
         </div>
       </div>
-      <CollectionProgressBar stats={preview?.stats} variant="minimal" />
-      {!compact && preview && preview.cards.length > 0 && (
-        <>
-          <div className="flex flex-col gap-0.5  border-gray-100 dark:border-gray-700 mt-0.5">
-            {preview.cards.map((card) => (
-              <div key={card.id} className="grid grid-cols-2 gap-1 text-sm text-gray-400 dark:text-gray-500">
-                <span className="truncate">{card.question ? card.question : <CiImageOn />}</span>
-                <span className="truncate text-gray-300 dark:text-gray-600">
-                  {card.answer ? card.answer : <CiImageOn />}
-                </span>
-              </div>
-            ))}
-          </div>{" "}
-        </>
+
+      {/* Progress bar with % */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <CollectionProgressBar stats={stats} variant="minimal" size="md" />
+        </div>
+        {learnedPct !== null && (
+          <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 w-8 text-right">{learnedPct}%</span>
+        )}
+      </div>
+
+      {/* Note */}
+      {!compact && !!collection.note && (
+        <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{collection.note}</p>
       )}
 
+      {/* Hover popup: first 3 cards */}
+      {!compact && preview && preview.cards.length > 0 && (
+        <div className="absolute top-full left-0 mt-1 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 w-full pointer-events-none">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg p-3">
+            <div className="flex flex-col gap-1">
+              {preview.cards.map((card) => (
+                <div key={card.id} className="grid grid-cols-2 gap-1 text-sm text-gray-400 dark:text-gray-500">
+                  <span className="truncate">{card.question ? card.question : <CiImageOn />}</span>
+                  <span className="truncate text-gray-300 dark:text-gray-600">
+                    {card.answer ? card.answer : <CiImageOn />}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tags */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1  ">
+        <div className="flex flex-wrap gap-1">
           {tags.map((tag) => (
             <span
               key={tag.id}
-              className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
+              className="inline-flex items-center gap-0.5 text-xs bg-violet-50 dark:bg-violet-900/30 text-purple-600 dark:text-violet-400 px-1.5 py-1.5 rounded-full">
               {tag.name}
             </span>
           ))}
         </div>
       )}
+
       <Link
         to={`/play/${collection.id}`}
         onClick={(e) => e.stopPropagation()}
-        className="flex justify-center item-center opacity-0 absolute bottom-0 text-center right-0 w-[70%] group-hover:opacity-80 transition-opacity shrink-0 text-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-br-lg rounded-tl-lg">
+        className="flex justify-center item-center opacity-0 absolute bottom-0 text-center right-0 w-full group-hover:opacity-80 transition-opacity shrink-0 text-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-b-lg ">
         <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
       </Link>
     </div>
@@ -195,61 +218,69 @@ function CollectionListRow({
 
   return (
     <div
-      onClick={() => navigate(`/collections/${collection.id}`)}
-      className="group relative flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors first:rounded-t-xl last:rounded-b-xl border-b border-gray-100 dark:border-gray-700/60 last:border-b-0">
-      <StudyDot stats={preview?.stats} showFallback className="shrink-0 w-2 h-2" />
-      <span className="flex-1 min-w-0 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
-        {highlight(collection.name, search)}
-      </span>
-
-      {tags.length > 0 && (
-        <div className="hidden xl:flex gap-1 shrink-0">
-          {tags.slice(0, 2).map((tag) => (
-            <span
-              key={tag.id}
-              className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
-              {tag.name}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="w-20 shrink-0 absolute bottom-0 w-full left-0">
-        <CollectionProgressBar stats={preview?.stats} variant="minimal" />
+      className={`group relative sm:max-w-[1000px] flex flex-col  gap-0 px-4 py-2.5 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-gray-900 transition-colors first:rounded-t-xl last:rounded-b-xl rounded-l-xl border border-gray-100 dark:border-gray-700 border-l-[5px] ${getAccentBorderClass(preview?.stats)} last:border-b-0`}>
+      <div
+        onClick={() => navigate(`/collections/${collection.id}`)}
+        className={`group relative flex items-center gap-3`}>
+        <StudyDot stats={preview?.stats} showFallback className="hidden md:flex shrink-0 w-2 h-2" />
+        <span className="flex-1 min-w-0 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
+          {highlight(collection.name, search)}
+        </span>
+        {tags.length > 0 && (
+          <div className="hidden xl:flex gap-1 shrink-0">
+            {tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag.id}
+                className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400  px-1.5 py-1.5 rounded-full">
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+        {/* <div className="w-full shrink-0 absolute bottom-0 left-0">
+          <CollectionProgressBar stats={preview?.stats} variant="minimal" />
+        </div> */}
+        <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
+          {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
+          {!!collection.isPublic && <span className="text-xs">🔓</span>}
+          {collection.layout === "document" && (
+            <span className="text-xs text-teal-500 dark:text-teal-400">📄</span>
+          )}{" "}
+          {t("collections.card_count", {
+            count: preview?.stats
+              ? preview.stats.toLearn + preview.stats.inProgress + preview.stats.learned
+              : (collection.cardCount ?? 0),
+          })}
+        </span>
       </div>
-
-      <span className="shrink-0 w-28 flex items-center justify-end gap-1.5 text-xs text-gray-400 dark:text-gray-500 group-hover:opacity-0 transition-opacity">
-        {!!collection.isFavorite && <span className="text-sm text-rose-400">♥</span>}
-        {!!collection.isPublic && <span className="text-xs">🔓</span>}
-        {collection.layout === "document" && <span className="text-xs text-teal-500 dark:text-teal-400">📄</span>}{" "}
-        {t("collections.card_count", {
-          count: preview?.stats
-            ? preview.stats.toLearn + preview.stats.inProgress + preview.stats.learned
-            : (collection.cardCount ?? 0),
-        })}
-      </span>
-
-      <Link
-        to={`/play/${collection.id}`}
-        onClick={(e) => e.stopPropagation()}
-        className="absolute right-0 inset-y-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-r-md whitespace-nowrap">
-        <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
-      </Link>
-
+      <div className="w-40 shrink-0 pl-5">
+        <CollectionProgressBar stats={preview?.stats} variant="minimal" size="md" />
+      </div>
       {preview && preview.cards.length > 0 && (
-        <div className="pointer-events-none absolute left-0 right-0 top-full z-10 pt-px opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-75">
-          <div className="mx-4 bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-lg shadow-lg px-3 py-2.5">
+        <div className="pointer-events-none bg-white dark:bg-gray-900 absolute left-0 right-0 top-full z-10 pt-px  opacity-0 group-hover:opacity-100 transition-opacity duration-150 delay-75">
+          <div className="bg-indigo-50/50 dark:bg-gray-900/10 ring-1 ring-gray-200 dark:ring-gray-700 rounded-lg shadow-lg px-3 py-2.5">
             <div className="flex flex-col gap-1.5">
               {preview.cards.map((card) => (
                 <div key={card.id} className="grid grid-cols-2 gap-3 text-xs">
-                  <span className="text-gray-700 dark:text-gray-300 truncate">{card.question}</span>
-                  <span className="text-gray-400 dark:text-gray-500 truncate">{card.answer}</span>
+                  {/* <span className="text-gray-700 dark:text-gray-300 truncate">{card.question}</span>
+                  <span className="text-gray-400 dark:text-gray-500 truncate">{card.answer}</span> */}
+
+                  <span className="truncate">{card.question ? card.question : <CiImageOn />}</span>
+                  <span className="truncate text-gray-300 dark:text-gray-600">
+                    {card.answer ? card.answer : <CiImageOn />}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
       )}
+      <Link
+        to={`/play/${collection.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="absolute right-0 inset-y-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-r-md whitespace-nowrap">
+        <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
+      </Link>
     </div>
   );
 }
@@ -639,11 +670,7 @@ function RecentView({
     .filter((c) => !search || c.name.toLowerCase().includes(search));
 
   if (recentCollections.length === 0) {
-    return (
-      <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">
-        {t("collections.no_recents")}
-      </p>
-    );
+    return <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">{t("collections.no_recents")}</p>;
   }
 
   if (compact) {
@@ -826,7 +853,7 @@ export function CollectionsPage() {
                 className={`shrink-0 px-3 py-1 text-xs rounded-full border transition-colors ${
                   activeTagId === tag.id
                     ? "bg-violet-600 border-violet-600 text-white"
-                    : "border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:border-violet-300 dark:hover:border-violet-600"
+                    : "border-transparent bg-gray-100 dark:bg-gray-800/60 text-gray-400 dark:text-gray-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400"
                 }`}>
                 {tag.name}
               </button>
@@ -903,8 +930,8 @@ export function CollectionsPage() {
           viewMode === "all"
             ? `${t("collections.all_collections_count", { count: totalCollections })} `
             : viewMode === "recent"
-            ? `${t("collections.recent_nav")} `
-            : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} `
+              ? `${t("collections.recent_nav")} `
+              : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} `
         }
         tabIcon={<HiOutlineBookmarkSquare className="text-[22px]" strokeWidth="1.8" />}
         topValue="top-[100px] w-72 flex flex-row nowrap"

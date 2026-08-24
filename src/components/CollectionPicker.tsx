@@ -86,7 +86,7 @@ export function CollectionPicker({
               className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                 tagFilter === tag
                   ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-600"
-                  : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400"
+                  : "border-transparent bg-gray-100 dark:bg-gray-800/60 text-gray-400 dark:text-gray-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400"
               }`}>
               {tag}
             </button>

@@ -91,6 +91,7 @@ export function Layout() {
   const isGamePage = /^\/play\/[^/]+\/[^/]+/.test(location.pathname);
   const isGameHubPage = /^\/play\/[^/]+$/.test(location.pathname);
   const isCollectionDetailPage = /^\/collections\/(?!new)[^/]+$/.test(location.pathname);
+  const isCollectionEditPage = /^\/collections\/(?!new)[^/]+\/edit$/.test(location.pathname);
 
   const { myLibrary, publicLibrary, setMyLibrary, setPublicLibrary } = useLibraryUiStore();
   const isPublicLibraryPage = location.pathname === "/library/public";
@@ -470,7 +471,7 @@ export function Layout() {
           </button>
           <NavLink
             to={`/play/${location.pathname.split("/").pop()}`}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
+            className="flex-1 flex flex-col items-center border-t-[5px] border-t-indigo-600 rounded-t-lg  justify-center gap-0.5 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
             <PiShootingStarThin className="text-[22px]" />
             <span className="text-[10px] leading-none font-medium">{t("collection_detail.practice_btn")}</span>
           </NavLink>
@@ -493,7 +494,7 @@ export function Layout() {
             <span className="text-[10px] leading-none font-medium">{t("nav.more")}</span>
           </button>
         </nav>
-      ) : !isGamePage ? (
+      ) : !isGamePage && !isCollectionEditPage ? (
         <nav
           className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>

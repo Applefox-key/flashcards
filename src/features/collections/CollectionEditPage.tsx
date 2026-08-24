@@ -126,7 +126,7 @@ export function CollectionEditPage() {
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          className="hidden sm:inline text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
           {t("edit_collection.back")}
         </button>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("edit_collection.title")}</h1>
@@ -134,6 +134,7 @@ export function CollectionEditPage() {
 
       {/* Edit form */}
       <form
+        id="edit-deck-form"
         onSubmit={handleSubmit}
         className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
@@ -260,7 +261,7 @@ export function CollectionEditPage() {
           )}
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="hidden sm:flex gap-3 pt-2">
           <Button type="submit" loading={editCollection.isPending} disabled={!name.trim()}>
             {t("edit_collection.save_btn")}
           </Button>
@@ -269,6 +270,23 @@ export function CollectionEditPage() {
           </Button>
         </div>
       </form>
+
+      {/* Mobile fixed action bar */}
+      <div
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex gap-3 px-4 py-3"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}>
+        <Button
+          type="submit"
+          form="edit-deck-form"
+          loading={editCollection.isPending}
+          disabled={!name.trim()}
+          className="flex-1">
+          {t("edit_collection.save_btn")}
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="flex-1">
+          {t("edit_collection.cancel_btn")}
+        </Button>
+      </div>
 
       {/* Danger zone */}
       <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-900/50 p-5">

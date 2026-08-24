@@ -66,7 +66,7 @@ export function TagSelect({ value, onChange }: Props) {
             key={tag.id}
             type="button"
             onClick={() => toggle(tag.id)}
-            className="text-xs border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full hover:border-violet-300 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+            className="text-xs border border-transparent bg-gray-100 dark:bg-gray-800/60 text-gray-400 dark:text-gray-500 px-2 py-0.5 rounded-full hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
             + {tag.name}
           </button>
         ))}
