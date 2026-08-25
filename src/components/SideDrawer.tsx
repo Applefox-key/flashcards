@@ -61,7 +61,7 @@ export function SideDrawer({
         <button
           onClick={open ? onClose : onOpen}
           className={`absolute  -translate-y-1/2
-            bg-indigo-600 text-white shadow-lg select-none
+            bg-indigo-600 text-white shadow-lg select-none dark:bg-indigo-950 dark:text-indigo-400
             flex flex-row items-center justify-between gap-1 px-2 py-3 ${topValue}
             ${isRight ? "left-0 -translate-x-full rounded-l-xl" : "right-0 translate-x-full rounded-r-xl"}`}>
           {tabIcon}

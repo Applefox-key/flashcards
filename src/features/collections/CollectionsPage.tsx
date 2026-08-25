@@ -20,6 +20,7 @@ import { SideDrawer } from "@/components/SideDrawer";
 import { CiImageOn } from "react-icons/ci";
 import { HiOutlineBookmarkSquare } from "react-icons/hi2";
 import { useRecentCollectionsStore } from "@/store/recentCollectionsStore";
+import { MdAccessTime } from "react-icons/md";
 
 const ALL_LIMIT = 30;
 
@@ -106,7 +107,7 @@ function CollectionCard({
   return (
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
-      className={`group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-l-[5px] ${getAccentBorderClass(stats)} p-4 flex flex-col gap-2 cursor-pointer hover:shadow-md transition-all`}>
+      className={`group bg-white relative dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-l-[5px] ${getAccentBorderClass(stats)} p-4 flex flex-col gap-2 cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/20 dark:hover:shadow-indigo-500/15 hover:scale-[1.025] hover:z-10 hover:ring-2 hover:ring-indigo-300/60 dark:hover:ring-indigo-600/50 transition-all duration-150`}>
       <StudyDot stats={stats} className="absolute top-3 right-3 w-3.5 h-3.5 shadow-sm" />
 
       {/* Name + count */}
@@ -141,13 +142,15 @@ function CollectionCard({
 
       {/* Hover popup: first 3 cards */}
       {!compact && preview && preview.cards.length > 0 && (
-        <div className="absolute top-full left-0 mt-1 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 w-full pointer-events-none">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg p-3">
-            <div className="flex flex-col gap-1">
+        <div className="absolute top-full left-0 mt-1.5 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 w-full pointer-events-none">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-indigo-200 dark:border-indigo-700/70 shadow-xl shadow-indigo-500/15 dark:shadow-indigo-500/10 p-3">
+            <div className="flex flex-col gap-1.5">
               {preview.cards.map((card) => (
-                <div key={card.id} className="grid grid-cols-2 gap-1 text-sm text-gray-400 dark:text-gray-500">
-                  <span className="truncate">{card.question ? card.question : <CiImageOn />}</span>
-                  <span className="truncate text-gray-300 dark:text-gray-600">
+                <div key={card.id} className="grid grid-cols-2 gap-2 text-xs">
+                  <span className="truncate text-gray-700 dark:text-gray-200">
+                    {card.question ? card.question : <CiImageOn />}
+                  </span>
+                  <span className="truncate text-gray-400 dark:text-gray-500">
                     {card.answer ? card.answer : <CiImageOn />}
                   </span>
                 </div>
@@ -173,8 +176,8 @@ function CollectionCard({
       <Link
         to={`/play/${collection.id}`}
         onClick={(e) => e.stopPropagation()}
-        className="flex justify-center item-center opacity-0 absolute bottom-0 text-center right-0 w-full group-hover:opacity-80 transition-opacity shrink-0 text-md bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-b-lg ">
-        <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
+        className="flex justify-center items-center opacity-0 absolute bottom-0 text-center right-0 w-full group-hover:opacity-100 transition-opacity shrink-0 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1.5 rounded-b-xl gap-1.5">
+        <PiShootingStarThin className="w-4 h-4" /> {t("collections.practice_btn")}
       </Link>
     </div>
   );
@@ -218,9 +221,9 @@ function CollectionListRow({
 
   return (
     <div
+      onClick={() => navigate(`/collections/${collection.id}`)}
       className={`group relative sm:max-w-[1000px] flex flex-col  gap-0 px-4 py-2.5 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-gray-900 transition-colors first:rounded-t-xl last:rounded-b-xl rounded-l-xl border border-gray-100 dark:border-gray-700 border-l-[5px] ${getAccentBorderClass(preview?.stats)} last:border-b-0`}>
       <div
-        onClick={() => navigate(`/collections/${collection.id}`)}
         className={`group relative flex items-center gap-3`}>
         <StudyDot stats={preview?.stats} showFallback className="hidden md:flex shrink-0 w-2 h-2" />
         <span className="flex-1 min-w-0 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
@@ -480,7 +483,7 @@ function AllCollectionsView({ search }: { search: string }) {
         </div>
       )}
       {compact && (
-        <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800 ">
+        <div className="border border-gray-200 dark:border-gray-600 border-l-0  dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800 sm:max-w-[1000px] sm:m-auto">
           {visible.map((col) => (
             <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
           ))}
@@ -559,24 +562,24 @@ function CardsView({
   return (
     <div className="flex gap-0 min-h-0">
       {/* Left: category list — desktop only */}
-      <div className="hidden sm:flex flex-col w-52 shrink-0 gap-0.5 rounded-xl p-2 mr-4 bg-gray-100 dark:bg-gray-800/70 self-start">
+      <div className="hidden sm:flex flex-col w-60 shrink-0 gap-0.5 p-2 mr-4 self-start border-r ">
         {recents.length > 0 && (
           <button
             onClick={switchToRecent}
-            className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+            className={`italic text-left flex items-center px-3  py-2 rounded-lg text-sm transition-colors ${
               viewMode === "recent"
-                ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}>
-            <span className="truncate">{t("collections.recent_nav")}</span>
+            <MdAccessTime /> <span className="ml-2 truncate">{t("collections.recent_nav")}</span>
           </button>
         )}
 
         <button
           onClick={switchToAll}
-          className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+          className={`italic text-left px-3 py-2 rounded-lg text-sm transition-colors ${
             viewMode === "all"
-              ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+              ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
               : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
           }`}>
           <div className="flex items-center justify-between gap-1">
@@ -585,7 +588,7 @@ function CardsView({
           </div>
         </button>
 
-        <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+        <div className="border-t border-gray-200 dark:border-gray-700 my-1 mb-3" />
 
         {visibleCategories.map(({ category, collections }) => (
           <button
@@ -593,7 +596,7 @@ function CardsView({
             onClick={() => switchToCategory(category.id)}
             className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
               viewMode === "by-category" && effectiveId === category.id
-                ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium "
+                ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 "
             }`}>
             <div className="flex items-center justify-between gap-1">
@@ -622,7 +625,7 @@ function CardsView({
             </div>
 
             {compact && (
-              <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800">
+              <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800 sm:max-w-[1000px] sm:m-auto">
                 {selectedCollections.map((col) => (
                   <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
                 ))}
@@ -675,7 +678,7 @@ function RecentView({
 
   if (compact) {
     return (
-      <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800">
+      <div className="ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl bg-white dark:bg-gray-800  sm:max-w-[1000px] sm:m-autos">
         {recentCollections.map((col) => (
           <CollectionListRow key={col.id} collection={col} search={search} tags={col.tags ?? []} />
         ))}
@@ -934,7 +937,7 @@ export function CollectionsPage() {
               : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} `
         }
         tabIcon={<HiOutlineBookmarkSquare className="text-[22px]" strokeWidth="1.8" />}
-        topValue="top-[100px] w-72 flex flex-row nowrap"
+        topValue="top-[102px] w-72 flex flex-row nowrap"
         title={t("collections.filters_title")}
         hasActiveIndicator={
           activeFilter !== "All" ||
@@ -973,28 +976,30 @@ export function CollectionsPage() {
                   setMyLibrary({ viewMode: "recent" });
                   setFilterOpen(false);
                 }}
-                className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                className={` text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center ${
                   viewMode === "recent"
-                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
-                <span className="truncate">{t("collections.recent_nav")}</span>
+                <MdAccessTime />
+                <span className="italic ml-2 truncate">{t("collections.recent_nav")}</span>
               </button>
               <button
                 onClick={() => {
                   setMyLibrary({ viewMode: "all", allPage: 1 });
                   setFilterOpen(false);
                 }}
-                className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                className={`text-left italic px-3 py-2 rounded-lg text-sm transition-colors ${
                   viewMode === "all"
-                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}>
                 <div className="flex items-center justify-between gap-1">
                   <span className="truncate">{t("collections.all_collections")}</span>
                   <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">({totalCollections})</span>
                 </div>
-              </button>
+              </button>{" "}
+              <div className="border-t border-gray-200 dark:border-gray-700 my-1 mb-3" />
               {visibleCategories.map(({ category, collections }) => (
                 <button
                   key={category.id}
@@ -1004,7 +1009,7 @@ export function CollectionsPage() {
                   }}
                   className={`text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     viewMode === "by-category" && effectiveId === category.id
-                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}>
                   <div className="flex items-center justify-between gap-1">

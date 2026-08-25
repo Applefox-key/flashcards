@@ -51,9 +51,7 @@ export function DifficultyFilter({ value, onChange, inline }: Props) {
             {opt === null && t("collection_detail.filter_all")}
             {opt === "not5" && t("collection_detail.filter_not_mastered")}
             {opt === 0 && t("collection_detail.filter_not_rated")}
-            {typeof opt === "number" && opt > 0 && (
-              <span className="text-yellow-400">{"★".repeat(opt)}</span>
-            )}
+            {typeof opt === "number" && opt > 0 && <span className="text-yellow-400">{"★".repeat(opt)}</span>}
           </button>
         ))}
       </div>
@@ -98,18 +96,16 @@ export function DifficultyFilter({ value, onChange, inline }: Props) {
                   <>
                     <span className="text-yellow-400">★★★★</span>
                     <span className="text-gray-300 dark:text-gray-600">★</span>
-                    <span className="ml-1">{t("collection_detail.filter_not_mastered")}</span>
+                    <span className="ml-1 whitespace-nowrap">{t("collection_detail.filter_not_mastered")}</span>
                   </>
                 )}
                 {opt === 0 && (
                   <>
                     <span className="text-gray-300 dark:text-gray-600">★★★★★</span>
-                    <span className="ml-1">{t("collection_detail.filter_not_rated")}</span>
+                    <span className="ml-1 whitespace-nowrap">{t("collection_detail.filter_not_rated")}</span>
                   </>
                 )}
-                {typeof opt === "number" && opt > 0 && (
-                  <span className="text-yellow-400">{"★".repeat(opt)}</span>
-                )}
+                {typeof opt === "number" && opt > 0 && <span className="text-yellow-400">{"★".repeat(opt)}</span>}
               </button>
             </div>
           ))}

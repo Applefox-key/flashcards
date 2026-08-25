@@ -58,7 +58,7 @@ export function TranslateButton({
 
   return (
     <div
-      className={`inline-flex items-center gap-0.5 border border-dashed border-gray-300 dark:border-gray-600 rounded ${className}`}>
+      className={`inline-flex items-center gap-0.5 bg-gray-100 dark:bg-gray-900 rounded border  border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 ${className}`}>
       {controlled ? (
         <span className="text-[10px] text-gray-400 dark:text-gray-500 px-1">
           {srcLang.slice(0, 2).toUpperCase()}→{tgtLang.slice(0, 2).toUpperCase()}

@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 const sizeClass = {
   md: "max-w-md",
@@ -18,6 +19,7 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, size = "md", mobileFullscreen, children }: ModalProps) {
+  const { t } = useTranslation();
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -29,21 +31,33 @@ export function Modal({ open, onClose, title, size = "md", mobileFullscreen, chi
   if (!open) return null;
 
   return createPortal(
-    <div className={`fixed inset-0 z-50 flex justify-center ${mobileFullscreen ? "items-end sm:items-center" : "items-center"}`}>
+    <div
+      className={`fixed inset-0 z-[60] flex justify-center ${mobileFullscreen ? "items-start sm:items-center" : "items-center"}`}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className={`relative ${size === "xxl" ? "bg-transparent dark:bg-transparent" : "bg-white dark:bg-gray-800 shadow-xl"} w-full overflow-y-auto ${mobileFullscreen ? "rounded-t-2xl sm:rounded-lg mx-0 sm:mx-4 p-4 sm:p-6 max-h-[95dvh] sm:max-h-[90vh]" : "rounded-lg mx-4 p-6 max-h-[90vh]"} ${sizeClass[size]}`}>
-        {title && (
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
+        className={`relative ${size === "xxl" ? "bg-transparent dark:bg-transparent" : "bg-white dark:bg-slate-900 shadow-xl"} w-full ${mobileFullscreen ? "flex flex-col rounded-none sm:rounded-lg mx-0 sm:mx-4 h-dvh sm:h-auto sm:max-h-[90vh] sm:overflow-y-auto" : "overflow-y-auto rounded-lg mx-4 max-h-[90vh]"} ${sizeClass[size]}`}>
+        <div className={mobileFullscreen ? "flex-1 min-h-0 overflow-y-auto p-4 sm:p-6" : "p-6"}>
+          {title && (
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
+              <button
+                onClick={onClose}
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">
+                ×
+              </button>
+            </div>
+          )}
+          {children}
+        </div>
+        {mobileFullscreen && (
+          <div className="sm:hidden shrink-0 px-4 pt-3 pb-6 bg-white dark:bg-slate-900">
             <button
               onClick={onClose}
-              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">
-              ×
+              className="w-full py-3 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 font-medium text-sm active:opacity-70">
+              {t("result_screen.close")}
             </button>
           </div>
         )}
-        {children}
       </div>
     </div>,
     document.body,

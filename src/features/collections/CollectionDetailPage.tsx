@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import Masonry from "react-masonry-css";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -27,15 +28,17 @@ import { useToast } from "@/hooks/useToast";
 import { useCardImage } from "@/hooks/useCardImage";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import type { Content, Collection, CardEditRequest, Category } from "@/types";
-import { PiListBold, PiShootingStarThin } from "react-icons/pi";
+import { PiShootingStarThin } from "react-icons/pi";
+import { DifficultyFilter, type RateFilter } from "@/features/games/DifficultyFilter";
 import { useRecentCollectionsStore } from "@/store/recentCollectionsStore";
-import { IoTrashBinOutline, IoChevronDown } from "react-icons/io5";
-import { BsGridFill, BsTextLeft } from "react-icons/bs";
+import { IoTrashBinOutline } from "react-icons/io5";
+import { BsGridFill } from "react-icons/bs";
 import { SideDrawer } from "@/components/SideDrawer";
 import { FaInfo } from "react-icons/fa6";
 import { BiImageAdd } from "react-icons/bi";
-import { MdOutlineSortByAlpha, MdShortText } from "react-icons/md";
+import { MdOutlineSortByAlpha } from "react-icons/md";
 import { RiSortAlphabetAsc, RiSortAlphabetDesc } from "react-icons/ri";
+import { LuWrapText } from "react-icons/lu";
 
 interface CollectionContentResponse {
   collection: Collection;
@@ -130,8 +133,8 @@ function ImageUploadField({
       ) : (
         <div
           onClick={() => inputRef.current?.click()}
-          className="relative border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
-          <BiImageAdd className="text-xl sm:text-2xl absolute bottom-0 left-0 sm:right-0 sm:left-unset" />{" "}
+          className="max-w-24 flex items-center justify-between sm:justify-start text-[18px] sm:text-md relative border-2 max-h-24 h-24 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
+          <BiImageAdd className="text-[3rem] sm:text-2xl sm:absolute bottom-0 left-0 sm:right-0 sm:left-unset" />{" "}
           {t("collection_detail.img_click_to_add")}
         </div>
       )}
@@ -231,14 +234,19 @@ function EditCardModal({
   const isDoc = layout === "document";
 
   return (
-    <Modal open={open} onClose={onClose} title={t("collection_detail.edit_card_title")} size={isDoc ? "xl" : "lg"} mobileFullscreen>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t("collection_detail.edit_card_title")}
+      size={isDoc ? "xl" : "lg"}
+      mobileFullscreen>
       <div className="flex flex-col gap-3">
-        <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
-          <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
+        <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-teal-500 dark:border-l-teal-500">
+          <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
             <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
           </div>
-          <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-col-reverse md:flex-row"}`}>
+          <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-row"}`}>
             {!isDoc && (
               <ImageUploadField
                 currentFilename={clearImgQ ? undefined : card.imgQ}
@@ -256,12 +264,12 @@ function EditCardModal({
               onChange={(e) => setQuestion(e.target.value)}
               rows={isDoc ? 3 : 2}
               autoFocus
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
             />
           </div>
         </div>
-        <div className="border-2 border-gray-200 dark:border-gray-600 rounded-b-lg p-1">
-          <div className="flex items-center justify-between mb-1 bg-gray-100 dark:bg-gray-600/30">
+        <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-1  border-l-[5px] border-l-violet-500 dark:border-l-violet-500">
+          <div className="flex items-center justify-between mb-1 ">
             <label className="text-xs text-gray-400">{t("collection_detail.answer_label")}</label>
             <div className="flex items-center gap-1">
               <TranslateButton
@@ -279,7 +287,7 @@ function EditCardModal({
               />
             </div>
           </div>
-          <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-col-reverse md:flex-row"}`}>
+          <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-row"}`}>
             {!isDoc && (
               <ImageUploadField
                 currentFilename={clearImgA ? undefined : card.imgA}
@@ -296,18 +304,16 @@ function EditCardModal({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               rows={isDoc ? 7 : 2}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
             />
           </div>
         </div>
         <div>
-          <label className="text-xs text-gray-400 block mb-1 bg-gray-100 dark:bg-gray-600/30">
-            {t("collection_detail.note_label")}
-          </label>
+          <label className="text-xs text-gray-400 block mb-1 ">{t("collection_detail.note_label")}</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100  border-l-[5px] border-l-orange-400 dark:border-l-orange-400"
           />
         </div>
         <div className="flex gap-3 justify-center sm:justify-end">
@@ -520,6 +526,23 @@ function highlightNote(note: string, question: string, answer: string) {
   );
 }
 
+function ratingBorderClass(rate?: number): string {
+  switch (rate) {
+    case 5:
+      return "border-l-[5px] border-l-green-500";
+    case 4:
+      return "border-l-[5px] border-l-green-300";
+    case 3:
+      return "border-l-[5px] border-l-amber-400";
+    case 2:
+      return "border-l-[5px] border-l-sky-300";
+    case 1:
+      return "border-l-[5px] border-l-violet-400";
+    default:
+      return "border-l-[5px] border-l-gray-200";
+  }
+}
+
 function CardListRow({
   card,
   collectionId,
@@ -562,7 +585,9 @@ function CardListRow({
         onClose={() => setEditing(false)}
         layout={layout}
       />
-      <div className="sm:w-[75vw] sm:m-auto group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+      <div
+        onClick={() => onView(card)}
+        className={`sm:w-[75vw] sm:m-auto group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${ratingBorderClass(card.rate)}`}>
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
             {index}
@@ -585,7 +610,9 @@ function CardListRow({
           </div>
         </div>
         {/* Desktop: hover buttons */}
-        <div className="hidden sm:flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="hidden sm:flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <button
             onClick={() => onView(card)}
             className="text-xs text-gray-400 hover:text-indigo-600 transition-colors px-1.5 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -604,7 +631,7 @@ function CardListRow({
           </button>
         </div>
         {/* Mobile: ··· kebab menu */}
-        <div className="relative sm:hidden shrink-0" ref={rowMenuRef}>
+        <div onClick={(e) => e.stopPropagation()} className="relative sm:hidden shrink-0" ref={rowMenuRef}>
           <button
             onClick={() => setRowMenuOpen((v) => !v)}
             className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm leading-none">
@@ -695,7 +722,9 @@ function CardItem({
         layout={layout}
       />
       {/* <div className="bg-gray-100 dark:bg-gray-900 flex align-center justify-center p-2 rounded-lg"> */}
-      <div className="justify-start bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
+      <div
+        onClick={() => onView(card)}
+        className={`justify-start bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group cursor-pointer ${ratingBorderClass(card.rate)}`}>
         <div className="sm:flex sm:items-start sm:gap-3">
           <div className="sm:flex-1 sm:min-w-0">
             <p className="text-xs text-gray-400 mb-1">{t("collection_detail.question_label")}</p>
@@ -725,7 +754,7 @@ function CardItem({
           <p className="text-xs text-gray-400 italic">{highlightNote(card.note, card.question, card.answer)}</p>
         )}
         <div className="flex items-center justify-between mt-auto">
-          <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
+          <div onClick={(e) => e.stopPropagation()} className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
@@ -739,7 +768,9 @@ function CardItem({
               </button>
             ))}
           </div>
-          <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => onView(card)}
               className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
@@ -814,7 +845,9 @@ function CardItemCompact({
         onClose={() => setEditing(false)}
         layout={layout}
       />
-      <div className="justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group">
+      <div
+        onClick={() => onView(card)}
+        className={`justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group cursor-pointer ${ratingBorderClass(card.rate)}`}>
         <div className="sm:flex sm:items-start sm:gap-2">
           <div className="sm:flex-1 sm:min-w-0">
             <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
@@ -843,7 +876,7 @@ function CardItemCompact({
           ) : null}
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
+          <div onClick={(e) => e.stopPropagation()} className="flex gap-0.5" onMouseLeave={() => setHoverRate(0)}>
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
@@ -857,7 +890,9 @@ function CardItemCompact({
               </button>
             ))}
           </div>
-          <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => onView(card)}
               className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
@@ -933,15 +968,14 @@ export function CollectionDetailPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [addCardDropdownOpen, setAddCardDropdownOpen] = useState(false);
   const [editDropdownOpen, setEditDropdownOpen] = useState(false);
-  const [rateFilter, setRateFilter] = useState<null | 0 | 1 | 2 | 3 | 4 | 5 | "not5">(null);
-  const [rateFilterOpen, setRateFilterOpen] = useState(false);
+  const [rateFilter, setRateFilter] = useState<RateFilter>(null);
   const tagPopoverMobileRef = useRef<HTMLDivElement>(null);
   const tagPopoverDesktopRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
   const addCardDropdownRef = useRef<HTMLDivElement>(null);
   const editDropdownRef = useRef<HTMLDivElement>(null);
-  const rateFilterRef = useRef<HTMLDivElement>(null);
+
   const compactMenuRef = useRef<HTMLDivElement>(null);
 
   const setCollectionTags = useSetCollectionTags();
@@ -1023,17 +1057,6 @@ export function CollectionDetailPage() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [editDropdownOpen]);
-
-  useEffect(() => {
-    if (!rateFilterOpen) return;
-    function handleClick(e: MouseEvent) {
-      if (rateFilterRef.current && !rateFilterRef.current.contains(e.target as Node)) {
-        setRateFilterOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [rateFilterOpen]);
 
   const parsed = rawData as unknown as CollectionContentResponse[] | undefined;
   const collectionData = parsed?.[0];
@@ -1526,7 +1549,7 @@ export function CollectionDetailPage() {
                   <button
                     onClick={() => setSortMenuOpen((v) => !v)}
                     title="Sort cards"
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs transition-colors ${
+                    className={`flex items-center text-[18px] sm:text-[14px] gap-1 px-2.5 py-1 rounded-lg border text-xs transition-colors ${
                       sortField
                         ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
                         : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -1537,11 +1560,11 @@ export function CollectionDetailPage() {
                     {/* <BiSort className="text-[13px]" /> */}
 
                     {sortDir === null ? (
-                      <MdOutlineSortByAlpha className="text-[14px]" />
+                      <MdOutlineSortByAlpha className="text-[18px] sm:text-[14px]" />
                     ) : sortDir === "asc" ? (
-                      <RiSortAlphabetAsc className="text-[14px]" />
+                      <RiSortAlphabetAsc className="text-[18px] sm:text-[14px]" />
                     ) : (
-                      <RiSortAlphabetDesc className="text-[14px]" />
+                      <RiSortAlphabetDesc className="text-[18px] sm:text-[14px]" />
                     )}
                     {sortField ? (
                       <span>
@@ -1612,141 +1635,29 @@ export function CollectionDetailPage() {
                   )}
                 </div>
                 {/* Rate filter button */}
-                <div className="relative" ref={rateFilterRef}>
-                  <button
-                    onClick={() => setRateFilterOpen((v) => !v)}
-                    title="Filter by rating"
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs transition-colors ${
-                      rateFilter !== null
-                        ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
-                        : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}>
-                    <span className="text-sm leading-none">★</span>
-                    {rateFilter === null && (
-                      <span className="hidden lg:inline">{t("collection_detail.filter_btn")}</span>
-                    )}
-                    {rateFilter === 0 && <span>—</span>}
-                    {rateFilter === "not5" && <span>≠5</span>}
-                    {typeof rateFilter === "number" && rateFilter > 0 && <span>{rateFilter}★</span>}
-                  </button>
-                  {rateFilterOpen && (
-                    <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[170px] py-1">
-                      {([null, "not5", 0, 5, 4, 3, 2, 1] as const).map((opt, i) => (
-                        <div key={String(opt)}>
-                          {i === 2 && <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />}
-                          {i === 3 && <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />}
-                          <button
-                            onClick={() => {
-                              setRateFilter(opt);
-                              setRateFilterOpen(false);
-                            }}
-                            className={`flex items-center gap-1.5 w-full px-3 py-2 text-sm transition-colors ${
-                              rateFilter === opt
-                                ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
-                                : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                            }`}>
-                            {opt === null && t("collection_detail.filter_all")}
-                            {opt === "not5" && (
-                              <>
-                                <span className="text-yellow-400">★★★★</span>
-                                <span className="text-gray-300 dark:text-gray-600">★</span>
-                                <span className="ml-1">{t("collection_detail.filter_not_mastered")}</span>
-                              </>
-                            )}
-                            {opt === 0 && (
-                              <>
-                                <span className="text-gray-300 dark:text-gray-600">★★★★★</span>
-                                <span className="ml-1">{t("collection_detail.filter_not_rated")}</span>
-                              </>
-                            )}
-                            {typeof opt === "number" && opt > 0 && (
-                              <>
-                                <span className="text-yellow-400">{"★".repeat(opt)}</span>
-                                <span className="text-gray-300 dark:text-gray-600">{"★".repeat(5 - opt)}</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {/* View dropdown */}
-                <div className="relative" ref={compactMenuRef}>
-                  <button
-                    onClick={() => setCompactMenuOpen((v) => !v)}
-                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <span className="relative shrink-0">
-                      {displayMode === "list" ? (
-                        <PiListBold className="text-[16px] text-indigo-600 dark:text-indigo-400" />
-                      ) : (
-                        <BsGridFill className="text-[14px] text-indigo-600 dark:text-indigo-400" />
-                      )}
-                      {!compact && <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />}
-                    </span>
-                    <span className="hidden lg:inline">
-                      {displayMode === "list" ? t("collection_detail.view_list") : t("collection_detail.view_cards")}
-                    </span>
-                    <IoChevronDown
-                      className={`text-[11px] text-gray-400 transition-transform duration-150 ${compactMenuOpen ? "rotate-180" : ""}`}
+                <DifficultyFilter value={rateFilter} onChange={setRateFilter} />
+
+                <button
+                  onClick={() => setDisplayMode((prev) => (prev === "list" ? "cards" : "list"))}
+                  title={t("collection_detail.view_list") + "/" + t("collection_detail.view_cards")}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <span className="relative shrink-0">
+                    <BsGridFill
+                      className={`text-[18px] sm:text-[14px] ${displayMode !== "list" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-300"}`}
                     />
-                  </button>
-                  {compactMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1.5 z-50 min-w-[170px]">
-                      <p className="px-3 pt-0.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                        {t("collection_detail.view_group_layout")}
-                      </p>
-                      <button
-                        onClick={() => setDisplayMode("list")}
-                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                          displayMode === "list"
-                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
-                            : "text-gray-700 dark:text-gray-300"
-                        }`}>
-                        <PiListBold className="text-[15px] shrink-0" />
-                        {t("collection_detail.view_list")}
-                        {displayMode === "list" && <span className="ml-auto">✓</span>}
-                      </button>
-                      <button
-                        onClick={() => setDisplayMode("cards")}
-                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                          displayMode === "cards"
-                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
-                            : "text-gray-700 dark:text-gray-300"
-                        }`}>
-                        <BsGridFill className="text-[13px] shrink-0" />
-                        {t("collection_detail.view_cards")}
-                        {displayMode === "cards" && <span className="ml-auto">✓</span>}
-                      </button>
-                      <div className="my-1.5 border-t border-gray-100 dark:border-gray-700" />
-                      <p className="px-3 pt-0.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                        {t("collection_detail.view_group_density")}
-                      </p>
-                      <button
-                        onClick={() => setCompact(true)}
-                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                          compact
-                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
-                            : "text-gray-700 dark:text-gray-300"
-                        }`}>
-                        <MdShortText className="text-[15px] shrink-0" />
-                        {t("collection_detail.view_compact")}
-                        {compact && <span className="ml-auto">✓</span>}
-                      </button>
-                      <button
-                        onClick={() => setCompact(false)}
-                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center gap-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                          !compact
-                            ? "text-indigo-600 dark:text-indigo-400 font-medium"
-                            : "text-gray-700 dark:text-gray-300"
-                        }`}>
-                        <BsTextLeft className="text-[13px] shrink-0" />
-                        {t("collection_detail.view_full")}
-                        {!compact && <span className="ml-auto">✓</span>}
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setCompact((prev) => !prev)}
+                  title={t("collection_detail.view_list") + "/" + t("collection_detail.view_cards")}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <span className="relative shrink-0">
+                    <LuWrapText
+                      className={`text-[18px] sm:text-[14px] ${!compact ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-500"}`}
+                    />
+                  </span>
+                </button>
               </div>
             )}
           </div>
@@ -1793,7 +1704,10 @@ export function CollectionDetailPage() {
 
       {/* Cards */}
       {!isLoading && sorted.length > 0 && displayMode === "cards" && !compact && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-36 sm:pb-0 sm:max-w-[1700px] m-auto">
+        <Masonry
+          breakpointCols={{ default: 3, 640: 1 }}
+          className="flex gap-3 pb-36 sm:pb-0 sm:max-w-[1700px] m-auto"
+          columnClassName="flex flex-col gap-3">
           {sorted.map((card) => (
             <CardItem
               key={card.id}
@@ -1804,10 +1718,13 @@ export function CollectionDetailPage() {
               layout={collection?.layout}
             />
           ))}
-        </div>
+        </Masonry>
       )}
       {!isLoading && sorted.length > 0 && displayMode === "cards" && compact && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-36 sm:pb-0 sm:max-w-[1700px] m-auto">
+        <Masonry
+          breakpointCols={{ default: 3, 640: 1 }}
+          className="flex gap-3 pb-36 sm:pb-0 sm:max-w-[1700px] m-auto"
+          columnClassName="flex flex-col gap-3">
           {sorted.map((card) => (
             <CardItemCompact
               key={card.id}
@@ -1818,7 +1735,7 @@ export function CollectionDetailPage() {
               layout={collection?.layout}
             />
           ))}
-        </div>
+        </Masonry>
       )}
       {!isLoading && sorted.length > 0 && displayMode === "list" && (
         <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-36 sm:pb-0">
@@ -2009,7 +1926,7 @@ export function CollectionDetailPage() {
       <FileImportModal open={fileOpen} onClose={() => setFileOpen(false)} collectionId={collectionId} />
 
       {/* Card preview modal */}
-      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="xxl">
+      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="xxl" mobileFullscreen>
         {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} layout={collection?.layout} />}
       </Modal>
 
