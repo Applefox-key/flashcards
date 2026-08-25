@@ -223,8 +223,7 @@ function CollectionListRow({
     <div
       onClick={() => navigate(`/collections/${collection.id}`)}
       className={`group relative sm:max-w-[1000px] flex flex-col  gap-0 px-4 py-2.5 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-gray-900 transition-colors first:rounded-t-xl last:rounded-b-xl rounded-l-xl border border-gray-100 dark:border-gray-700 border-l-[5px] ${getAccentBorderClass(preview?.stats)} last:border-b-0`}>
-      <div
-        className={`group relative flex items-center gap-3`}>
+      <div className={`group relative flex items-center gap-3`}>
         <StudyDot stats={preview?.stats} showFallback className="hidden md:flex shrink-0 w-2 h-2" />
         <span className="flex-1 min-w-0 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
           {highlight(collection.name, search)}

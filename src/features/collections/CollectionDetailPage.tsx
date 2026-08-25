@@ -529,17 +529,17 @@ function highlightNote(note: string, question: string, answer: string) {
 function ratingBorderClass(rate?: number): string {
   switch (rate) {
     case 5:
-      return "border-l-[5px] border-l-green-500";
+      return "border-l-[5px] border-l-green-500 dark:border-l-green-500";
     case 4:
-      return "border-l-[5px] border-l-green-300";
+      return "border-l-[5px] border-l-green-300 dark:border-l-green-300";
     case 3:
-      return "border-l-[5px] border-l-amber-400";
+      return "border-l-[5px] border-l-amber-400 dark:border-l-amber-400";
     case 2:
-      return "border-l-[5px] border-l-sky-300";
+      return "border-l-[5px] border-l-sky-300 dark:border-l-sky-300";
     case 1:
-      return "border-l-[5px] border-l-violet-400";
+      return "border-l-[5px] border-l-violet-400 dark:border-l-violet-400";
     default:
-      return "border-l-[5px] border-l-gray-200";
+      return "border-l-[5px] border-l-gray-200 dark:border-l-gray-200";
   }
 }
 
