@@ -624,7 +624,7 @@ function CardListRow({
       />
       <div
         onClick={() => onView(card)}
-        className={`sm:w-[75vw] sm:m-auto group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${ratingBorderClass(card.rate)}`}>
+        className={`sm:w-[75vw] sm:m-auto sm:max-w-full group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${ratingBorderClass(card.rate)}`}>
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
             {index}
