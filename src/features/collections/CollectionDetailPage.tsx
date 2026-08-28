@@ -337,7 +337,6 @@ function EditCardModal({
 }
 
 // ── Add card form ───────────────────────────────────────────────────
-
 function AddCardForm({
   collectionId,
   onDone,
@@ -350,11 +349,15 @@ function AddCardForm({
   const { t } = useTranslation();
   const toast = useToast();
   const { speechLangs } = useUserSettings();
+
   const validLangs = ALL_SPEECH_LANGS.filter((l) => speechLangs.includes(l.code) && l.code !== "");
+
   const initQLang = validLangs[0]?.code ?? ("en-US" as LangCode);
   const initALang = validLangs[1]?.code ?? validLangs[0]?.code ?? ("en-US" as LangCode);
+
   const addCard = useAddCard();
   const addCardWithImage = useAddCardWithImage();
+
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [questionLang, setQuestionLang] = useState<LangCode>(initQLang);
@@ -365,8 +368,10 @@ function AddCardForm({
 
   function handleSave() {
     if (!question.trim() || !answer.trim()) return;
+
     if (imgQFile || imgAFile) {
       const fd = new FormData();
+
       fd.append(
         "data",
         JSON.stringify({
@@ -375,8 +380,10 @@ function AddCardForm({
           note: note.trim() || undefined,
         }),
       );
+
       if (imgQFile) fd.append("imgQfile", imgQFile);
       if (imgAFile) fd.append("imgAfile", imgAFile);
+
       addCardWithImage.mutate(
         { collectionId, formData: fd },
         {
@@ -393,7 +400,14 @@ function AddCardForm({
       );
     } else {
       addCard.mutate(
-        { collectionId, card: { question: question.trim(), answer: answer.trim(), note: note.trim() || undefined } },
+        {
+          collectionId,
+          card: {
+            question: question.trim(),
+            answer: answer.trim(),
+            note: note.trim() || undefined,
+          },
+        },
         {
           onSuccess: () => {
             toast.success(t("collection_detail.card_added"));
@@ -408,30 +422,20 @@ function AddCardForm({
   }
 
   const isPending = addCard.isPending || addCardWithImage.isPending;
+
   const isDoc = layout === "document";
 
   return (
-    <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-4 flex flex-col gap-3 mb-4">
-      <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
-        {t("collection_detail.new_card_heading")}
-      </p>
-      <div className={isDoc ? "flex flex-col gap-3" : "grid grid-cols-1 sm:grid-cols-3 2xl:grid-cols-4 gap-3"}>
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-500 dark:text-gray-400">{t("collection_detail.question_label")}</label>
-            <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
-          </div>
-          <textarea
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
-            }}
-            placeholder={t("collection_detail.question_placeholder")}
-            rows={isDoc ? 3 : 2}
-            autoFocus
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
-          />
+    <div className="flex flex-col gap-3  border-[5px] border-indigo-300 dark:border-indigo-700 rounded-lg p-4 mb-4">
+      {/* Question */}
+      <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-teal-500 dark:border-l-teal-500">
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
+
+          <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
+        </div>
+
+        <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-row"}`}>
           {!isDoc && (
             <ImageUploadField
               collectionId={collectionId}
@@ -440,36 +444,47 @@ function AddCardForm({
               onClear={() => setImgQFile(null)}
             />
           )}
-        </div>
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-500 dark:text-gray-400">{t("collection_detail.answer_label")}</label>
-            <div className="flex items-center gap-1">
-              <TranslateButton
-                sourceText={question}
-                srcLang={questionLang}
-                tgtLang={answerLang}
-                onResult={setAnswer}
-                onError={(m) => toast.error(m)}
-              />
-              <VoiceInputButton
-                onResult={setAnswer}
-                defaultLang={initALang}
-                onLangChange={setAnswerLang}
-                speakText={answer}
-              />
-            </div>
-          </div>
+
           <textarea
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSave();
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                handleSave();
+              }
             }}
-            placeholder={t("collection_detail.answer_placeholder")}
-            rows={isDoc ? 8 : 2}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+            placeholder={t("collection_detail.question_placeholder")}
+            rows={isDoc ? 3 : 4}
+            autoFocus
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
           />
+        </div>
+      </div>
+
+      {/* Answer */}
+      <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-violet-500 dark:border-l-violet-500">
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-xs text-gray-400">{t("collection_detail.answer_label")}</label>
+
+          <div className="flex items-center gap-1">
+            <TranslateButton
+              sourceText={question}
+              srcLang={questionLang}
+              tgtLang={answerLang}
+              onResult={setAnswer}
+              onError={(m) => toast.error(m)}
+            />
+
+            <VoiceInputButton
+              onResult={setAnswer}
+              defaultLang={initALang}
+              onLangChange={setAnswerLang}
+              speakText={answer}
+            />
+          </div>
+        </div>
+
+        <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-row"}`}>
           {!isDoc && (
             <ImageUploadField
               collectionId={collectionId}
@@ -478,32 +493,54 @@ function AddCardForm({
               onClear={() => setImgAFile(null)}
             />
           )}
+
+          <textarea
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                handleSave();
+              }
+            }}
+            placeholder={t("collection_detail.answer_placeholder")}
+            rows={isDoc ? 7 : 4}
+            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+          />
         </div>
       </div>
+
+      {/* Note */}
       <div>
-        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
-          {t("collection_detail.note_label")}
-        </label>
+        <label className="text-xs text-gray-400 block mb-1">{t("collection_detail.note_label")}</label>
+
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder={t("collection_detail.note_placeholder")}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-l-[5px] border-l-orange-400 dark:border-l-orange-400"
         />
       </div>
-      <div className="flex gap-2 justify-end items-center">
-        <span className="text-xs text-gray-400 mr-auto">{t("collection_detail.ctrl_enter_hint")}</span>
-        <Button variant="ghost" size="sm" onClick={onDone}>
+
+      {/* Actions */}
+      <div className="flex gap-3 justify-center sm:justify-end">
+        <Button
+          variant="secondary"
+          className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
+          onClick={onDone}>
           {t("collection_detail.cancel_btn")}
         </Button>
-        <Button size="sm" onClick={handleSave} loading={isPending} disabled={!question.trim() || !answer.trim()}>
+
+        <Button
+          className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
+          onClick={handleSave}
+          loading={isPending}
+          disabled={!question.trim() || !answer.trim()}>
           {t("collection_detail.add_card_btn")}
         </Button>
       </div>
     </div>
   );
 }
-
 // ── Card item ───────────────────────────────────────────────────────
 
 function highlightNote(note: string, question: string, answer: string) {
