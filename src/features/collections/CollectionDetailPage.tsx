@@ -264,7 +264,7 @@ function EditCardModal({
               onChange={(e) => setQuestion(e.target.value)}
               rows={isDoc ? 3 : 2}
               autoFocus
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed h-[20vh] sm:h-auto"
             />
           </div>
         </div>
@@ -304,7 +304,7 @@ function EditCardModal({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               rows={isDoc ? 7 : 2}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed h-[45vh] sm:h-auto"
             />
           </div>
         </div>
@@ -316,15 +316,18 @@ function EditCardModal({
             className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100  border-l-[5px] border-l-orange-400 dark:border-l-orange-400"
           />
         </div>
-        <div className="flex gap-3 justify-center sm:justify-end">
+        <div
+          className={
+            "fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 flex-row-reverse dark:border-gray-700 flex sm:relative sm:gap-3 sm:flex-row sm:justify-end sm:border-0"
+          }>
           <Button
             variant="secondary"
-            className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
+            className="flex-1 rounded-none sm:rounded-md sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
             onClick={onClose}>
             {t("collection_detail.cancel_btn")}
           </Button>
           <Button
-            className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
+            className="flex-1 rounded-none sm:rounded-md sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
             onClick={handleSave}
             loading={editCard.isPending}
             disabled={!question.trim() || !answer.trim()}>
@@ -425,10 +428,10 @@ function AddCardForm({
 
   const isDoc = layout === "document";
 
-  return (
-    <div className="flex flex-col gap-3  border-[5px] border-indigo-300 dark:border-indigo-700 rounded-lg p-4 mb-4">
+  const bodyAdd = (
+    <>
       {/* Question */}
-      <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-teal-500 dark:border-l-teal-500">
+      <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-teal-500 dark:border-l-teal-500 ">
         <div className="flex items-center justify-between mb-1">
           <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
 
@@ -456,11 +459,10 @@ function AddCardForm({
             placeholder={t("collection_detail.question_placeholder")}
             rows={isDoc ? 3 : 4}
             autoFocus
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+            className="w-full h-[20vh] sm:h-auto border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
           />
         </div>
       </div>
-
       {/* Answer */}
       <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-violet-500 dark:border-l-violet-500">
         <div className="flex items-center justify-between mb-1">
@@ -504,11 +506,10 @@ function AddCardForm({
             }}
             placeholder={t("collection_detail.answer_placeholder")}
             rows={isDoc ? 7 : 4}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
+            className="w-full h-[45vh] sm:h-auto border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed"
           />
         </div>
       </div>
-
       {/* Note */}
       <div>
         <label className="text-xs text-gray-400 block mb-1">{t("collection_detail.note_label")}</label>
@@ -520,25 +521,51 @@ function AddCardForm({
           className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-orange-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-l-[5px] border-l-orange-400 dark:border-l-orange-400"
         />
       </div>
-
-      {/* Actions */}
-      <div className="flex gap-3 justify-center sm:justify-end">
-        <Button
-          variant="secondary"
-          className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
-          onClick={onDone}>
-          {t("collection_detail.cancel_btn")}
-        </Button>
-
-        <Button
-          className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
-          onClick={handleSave}
-          loading={isPending}
-          disabled={!question.trim() || !answer.trim()}>
-          {t("collection_detail.add_card_btn")}
-        </Button>
+    </>
+  );
+  return (
+    <>
+      {/* Desktop */}
+      <div className="hidden sm:flex flex-col gap-3  border-[5px] border-indigo-300 dark:border-indigo-700 rounded-lg p-4 mb-4">
+        {bodyAdd}
+        {/* Actions */}
+        <div className="flex gap-3 justify-center sm:justify-end">
+          <Button
+            variant="secondary"
+            className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
+            onClick={onDone}>
+            {t("collection_detail.cancel_btn")}
+          </Button>
+          <Button
+            className="flex-1 sm:flex-none py-3 sm:py-1.5 text-base sm:text-sm px-6 sm:px-3"
+            onClick={handleSave}
+            loading={isPending}
+            disabled={!question.trim() || !answer.trim()}>
+            {t("collection_detail.add_card_btn")}
+          </Button>
+        </div>
       </div>
-    </div>
+      {/* Mobile */}
+      <div className="flex sm:hidden flex-col gap-3 p-4 mb-4 absolute top-0 left-0 h-[100vh] w-[100vw] z-[54] bg-white dark:bg-slate-900 shadow-xl w-full flex flex-col rounded-none  mx-0 h-dvh ">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {t("collection_detail.add_card_btn")}{" "}
+        </h2>{" "}
+        {bodyAdd}
+        {/* Actions */}
+        <div className="flex justify-center fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 flex-row dark:border-gray-700">
+          <Button variant="secondary" className="flex-1 rounded-none py-3 text-base px-6" onClick={onDone}>
+            {t("collection_detail.cancel_btn")}
+          </Button>
+          <Button
+            className="flex-1 py-3 rounded-none text-base  px-6"
+            onClick={handleSave}
+            loading={isPending}
+            disabled={!question.trim() || !answer.trim()}>
+            {t("collection_detail.add_card_btn")}
+          </Button>
+        </div>
+      </div>
+    </>
   );
 }
 // ── Card item ───────────────────────────────────────────────────────
@@ -1963,7 +1990,7 @@ export function CollectionDetailPage() {
       <FileImportModal open={fileOpen} onClose={() => setFileOpen(false)} collectionId={collectionId} />
 
       {/* Card preview modal */}
-      <Modal open={!!viewCard} onClose={() => setViewCard(null)} size="xxl" mobileFullscreen>
+      <Modal open={!!viewCard} onClose={() => setViewCard(null)} closeBtn size="xxl" mobileFullscreen noScroll>
         {viewCard && <FlashCardPreview card={viewCard} collectionId={collectionId} layout={collection?.layout} />}
       </Modal>
 
