@@ -1,73 +1,147 @@
-# React + TypeScript + Vite
+# FlashMinds
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web application for creating, organizing, and practicing flashcard decks.
 
-Currently, two official plugins are available:
+FlashMinds allows users to organize learning content into decks, categories, tags, and bundles, then practice cards using multiple interactive study modes.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Live Demo
 
-## React Compiler
+**https://flashcards.learnypie.com/**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+### Deck Management
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Users can create and organize flashcard decks containing custom questions and answers.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Decks provide an overview of:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Total number of cards
+- Learning progress
+- Cards currently in progress
+- Cards ready to learn
+- Favorite and public/private status
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Card Management
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Each deck contains individual flashcards with questions and answers.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Users can:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Create cards
+- Edit cards
+- Delete cards
+- Search cards within a deck
+- Filter and sort cards
+- Track learning progress
+- Rate card difficulty
+
+### Organization
+
+Learning content can be organized using:
+
+- Decks
+- Bundles
+- Categories
+- Tags
+
+This makes it easier to group related learning material and navigate larger collections of cards.
+
+### Practice Modes
+
+Each deck can be practiced using several interactive study modes.
+
+#### Flashcards
+
+Review cards one by one and rate how well the answer was remembered.
+
+#### Multiple Choice
+
+Choose the correct answer from multiple options.
+
+Harder cards can appear more frequently based on learning progress.
+
+#### Write the Answer
+
+Type the answer from memory.
+
+A hint option is available when additional help is needed.
+
+#### Match Pairs
+
+Match questions with their corresponding answers.
+
+#### Timed Cards
+
+Review cards that automatically advance for faster practice sessions.
+
+#### Word Puzzle
+
+Reconstruct the correct answer by arranging words in the correct order.
+
+### Learning Progress
+
+The application tracks the learning state of cards and displays progress within each deck.
+
+Cards can be categorized by learning status, including:
+
+- Learned
+- In progress
+- Ready to learn
+
+Progress indicators provide a quick overview of learning activity for each deck.
+
+### Search and Filtering
+
+Users can search and filter learning content by:
+
+- Deck
+- Card content
+- Tags
+- Learning status
+- Favorites
+- Public or private decks
+
+### Responsive Design
+
+FlashMinds provides responsive layouts for desktop and mobile devices.
+
+The interface includes:
+
+- Adaptive layouts
+- Mobile-friendly navigation
+- Bottom navigation for smaller screens
+- Responsive card grids
+- Mobile-optimized practice screens
+
+## Tech Stack
+
+### Front End
+
+- React
+- TypeScript
+- React Router
+- Zustand
+- Tailwind CSS
+
+### Development
+
+- Vite
+- npm
+- Git
+- GitHub
+
+## Project Structure
+
+```text
+src/
+├── api/          # API communication
+├── components/   # Reusable UI components
+├── features/     # Feature-specific functionality
+├── hooks/        # Custom React hooks
+├── pages/        # Application pages
+├── store/        # Global state management
+├── types/        # TypeScript types
+├── utils/        # Utility functions
+├── App.tsx
+└── main.tsx
