@@ -35,10 +35,10 @@ import { IoTrashBinOutline } from "react-icons/io5";
 import { BsGridFill } from "react-icons/bs";
 import { SideDrawer } from "@/components/SideDrawer";
 import { FaInfo } from "react-icons/fa6";
-import { BiImageAdd } from "react-icons/bi";
 import { MdOutlineSortByAlpha } from "react-icons/md";
 import { RiSortAlphabetAsc, RiSortAlphabetDesc } from "react-icons/ri";
 import { LuWrapText } from "react-icons/lu";
+import { TbCameraPlus } from "react-icons/tb";
 
 interface CollectionContentResponse {
   collection: Collection;
@@ -101,7 +101,7 @@ function ImageUploadField({
         onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
       />
       {file && previewUrl ? (
-        <div className="flex items-center gap-2 flex-row md:flex-col md:items-center">
+        <div className="flex items-center gap-2 flex-col items-center">
           <img src={previewUrl} alt="" className="max-h-24 object-contain rounded border border-gray-100" />
           <button
             type="button"
@@ -114,7 +114,7 @@ function ImageUploadField({
           </button>
         </div>
       ) : hasExisting ? (
-        <div className="flex items-center gap-2  md:flex-col md:items-start w-[103px]">
+        <div className="flex items-center gap-2 flex-col items-start w-[103px]">
           {existingSrc && (
             <img src={existingSrc} alt="" className="max-h-24 object-contain rounded border border-gray-100" />
           )}
@@ -133,8 +133,9 @@ function ImageUploadField({
       ) : (
         <div
           onClick={() => inputRef.current?.click()}
-          className="max-w-24 flex items-center justify-between sm:justify-start text-[18px] sm:text-md relative border-2 max-h-24 h-24 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
-          <BiImageAdd className="text-[3rem] sm:text-2xl sm:absolute bottom-0 left-0 sm:right-0 sm:left-unset" />{" "}
+          className="max-w-24 flex flex-col items-center justify-between sm:justify-start text-[18px] sm:text-md relative  max-h-24 h-24 p-3 text-center cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-xs text-gray-400 dark:text-gray-500">
+          {/* <BiImageAdd className="text-[3rem] sm:text-2xl sm:absolute bottom-0 left-0 sm:right-0 sm:left-unset" />{" "} */}
+          <TbCameraPlus className="text-[12rem] relative inline-block text-gray-500 hover:text-indigo-600 transition cursor-pointer" />
           {t("collection_detail.img_click_to_add")}
         </div>
       )}
@@ -241,7 +242,10 @@ function EditCardModal({
       size={isDoc ? "xl" : "lg"}
       mobileFullscreen>
       <div className="flex flex-col gap-3">
-        <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-teal-500 dark:border-l-teal-500">
+        {/* new */}
+
+        {/* old */}
+        <div className="border border-gray-200 dark:border-gray-600 rounded-xl p-1 border-l-[5px] border-l-teal-500 dark:border-l-teal-500 focus-within:ring-1 focus-within:ring-teal-400 ">
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-400">{t("collection_detail.question_label")}</label>
             <VoiceInputButton onResult={setQuestion} onLangChange={setQuestionLang} speakText={question} />
@@ -264,11 +268,11 @@ function EditCardModal({
               onChange={(e) => setQuestion(e.target.value)}
               rows={isDoc ? 3 : 2}
               autoFocus
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed h-[20vh] sm:h-auto"
+              className="w-full border-l border-gray-300 dark:border-gray-600 px-2 py-1.5 text-sm focus:outline-none resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed h-[20vh] sm:h-auto"
             />
           </div>
         </div>
-        <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-1  border-l-[5px] border-l-violet-500 dark:border-l-violet-500">
+        <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-1  border-l-[5px] border-l-violet-500 dark:border-l-violet-500 focus-within:ring-1 focus-within:ring-violet-400 ">
           <div className="flex items-center justify-between mb-1 ">
             <label className="text-xs text-gray-400">{t("collection_detail.answer_label")}</label>
             <div className="flex items-center gap-1">
@@ -287,7 +291,7 @@ function EditCardModal({
               />
             </div>
           </div>
-          <div className={`flex gap-2 ${isDoc ? "flex-col" : "flex-row"}`}>
+          <div className={`flex gap-2  ${isDoc ? "flex-col" : "flex-row"}`}>
             {!isDoc && (
               <ImageUploadField
                 currentFilename={clearImgA ? undefined : card.imgA}
@@ -304,7 +308,7 @@ function EditCardModal({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               rows={isDoc ? 7 : 2}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-400 resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed h-[45vh] sm:h-auto"
+              className="w-full border-l border-gray-300 dark:border-gray-600 px-2 py-1.5 text-sm focus:outline-none resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 leading-relaxed h-[45vh] sm:h-auto"
             />
           </div>
         </div>
