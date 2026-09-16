@@ -92,10 +92,21 @@ export function SideDrawer({
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5">{children}</div>
-        {/* Back button — mobile only */}
+        {/* Back button — mobile only, bottom of full-screen menu */}
         <div
+          className="sm:hidden shrink-0  dark:border-gray-700 "
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          <button
+            onClick={onClose}
+            className="w-full flex flex-col items-center border-t-[5px] border-t-indigo-400 rounded-t-md justify-center gap-0.5 py-3 text-white dark:text-gray-300 bg-indigo-600 dark:bg-indigo-700/50">
+            <span className="text-[18px] py-1.5 leading-none font-medium">{t("nav.back")}</span>
+          </button>
+        </div>
+        {/* Back button — mobile only */}
+        {/* <div
           className="sm:hidden shrink-0 border-t border-gray-200 dark:border-gray-700"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+            
           <button
             onClick={onClose}
             className="w-full flex flex-col items-center justify-center gap-0.5 py-3 text-gray-500 dark:text-gray-400 active:bg-gray-50 dark:active:bg-gray-700/50">
@@ -112,7 +123,7 @@ export function SideDrawer({
             </svg>
             <span className="text-[10px] leading-none font-medium">{t("nav.back")}</span>
           </button>
-        </div>
+        </div> */}
       </div>
     </>
   );

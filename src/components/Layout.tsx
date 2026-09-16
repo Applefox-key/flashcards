@@ -14,7 +14,9 @@ import { DarkModeToggle } from "./DarkModeToggle";
 import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
 import i18n from "@/i18n";
 import { HiOutlineBookmarkSquare } from "react-icons/hi2";
-import { PiShootingStarThin } from "react-icons/pi";
+import { PiCards, PiShootingStarThin } from "react-icons/pi";
+import { IoRocketOutline } from "react-icons/io5";
+import { FaRegCommentDots } from "react-icons/fa6";
 
 const UI_LANGS = [
   { code: "en", label: "English" },
@@ -32,6 +34,7 @@ const APPS = [
     current: true,
     iconBg: "#eef2ff",
     iconColor: "#4f46e5",
+    icon: <PiCards className="text-[22px] text-indigo-500" />,
   },
   {
     name: "SayLoop",
@@ -40,6 +43,7 @@ const APPS = [
     current: false,
     iconBg: "#faf5ff",
     iconColor: "#0d9488",
+    icon: <FaRegCommentDots className="text-[22px] text-teal-500" />,
   },
   {
     name: "Tracker",
@@ -48,6 +52,7 @@ const APPS = [
     current: false,
     iconBg: "#f0fdf4",
     iconColor: "#16a34a",
+    icon: <IoRocketOutline className="text-[22px] text-green-500" />,
   },
 ] as const;
 
@@ -279,14 +284,7 @@ export function Layout() {
                         <div
                           key={app.name}
                           className="flex flex-col gap-1 p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 cursor-default">
-                          <div
-                            className="w-7 h-7 rounded-lg flex items-center justify-center mb-1"
-                            style={{ background: app.iconBg }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill={app.iconColor}>
-                              <rect x="2" y="3" width="20" height="14" rx="2" />
-                              <path d="M8 21h8M12 17v4" />
-                            </svg>
-                          </div>
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-1">{app.icon}</div>
                           <span className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{app.name}</span>
                           <span className="text-xs text-indigo-400 leading-tight">{t(app.descKey)}</span>
                           <span className="text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded px-1.5 py-0.5 w-fit mt-0.5">
@@ -300,14 +298,7 @@ export function Layout() {
                           target="_blank"
                           rel="noreferrer"
                           className="flex flex-col gap-1 p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors no-underline cursor-pointer">
-                          <div
-                            className="w-7 h-7 rounded-lg flex items-center justify-center mb-1"
-                            style={{ background: app.iconBg }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill={app.iconColor}>
-                              <rect x="2" y="3" width="20" height="14" rx="2" />
-                              <path d="M8 21h8M12 17v4" />
-                            </svg>
-                          </div>
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-1">{app.icon}</div>
                           <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">{app.name}</span>
                           <span className="text-xs text-gray-400 leading-tight">{t(app.descKey)}</span>
                         </a>
@@ -339,7 +330,10 @@ export function Layout() {
         {sidebarOpen && (
           <aside className="fixed inset-0 z-[55] flex flex-col sm:relative sm:inset-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 sm:border-r border-gray-200 dark:border-gray-700">
             <div className="flex-1 overflow-y-auto p-4">
-              <p className="text-xs font-semibold text-gray-400 uppercase mb-2">{t("layout.navigation")}</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
+                <span className="inline-flex w-2 h-2 rounded-full bg-indigo-500 shrink-0 mr-1" />
+                {t("layout.navigation")}
+              </p>{" "}
               <nav className="flex flex-col gap-1">
                 <div className="flex items-center justify-between py-1">
                   <span className="text-sm text-gray-700 dark:text-gray-300">{t("layout.theme")}</span>
@@ -420,7 +414,10 @@ export function Layout() {
                 </NavLink>
                 {/* Other tools */}
                 <div className="border-t border-gray-100 dark:border-gray-700 mt-3 pt-3">
-                  <p className="text-xs font-semibold text-gray-400 uppercase mb-2">{t("layout.other_tools")}</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
+                    <span className="inline-flex w-2 h-2 rounded-full bg-indigo-500 shrink-0 mr-1" />
+                    {t("layout.other_tools")}
+                  </p>
                   {APPS.filter((app) => !app.current).map((app) => (
                     <a
                       key={app.name}
@@ -428,14 +425,7 @@ export function Layout() {
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center gap-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors no-underline">
-                      <div
-                        className="w-5 h-5 rounded flex items-center justify-center shrink-0"
-                        style={{ background: app.iconBg }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill={app.iconColor}>
-                          <rect x="2" y="3" width="20" height="14" rx="2" />
-                          <path d="M8 21h8M12 17v4" />
-                        </svg>
-                      </div>
+                      <div className="w-5 h-5 rounded flex items-center justify-center shrink-0">{app.icon}</div>
                       {app.name}
                     </a>
                   ))}
@@ -444,23 +434,12 @@ export function Layout() {
             </div>
             {/* Back button — mobile only, bottom of full-screen menu */}
             <div
-              className="sm:hidden shrink-0 border-t border-gray-200 dark:border-gray-700"
+              className="sm:hidden shrink-0  dark:border-gray-700"
               style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
               <button
                 onClick={toggleSidebar}
-                className="w-full flex flex-col items-center justify-center gap-0.5 py-3 text-gray-500 dark:text-gray-400 active:bg-gray-50 dark:active:bg-gray-700/50">
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round">
-                  <path d="M19 12H5M12 5l-7 7 7 7" />
-                </svg>
-                <span className="text-[10px] leading-none font-medium">{t("nav.back")}</span>
+                className="w-full flex flex-col items-center border-t-[5px] border-t-indigo-400 rounded-t-md justify-center gap-0.5 py-3 text-white dark:text-gray-300 bg-indigo-600 dark:bg-indigo-700/50">
+                <span className="text-[18px] py-1.5 leading-none font-medium">{t("nav.back")}</span>
               </button>
             </div>
           </aside>
