@@ -656,7 +656,7 @@ function CardListRow({
       <div
         onClick={() => onView(card)}
         className={`sm:w-[75vw] sm:m-auto sm:max-w-full group bg-white dark:bg-gray-800 px-4 py-2.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${ratingBorderClass(card.rate)}`}>
-        <div className="flex items-start gap-3 flex-1 min-w-0">
+        <div className="flex items-start gap-3 flex-1 min-w-0 ">
           <span className="text-xs text-gray-300 dark:text-gray-600 font-mono mt-0.5 w-5 shrink-0 text-right">
             {index}
           </span>
@@ -666,12 +666,12 @@ function CardListRow({
               {card.question}
             </span>
             <span
-              className={`text-sm text-gray-600 dark:text-gray-300${compact ? " truncate" : " whitespace-pre-wrap"}`}>
+              className={`text-sm text-gray-600 dark:text-gray-300 ps-3 italic ${compact ? " truncate" : " whitespace-pre-wrap"}`}>
               {card.answer}
             </span>
             {card.note && (
               <span
-                className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 w-fit max-w-full italic${compact ? " truncate" : " whitespace-pre-wrap"}`}>
+                className={`sm:col-span-2 text-xs text-gray-400 bg-amber-100 dark:bg-gray-900 dark:text-grey-400 t w-fit max-w-full ms-5 italic ${compact ? " truncate" : " whitespace-pre-wrap"}`}>
                 {highlightNote(card.note, card.question, card.answer)}
               </span>
             )}
@@ -1806,7 +1806,7 @@ export function CollectionDetailPage() {
         </Masonry>
       )}
       {!isLoading && sorted.length > 0 && displayMode === "list" && (
-        <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-36 sm:pb-0">
+        <div className="flex flex-col divide-y space-y-[0.5px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden pb-36 sm:pb-0">
           {sorted.map((card, idx) => (
             <CardListRow
               key={card.id}

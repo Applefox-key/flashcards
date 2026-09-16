@@ -335,103 +335,134 @@ export function Layout() {
         {/* Backdrop — mobile only, closes sidebar on tap */}
         {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/20 sm:hidden" onClick={toggleSidebar} />}
 
-        {/* Sidebar — overlays on mobile, pushes content on desktop */}
+        {/* Sidebar — full-screen on mobile, narrow panel on desktop */}
         {sidebarOpen && (
-          <aside className="absolute inset-y-0 right-0 z-[55] w-64 sm:relative sm:inset-y-auto sm:right-auto sm:left-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 border-l sm:border-l-0 sm:border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-2">{t("layout.navigation")}</p>
-            <nav className="flex flex-col gap-1">
-              <div className="flex items-center justify-between py-1">
-                <span className="text-sm text-gray-700 dark:text-gray-300">{t("layout.theme")}</span>
-                <DarkModeToggle />
-              </div>
-              {/* Language picker */}
-              <div className="flex items-center justify-between py-1 gap-2">
-                <span className="text-sm text-gray-700 dark:text-gray-300 shrink-0">{t("layout.language")}</span>
-                <select
-                  value={currentLang}
-                  onChange={(e) => saveLangUI(e.target.value)}
-                  className="text-xs rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer">
-                  {UI_LANGS.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
-                      {lang.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
-              <NavLink
-                to="/library"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                {t("nav.myLibrary")}
-              </NavLink>{" "}
-              <NavLink
-                to="/library/public"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                {t("nav.publicLibrary")}
-              </NavLink>{" "}
-              <NavLink
-                to="/playlists"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                {t("nav.playlists")}
-              </NavLink>
-              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
-              <NavLink
-                to="/categories"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                {t("nav.categories")}
-              </NavLink>
-              <NavLink
-                to="/tags"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-400 py-1">
-                {t("nav.tags")}
-              </NavLink>
-              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
-              <NavLink
-                to="/profile"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                {t("nav.profile")}
-              </NavLink>
-              {user?.role === "admin" && (
+          <aside className="fixed inset-0 z-[55] flex flex-col sm:relative sm:inset-auto sm:z-auto sm:w-56 sm:shrink-0 bg-white dark:bg-gray-800 sm:border-r border-gray-200 dark:border-gray-700">
+            <div className="flex-1 overflow-y-auto p-4">
+              <p className="text-xs font-semibold text-gray-400 uppercase mb-2">{t("layout.navigation")}</p>
+              <nav className="flex flex-col gap-1">
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t("layout.theme")}</span>
+                  <DarkModeToggle />
+                </div>
+                {/* Language picker */}
+                <div className="flex items-center justify-between py-1 gap-2">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 shrink-0">{t("layout.language")}</span>
+                  <select
+                    value={currentLang}
+                    onChange={(e) => saveLangUI(e.target.value)}
+                    className="text-xs rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-400 cursor-pointer">
+                    {UI_LANGS.map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
                 <NavLink
-                  to="/admin"
+                  to="/library"
+                  onClick={toggleSidebar}
                   className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                  {t("nav.admin")}
+                  {t("nav.myLibrary")}
+                </NavLink>{" "}
+                <NavLink
+                  to="/library/public"
+                  onClick={toggleSidebar}
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                  {t("nav.publicLibrary")}
+                </NavLink>{" "}
+                <NavLink
+                  to="/playlists"
+                  onClick={toggleSidebar}
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                  {t("nav.playlists")}
                 </NavLink>
-              )}
+                <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
+                <NavLink
+                  to="/categories"
+                  onClick={toggleSidebar}
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                  {t("nav.categories")}
+                </NavLink>
+                <NavLink
+                  to="/tags"
+                  onClick={toggleSidebar}
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-400 py-1">
+                  {t("nav.tags")}
+                </NavLink>
+                <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
+                <NavLink
+                  to="/profile"
+                  onClick={toggleSidebar}
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                  {t("nav.profile")}
+                </NavLink>
+                {user?.role === "admin" && (
+                  <NavLink
+                    to="/admin"
+                    onClick={toggleSidebar}
+                    className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                    {t("nav.admin")}
+                  </NavLink>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 py-1 text-left transition-colors">
+                  {t("nav.logout")}
+                </button>
+                <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
+                <NavLink
+                  to="/about"
+                  onClick={toggleSidebar}
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
+                  {t("nav.about")}
+                </NavLink>
+                {/* Other tools */}
+                <div className="border-t border-gray-100 dark:border-gray-700 mt-3 pt-3">
+                  <p className="text-xs font-semibold text-gray-400 uppercase mb-2">{t("layout.other_tools")}</p>
+                  {APPS.filter((app) => !app.current).map((app) => (
+                    <a
+                      key={app.name}
+                      href={app.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors no-underline">
+                      <div
+                        className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                        style={{ background: app.iconBg }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill={app.iconColor}>
+                          <rect x="2" y="3" width="20" height="14" rx="2" />
+                          <path d="M8 21h8M12 17v4" />
+                        </svg>
+                      </div>
+                      {app.name}
+                    </a>
+                  ))}
+                </div>
+              </nav>
+            </div>
+            {/* Back button — mobile only, bottom of full-screen menu */}
+            <div
+              className="sm:hidden shrink-0 border-t border-gray-200 dark:border-gray-700"
+              style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
               <button
-                onClick={handleLogout}
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 py-1 text-left transition-colors">
-                {t("nav.logout")}
+                onClick={toggleSidebar}
+                className="w-full flex flex-col items-center justify-center gap-0.5 py-3 text-gray-500 dark:text-gray-400 active:bg-gray-50 dark:active:bg-gray-700/50">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                <span className="text-[10px] leading-none font-medium">{t("nav.back")}</span>
               </button>
-              <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
-              <NavLink
-                to="/about"
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                {t("nav.about")}
-              </NavLink>
-              {/* Other tools — mobile only */}
-              <div className="border-t border-gray-100 dark:border-gray-700 mt-3 pt-3">
-                <p className="text-xs font-semibold text-gray-400 uppercase mb-2">{t("layout.other_tools")}</p>
-                {APPS.filter((app) => !app.current).map((app) => (
-                  <a
-                    key={app.name}
-                    href={app.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-2 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors no-underline">
-                    <div
-                      className="w-5 h-5 rounded flex items-center justify-center shrink-0"
-                      style={{ background: app.iconBg }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill={app.iconColor}>
-                        <rect x="2" y="3" width="20" height="14" rx="2" />
-                        <path d="M8 21h8M12 17v4" />
-                      </svg>
-                    </div>
-                    {app.name}
-                  </a>
-                ))}
-              </div>
-            </nav>
+            </div>
           </aside>
         )}
 

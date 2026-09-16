@@ -10,7 +10,8 @@
     "profile": "Perfil",
     "admin": "Admin",
     "logout": "Salir",
-    "more": "Más"
+    "more": "Más",
+    "back": "Volver"
   },
   "layout": {
     "demo_banner": "Modo demo — los cambios no se guardan y se perderán al recargar.",

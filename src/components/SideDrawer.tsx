@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface SideDrawerProps {
   open: boolean;
@@ -38,6 +39,7 @@ export function SideDrawer({
     };
   }, [open]);
 
+  const { t } = useTranslation();
   const hide = mobileOnly ? "sm:hidden" : "";
   const isRight = side === "right";
 
@@ -90,6 +92,27 @@ export function SideDrawer({
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5">{children}</div>
+        {/* Back button — mobile only */}
+        <div
+          className="sm:hidden shrink-0 border-t border-gray-200 dark:border-gray-700"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          <button
+            onClick={onClose}
+            className="w-full flex flex-col items-center justify-center gap-0.5 py-3 text-gray-500 dark:text-gray-400 active:bg-gray-50 dark:active:bg-gray-700/50">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+            <span className="text-[10px] leading-none font-medium">{t("nav.back")}</span>
+          </button>
+        </div>
       </div>
     </>
   );

@@ -10,7 +10,8 @@
     "profile": "Profile",
     "admin": "Admin",
     "logout": "Logout",
-    "more": "More"
+    "more": "More",
+    "back": "Back"
   },
   "layout": {
     "demo_banner": "Demo mode — changes are not saved and will be lost on refresh.",
