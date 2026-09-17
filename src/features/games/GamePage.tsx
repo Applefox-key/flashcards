@@ -221,7 +221,7 @@ export function GamePage() {
               <input
                 type="range"
                 min={0.5}
-                max={5}
+                max={7}
                 step={0.5}
                 value={timedDelay}
                 onChange={(e) => setTimedDelay(Number(e.target.value))}
