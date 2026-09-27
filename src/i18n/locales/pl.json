@@ -308,7 +308,7 @@
     "private_label": "prywatny",
     "public_collection": "publiczny zestaw",
     "private_collection": "prywatny zestaw",
-    "no_tags": "brak tagów",
+    "no_tags": "dodaj tagi",
     "layout_standard_badge": "standardowe karty",
     "layout_document_badge": "karty dokumentowe",
     "edit_tags_title": "Edytuj tagi",
@@ -727,7 +727,9 @@
     "confirm_delete": "Usunąć tag «{{name}}»? Zostanie usunięty ze wszystkich zestawów.",
     "toast_deleted": "Tag usunięty",
     "assign_no_collections": "Nie znaleziono zestawów.",
+    "assign_modal_title": "Przypisz tag do zestawów",
     "assign_save_btn": "Zapisz",
+    "assign_saving_btn": "Zapisywanie…",
     "assign_cancel_btn": "Anuluj",
     "toast_assignments_saved": "Przypisania zapisane",
     "toast_assignments_error": "Nie udało się zapisać przypisań"

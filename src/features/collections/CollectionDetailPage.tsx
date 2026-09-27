@@ -796,9 +796,7 @@ function CardItem({
         <div className="sm:flex sm:items-start sm:gap-3">
           <div className="sm:flex-1 sm:min-w-0">
             <p className="text-xs text-gray-400 mb-1">{t("collection_detail.question_label")}</p>
-            <p className="font-medium text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 whitespace-pre-line">
-              {card.question}
-            </p>
+            <p className="font-medium text-gray-900 dark:text-gray-100 whitespace-pre-line">{card.question}</p>
           </div>
           {card.imgQ && card.imgQ !== "null" && card.imgQ !== "" ? (
             <div className="sm:shrink-0 sm:w-32">
@@ -919,7 +917,7 @@ function CardItemCompact({
         <div className="sm:flex sm:items-start sm:gap-2">
           <div className="sm:flex-1 sm:min-w-0">
             <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
-            <p className="p-1 font-medium text-sm text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-900 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
+            <p className="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-2 whitespace-pre-line min-h-[2.625rem]">
               {card.question}
             </p>
           </div>
@@ -1205,7 +1203,7 @@ export function CollectionDetailPage() {
   return (
     <div className="sm:pt-0">
       {/* ── Sticky header + action bar ── */}
-      <div className="sticky top-0 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 border-b border-gray-200 dark:border-gray-700 mb-2">
+      <div className="sticky top-0 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6 mb-2">
         <div className="mb-2 pt-3">
           {/* Title row */}
           <div className="flex items-center gap-3 mb-2 border-b border-gray-200 dark:border-gray-700 sm:border-none sm:mb-0">
@@ -1238,7 +1236,159 @@ export function CollectionDetailPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   className="hidden sm:block flex-1 min-w-[300px] border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
-              )}
+              )}{" "}
+              {/* Actions + search + view toggle (sticky on mobile) */}
+              {!isLoading && (
+                //    {/* Desktop action buttons */}
+                <div className="flex items-center gap-2 py-2 min-h-[54px]">
+                  <div className="hidden sm:flex items-center gap-2 flex-wrap ml-6">
+                    {/* Split button: left = Edit collection, right = dropdown */}
+                    <Link to={`/collections/${id}/stats`} title={t("stats.title")}>
+                      <Button className="rounded-lg" size="sm" variant="secondary">
+                        <svg viewBox="0 0 24 24" className="w-4 h-4 mr-1.5" fill="currentColor">
+                          <path d="M3 3h2v18H3V3zm4 9h2v9H7v-9zm4-5h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
+                        </svg>
+                        {t("stats.title")}
+                      </Button>
+                    </Link>{" "}
+                    <div className="relative flex" ref={editDropdownRef}>
+                      <div className="flex">
+                        <button
+                          onClick={() => navigate(`/collections/${id}/edit`)}
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-l-lg">
+                          {t("collection_detail.edit_collection_btn")}
+                        </button>
+                        <button
+                          onClick={() => setEditDropdownOpen((v) => !v)}
+                          className="inline-flex items-center px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-l-0 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-r-lg">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path
+                              d="M2 4l4 4 4-4"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              fill="none"
+                            />
+                          </svg>
+                        </button>
+                        {/* ── DESKTOP Practice──*/}
+                        <Link to={`/play/${id}`}>
+                          <Button className="rounded-lg mx-2" size="sm">
+                            <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collection_detail.practice_btn")}
+                          </Button>
+                        </Link>
+                        {!addingCard && (
+                          <>
+                            {/* Split button: left = Add card, right = dropdown arrow */}
+                            <div className="relative hidden sm:flex" ref={addCardDropdownRef}>
+                              <div className="flex rounded-lg overflow-visible">
+                                <button
+                                  onClick={() => setAddingCard(true)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors rounded-l-lg border border-indigo-600">
+                                  {t("collection_detail.add_card_btn_short")}
+                                </button>
+                                <button
+                                  onClick={() => setAddCardDropdownOpen((v) => !v)}
+                                  className="inline-flex items-center px-2 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors rounded-r-lg border-l border-indigo-500">
+                                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                                    <path
+                                      d="M2 4l4 4 4-4"
+                                      stroke="currentColor"
+                                      strokeWidth="1.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      fill="none"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                              {addCardDropdownOpen && (
+                                <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[160px] py-1">
+                                  <button
+                                    onClick={() => {
+                                      setAddCardDropdownOpen(false);
+                                      setPasteOpen(true);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <span className="text-gray-400">⎘</span> {t("collection_detail.paste_list_btn")}
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setAddCardDropdownOpen(false);
+                                      setFileOpen(true);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <span className="text-gray-400">↑</span> {t("collection_detail.import_file_btn")}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {editDropdownOpen && !isLoading && (
+                        <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[170px] py-1">
+                          {cards.length > 0 && (
+                            <button
+                              onClick={() => {
+                                setEditDropdownOpen(false);
+                                setReorgMode(true);
+                              }}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                              <span className="text-gray-400">⇅</span> {t("collection_detail.reorganize_btn")}
+                            </button>
+                          )}
+                          {cards.length > 0 && (
+                            <button
+                              onClick={() => {
+                                setEditDropdownOpen(false);
+                                handleExport();
+                              }}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                              <span className="text-gray-400">↓</span> {t("collection_detail.export_btn")}
+                            </button>
+                          )}
+                          <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
+                          {cards.length > 0 && (
+                            <button
+                              onClick={() => {
+                                setEditDropdownOpen(false);
+                                handleDeleteAllCards();
+                              }}
+                              disabled={deleteAllCards.isPending}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40">
+                              <span className="text-red-300">✕</span> {t("collection_detail.clear_cards_btn")}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              setEditDropdownOpen(false);
+                              handleDeleteCollection();
+                            }}
+                            disabled={deleteCollection.isPending}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40">
+                            <span className="text-red-300">
+                              <IoTrashBinOutline />
+                            </span>{" "}
+                            {t("collection_detail.delete_btn_short")}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {/* Search — mobile only */}
+                  {cards.length > 4 && (
+                    <input
+                      type="search"
+                      placeholder="Search cards..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="sm:hidden ml-12 flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    />
+                  )}
+                </div>
+              )}{" "}
             </div>
             {/* menu... button — mobile only */}
             <div className="relative sm:hidden" ref={mobileMenuRef}>
@@ -1335,19 +1485,22 @@ export function CollectionDetailPage() {
 
           {/* Meta row— desktop only (sm and above) */}
           {!isLoading && (
-            <div className="hidden sm:flex gap-3 ml-8 mb-2 text-sm text-gray-400">
+            <div className="hidden sm:flex gap-3 mb-2 text-sm text-gray-400">
               <div className="flex items-center flex-rows gap-1.5 justify-center">
-                <span>{t("collection_detail.card", { count: cards.length })}</span>
+                <span className="px-1.5 py-0.5 rounded-full pl-3  bg-stone-100 dark:bg-stone-700/30 border border border-stone-200 dark:border-stone-700">
+                  • {t("collection_detail.card", { count: cards.length })}
+                </span>
 
                 {collection?.category && (
-                  <span className="border-l border-gray-200 dark:border-gray-700 pl-3">
+                  <span className="px-1.5 py-0.5 rounded-full pl-3  bg-stone-100 dark:bg-stone-700/30 border border border-stone-200 dark:border-stone-700">
+                    📁{" "}
                     {typeof collection.category === "object"
                       ? (collection.category as Category).name
                       : (collection.category as unknown as string)}
                   </span>
                 )}
               </div>
-              <div className="border-l ms-3 flex flex-rows gap-1.5 justify-center items-center">
+              <div className="border-l ps-3 flex flex-rows gap-1.5 justify-center items-center">
                 <button
                   onClick={() =>
                     toggleFavorite.mutate(
@@ -1361,11 +1514,13 @@ export function CollectionDetailPage() {
                       ? t("collection_detail.fav_remove_title")
                       : t("collection_detail.fav_add_title")
                   }
-                  className={`border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
-                    collection?.isFavorite
-                      ? "text-rose-400 hover:text-rose-300"
-                      : "text-gray-300 dark:text-gray-600 hover:text-rose-400"
-                  }`}>
+                  className={`px-1.5 py-0.5 rounded-full pl-3 transition-colors disabled:opacity-40 
+                    bg-amber-50 dark:bg-amber-900/30 border border border-amber-200 dark:border-amber-700
+                    ${
+                      collection?.isFavorite
+                        ? "text-rose-400 hover:text-rose-300"
+                        : "text-gray-300 dark:text-gray-600 hover:text-rose-400"
+                    }`}>
                   ♥ {collection?.isFavorite ? t("collection_detail.fav_label") : t("collection_detail.fav_add_label")}
                 </button>
                 <button
@@ -1381,11 +1536,13 @@ export function CollectionDetailPage() {
                       ? t("collection_detail.make_private_title")
                       : t("collection_detail.make_public_title")
                   }
-                  className={`border-l border-gray-200 dark:border-gray-700 pl-3 transition-colors disabled:opacity-40 ${
-                    collection?.isPublic
-                      ? "text-green-500 hover:text-red-400"
-                      : "text-gray-300 dark:text-gray-600 hover:text-green-500"
-                  }`}>
+                  className={`px-1.5 py-0.5 rounded-full  border-l
+                    bg-amber-50 dark:bg-amber-900/30 border border border-amber-200 dark:border-amber-700
+                    pl-3 transition-colors disabled:opacity-40 ${
+                      collection?.isPublic
+                        ? "text-green-500 hover:text-red-400"
+                        : "text-gray-300 dark:text-gray-600 hover:text-green-500"
+                    }`}>
                   {collection?.isPublic
                     ? `🔓 ${t("collection_detail.public_label")}`
                     : `🔒 ${t("collection_detail.private_label")}`}
@@ -1402,22 +1559,29 @@ export function CollectionDetailPage() {
                 ref={tagPopoverDesktopRef}>
                 <div className="flex items-center gap-2 flex-wrap ">
                   {collectionTags.length > 0 ? (
-                    collectionTags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
-                        {tag.name}
-                      </span>
-                    ))
+                    <>
+                      {collectionTags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="text-xs px-3 bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-700 px-1.5 py-0.5 rounded-full">
+                          🏷️{tag.name}
+                        </span>
+                      ))}{" "}
+                      <button
+                        onClick={() => setEditingTags(true)}
+                        title={t("collection_detail.edit_tags_title")}
+                        className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+                        ✏️
+                      </button>
+                    </>
                   ) : (
-                    <span className="text-gray-300 dark:text-gray-600 text-xs">{t("collection_detail.no_tags")}</span>
+                    <button
+                      onClick={() => setEditingTags(true)}
+                      title={t("collection_detail.edit_tags_title")}
+                      className="text-xs bg-stone-100 dark:bg-stone-700/30 border border border-stone-200 dark:border-stone-700 px-1.5 py-0.5 rounded-full hover:text-indigo-600 transition-colors">
+                      + {t("collection_detail.no_tags")}
+                    </button>
                   )}
-                  <button
-                    onClick={() => setEditingTags(true)}
-                    title={t("collection_detail.edit_tags_title")}
-                    className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
-                    ✏️
-                  </button>
                 </div>
                 {editingTags && (
                   <div className="absolute left-0 top-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 min-w-[280px] max-w-sm">
@@ -1461,279 +1625,124 @@ export function CollectionDetailPage() {
           )}
         </div>
         {/* Actions + search + view toggle (sticky on mobile) */}
-        {!isLoading && (
-          //    {/* Desktop action buttons */}
-          <div className="flex items-center gap-2 py-2 min-h-[54px]">
-            <div className="hidden sm:flex items-center gap-2 flex-wrap ml-6">
-              {/* ── DESKTOP Practice──*/}
-              <Link to={`/play/${id}`}>
-                <Button className="rounded-lg" size="sm">
-                  <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collection_detail.practice_btn")}
-                </Button>
-              </Link>
-              {!addingCard && (
-                <>
-                  {/* Split button: left = Add card, right = dropdown arrow */}
-                  <div className="relative hidden sm:flex" ref={addCardDropdownRef}>
-                    <div className="flex rounded-lg overflow-visible">
+
+        {/* Progress bar + controls */}
+        {!isLoading && cards.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
+            <div className="flex items-center justify-end gap-2 shrink-0 sm:order-last">
+              {/* Sort button */}
+              <div className="relative" ref={sortMenuRef}>
+                <button
+                  onClick={() => setSortMenuOpen((v) => !v)}
+                  title="Sort cards"
+                  className={`flex items-center text-[18px] sm:text-[14px] gap-1 px-2.5 py-1 rounded-lg border text-xs transition-colors ${
+                    sortField
+                      ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
+                      : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}>
+                  {sortDir === null ? (
+                    <MdOutlineSortByAlpha className="text-[18px] sm:text-[14px]" />
+                  ) : sortDir === "asc" ? (
+                    <RiSortAlphabetAsc className="text-[18px] sm:text-[14px]" />
+                  ) : (
+                    <RiSortAlphabetDesc className="text-[18px] sm:text-[14px]" />
+                  )}
+                  {sortField ? (
+                    <span>{sortField === "question" ? "Q" : sortField === "answer" ? "A" : "N"} </span>
+                  ) : (
+                    <span className="hidden lg:inline">{t("collection_detail.sort_btn")}</span>
+                  )}
+                </button>
+                {sortMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[160px] py-1">
+                    {(["question", "answer", "note"] as const).map((field) => (
                       <button
-                        onClick={() => setAddingCard(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors rounded-l-lg border border-indigo-600">
-                        {t("collection_detail.add_card_btn_short")}
-                      </button>
-                      <button
-                        onClick={() => setAddCardDropdownOpen((v) => !v)}
-                        className="inline-flex items-center px-2 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors rounded-r-lg border-l border-indigo-500">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                          <path
-                            d="M2 4l4 4 4-4"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            fill="none"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                    {addCardDropdownOpen && (
-                      <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[160px] py-1">
-                        <button
-                          onClick={() => {
-                            setAddCardDropdownOpen(false);
-                            setPasteOpen(true);
-                          }}
-                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                          <span className="text-gray-400">⎘</span> {t("collection_detail.paste_list_btn")}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setAddCardDropdownOpen(false);
-                            setFileOpen(true);
-                          }}
-                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                          <span className="text-gray-400">↑</span> {t("collection_detail.import_file_btn")}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-              {/* Split button: left = Edit collection, right = dropdown */}
-              <Link to={`/collections/${id}/stats`} title={t("stats.title")}>
-                <Button className="rounded-lg" size="sm" variant="secondary">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 mr-1.5" fill="currentColor">
-                    <path d="M3 3h2v18H3V3zm4 9h2v9H7v-9zm4-5h2v14h-2V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4z" />
-                  </svg>
-                  {t("stats.title")}
-                </Button>
-              </Link>{" "}
-              <div className="relative flex" ref={editDropdownRef}>
-                <div className="flex">
-                  <button
-                    onClick={() => navigate(`/collections/${id}/edit`)}
-                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-l-lg">
-                    {t("collection_detail.edit_collection_btn")}
-                  </button>
-                  <button
-                    onClick={() => setEditDropdownOpen((v) => !v)}
-                    className="inline-flex items-center px-2 py-1.5 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-l-0 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-r-lg">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                      <path
-                        d="M2 4l4 4 4-4"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="none"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                {editDropdownOpen && !isLoading && (
-                  <div className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[170px] py-1">
-                    {cards.length > 0 && (
-                      <button
+                        key={field}
                         onClick={() => {
-                          setEditDropdownOpen(false);
-                          setReorgMode(true);
+                          setSortField(field);
+                          setSortMenuOpen(false);
                         }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <span className="text-gray-400">⇅</span> {t("collection_detail.reorganize_btn")}
+                        className={`flex items-center justify-between w-full px-3 py-2 text-sm transition-colors ${
+                          sortField === field
+                            ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        }`}>
+                        <span className="capitalize">{t(`collection_detail.sort_${field}`)}</span>
+                        {sortField === field && <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>}
                       </button>
-                    )}
-                    {cards.length > 0 && (
-                      <button
-                        onClick={() => {
-                          setEditDropdownOpen(false);
-                          handleExport();
-                        }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <span className="text-gray-400">↓</span> {t("collection_detail.export_btn")}
-                      </button>
-                    )}
+                    ))}
                     <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
-                    {cards.length > 0 && (
-                      <button
-                        onClick={() => {
-                          setEditDropdownOpen(false);
-                          handleDeleteAllCards();
-                        }}
-                        disabled={deleteAllCards.isPending}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40">
-                        <span className="text-red-300">✕</span> {t("collection_detail.clear_cards_btn")}
-                      </button>
-                    )}
                     <button
                       onClick={() => {
-                        setEditDropdownOpen(false);
-                        handleDeleteCollection();
+                        setSortDir("asc");
+                        setSortMenuOpen(false);
                       }}
-                      disabled={deleteCollection.isPending}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40">
-                      <span className="text-red-300">
-                        <IoTrashBinOutline />
-                      </span>{" "}
-                      {t("collection_detail.delete_btn_short")}
+                      className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
+                        sortDir === "asc"
+                          ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                          : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}>
+                      <RiSortAlphabetAsc className="text-lg" /> {t("collection_detail.sort_asc")}
                     </button>
+                    <button
+                      onClick={() => {
+                        setSortDir("desc");
+                        setSortMenuOpen(false);
+                      }}
+                      className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
+                        sortDir === "desc"
+                          ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
+                          : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}>
+                      <RiSortAlphabetDesc className="text-lg" /> {t("collection_detail.sort_desc")}
+                    </button>
+                    {sortField && (
+                      <>
+                        <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
+                        <button
+                          onClick={() => {
+                            setSortField(null);
+                            setSortMenuOpen(false);
+                          }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                          {t("collection_detail.sort_clear")}
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
+              {/* Rate filter button */}
+              <DifficultyFilter value={rateFilter} onChange={setRateFilter} />
+
+              <button
+                onClick={() => setDisplayMode((prev) => (prev === "list" ? "cards" : "list"))}
+                title={t("collection_detail.view_list") + "/" + t("collection_detail.view_cards")}
+                className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <span className="relative shrink-0">
+                  <BsGridFill
+                    className={`text-[18px] sm:text-[14px] ${displayMode !== "list" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-300"}`}
+                  />
+                </span>
+              </button>
+
+              <button
+                onClick={() => setCompact((prev) => !prev)}
+                title={t("collection_detail.view_list") + "/" + t("collection_detail.view_cards")}
+                className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <span className="relative shrink-0">
+                  <LuWrapText
+                    className={`text-[18px] sm:text-[14px] ${!compact ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-500"}`}
+                  />
+                </span>
+              </button>
             </div>
-            {/* Search — mobile only */}
-            {cards.length > 4 && (
-              <input
-                type="search"
-                placeholder="Search cards..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="sm:hidden ml-12 flex-1 min-w-0 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              />
-            )}
-            {cards.length > 0 && (
-              <div className="flex items-center gap-2 ml-auto shrink-0">
-                {/* Sort button */}
-                <div className="relative" ref={sortMenuRef}>
-                  <button
-                    onClick={() => setSortMenuOpen((v) => !v)}
-                    title="Sort cards"
-                    className={`flex items-center text-[18px] sm:text-[14px] gap-1 px-2.5 py-1 rounded-lg border text-xs transition-colors ${
-                      sortField
-                        ? "border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
-                        : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}>
-                    {/* <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <path d="M1 3h11M3 6.5h7M5 10h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg> */}
-                    {/* <BiSort className="text-[13px]" /> */}
-
-                    {sortDir === null ? (
-                      <MdOutlineSortByAlpha className="text-[18px] sm:text-[14px]" />
-                    ) : sortDir === "asc" ? (
-                      <RiSortAlphabetAsc className="text-[18px] sm:text-[14px]" />
-                    ) : (
-                      <RiSortAlphabetDesc className="text-[18px] sm:text-[14px]" />
-                    )}
-                    {sortField ? (
-                      <span>
-                        {sortField === "question" ? "Q" : sortField === "answer" ? "A" : "N"}{" "}
-                        {/* {sortDir === "asc" ? "↑" : "↓"} */}
-                      </span>
-                    ) : (
-                      <span className="hidden lg:inline">{t("collection_detail.sort_btn")}</span>
-                    )}
-                  </button>
-                  {sortMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg min-w-[160px] py-1">
-                      {(["question", "answer", "note"] as const).map((field) => (
-                        <button
-                          key={field}
-                          onClick={() => {
-                            setSortField(field);
-                            setSortMenuOpen(false);
-                          }}
-                          className={`flex items-center justify-between w-full px-3 py-2 text-sm transition-colors ${
-                            sortField === field
-                              ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
-                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                          }`}>
-                          <span className="capitalize">{t(`collection_detail.sort_${field}`)}</span>
-                          {sortField === field && <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>}
-                        </button>
-                      ))}
-                      <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
-                      <button
-                        onClick={() => {
-                          setSortDir("asc");
-                          setSortMenuOpen(false);
-                        }}
-                        className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
-                          sortDir === "asc"
-                            ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
-                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        }`}>
-                        <RiSortAlphabetAsc className="text-lg" /> {t("collection_detail.sort_asc")}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSortDir("desc");
-                          setSortMenuOpen(false);
-                        }}
-                        className={`flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors ${
-                          sortDir === "desc"
-                            ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20"
-                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        }`}>
-                        <RiSortAlphabetDesc className="text-lg" /> {t("collection_detail.sort_desc")}
-                      </button>
-                      {sortField && (
-                        <>
-                          <div className="border-t border-gray-100 dark:border-gray-700 my-0.5" />
-                          <button
-                            onClick={() => {
-                              setSortField(null);
-                              setSortMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            {t("collection_detail.sort_clear")}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {/* Rate filter button */}
-                <DifficultyFilter value={rateFilter} onChange={setRateFilter} />
-
-                <button
-                  onClick={() => setDisplayMode((prev) => (prev === "list" ? "cards" : "list"))}
-                  title={t("collection_detail.view_list") + "/" + t("collection_detail.view_cards")}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <span className="relative shrink-0">
-                    <BsGridFill
-                      className={`text-[18px] sm:text-[14px] ${displayMode !== "list" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-300"}`}
-                    />
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setCompact((prev) => !prev)}
-                  title={t("collection_detail.view_list") + "/" + t("collection_detail.view_cards")}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <span className="relative shrink-0">
-                    <LuWrapText
-                      className={`text-[18px] sm:text-[14px] ${!compact ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-500"}`}
-                    />
-                  </span>
-                </button>
-              </div>
-            )}
-          </div>
-        )}{" "}
-        {/* Progress bar */}
-        {!isLoading && cards.length > 0 && (
-          <div className="mb-4">
-            <CollectionProgressBar stats={collection?.stats} variant="full" />
+            <CollectionProgressBar
+              stats={collection?.stats}
+              variant="compact"
+              size="md"
+              className="sm:flex-1 min-w-0"
+            />
           </div>
         )}
       </div>
@@ -1848,7 +1857,7 @@ export function CollectionDetailPage() {
         open={infoOpen}
         onClose={() => setInfoOpen(false)}
         onOpen={() => setInfoOpen(true)}
-        topValue="top-[80px]"
+        topValue="top-[70px]"
         tabLabel=""
         tabIcon={<FaInfo />}
         title={collection?.name ?? `Collection #${id}`}>

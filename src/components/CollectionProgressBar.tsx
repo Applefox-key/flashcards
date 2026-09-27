@@ -3,7 +3,7 @@ import { getStatusColor } from "@/components/StudyDot";
 
 interface Props {
   stats?: CollectionStats | null;
-  variant?: "minimal" | "full";
+  variant?: "minimal" | "full" | "compact";
   className?: string;
   size?: "sm" | "md";
 }
@@ -49,8 +49,9 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
   ].filter(Boolean) as { width: number; color: string; label: string }[];
 
   const barHeight = size === "md" ? "h-1.5" : "h-[1px] sm:h-[3px]";
+  const barCls = variant === "compact" ? "sm:flex-1" : className;
   const bar = (
-    <div className={`flex ${barHeight} bg-gray-100 dark:bg-gray-700 rounded-full ${className}`}>
+    <div className={`flex ${barHeight} bg-gray-100 dark:bg-gray-700 rounded-full ${barCls}`}>
       {segments.map((seg, i) => (
         <div
           key={seg.label}
@@ -65,6 +66,32 @@ export function CollectionProgressBar({ stats, variant = "minimal", className = 
   );
 
   if (variant === "minimal") return bar;
+
+  const legend = (
+    <div className="flex items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 shrink-0">
+      <span className="flex items-center gap-1">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${learnedBg[getStatusColor(stats)]}`} />
+        {stats.learned} learned
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-2 h-2 rounded-full bg-amber-200 dark:bg-orange-200 shrink-0" />
+        {stats.inProgress} in progress
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0" />
+        {stats.toLearn} to learn
+      </span>
+    </div>
+  );
+
+  if (variant === "compact") {
+    return (
+      <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 ${className}`}>
+        {legend}
+        {bar}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-1.5">

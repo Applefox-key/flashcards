@@ -182,7 +182,7 @@ function EditTile({
 
 // ── New playlist panel ─────────────────────────────────────────────────────
 
-function NewPlaylistPanel({ allCollections, onClose }: { allCollections: Collection[]; onClose: () => void }) {
+export function NewPlaylistPanel({ allCollections, onClose }: { allCollections: Collection[]; onClose: () => void }) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [localIds, setLocalIds] = useState<(number | undefined)[]>(Array.from({ length: MAX_SLOTS }));
@@ -301,7 +301,7 @@ function NewPlaylistPanel({ allCollections, onClose }: { allCollections: Collect
 
 // ── Right panel — holds all edit state, reset via key prop ────────────────
 
-function PlaylistPanel({
+export function PlaylistPanel({
   playlist,
   allCollections,
   onDelete,

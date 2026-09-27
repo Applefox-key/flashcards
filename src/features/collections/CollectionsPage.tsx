@@ -14,13 +14,16 @@ import { useLibraryUiStore } from "@/store/libraryUiStore";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import { StudyDot, getAccentBorderClass } from "@/components/StudyDot";
 import { MobileFab } from "@/components/MobileFab";
-import type { Collection, CollectionTag, CollectionStats } from "@/types";
+import type { Collection, CollectionTag, CollectionStats, Playlist } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
 import { SideDrawer } from "@/components/SideDrawer";
 import { CiImageOn } from "react-icons/ci";
 import { HiOutlineBookmarkSquare } from "react-icons/hi2";
 import { useRecentCollectionsStore } from "@/store/recentCollectionsStore";
 import { MdAccessTime } from "react-icons/md";
+import { PlaylistPanel, NewPlaylistPanel } from "@/features/playlists/PlaylistsPage";
+import { usePlaylists, useDeletePlaylist } from "@/hooks/usePlaylistHooks";
+import { useToast } from "@/hooks/useToast";
 
 const ALL_LIMIT = 30;
 
@@ -289,6 +292,152 @@ function CollectionListRow({
 
 type VisibleEntry = { category: { id: number; name: string }; collections: Collection[] };
 
+// ── Bundle icon (inline SVG layers) ────────────────────────────────────────
+function BundlesIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}>
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  );
+}
+
+// ── Bundle card ────────────────────────────────────────────────────────────
+function BundleCard({ playlist, onClick }: { playlist: Playlist; onClick: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      onClick={onClick}
+      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-2 cursor-pointer hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 hover:scale-[1.02] transition-all duration-150">
+      <div className="font-semibold text-gray-800 dark:text-gray-100 text-sm uppercase tracking-wide truncate">
+        {playlist.name}
+      </div>
+      <div className="text-xs text-gray-400 dark:text-gray-500">
+        {playlist.collections.length === 0
+          ? t("playlists.item_no_collections")
+          : t("playlists.item_collections", { count: playlist.collections.length })}
+      </div>
+      {playlist.collections.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-auto">
+          {playlist.collections.slice(0, 3).map((c) => (
+            <span
+              key={c.id}
+              className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full truncate max-w-[120px]">
+              {c.name}
+            </span>
+          ))}
+          {playlist.collections.length > 3 && (
+            <span className="text-xs text-gray-400 dark:text-gray-500">+{playlist.collections.length - 3}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Bundles view ───────────────────────────────────────────────────────────
+function BundlesView({ allCollections }: { allCollections: Collection[] }) {
+  const { t } = useTranslation();
+  const { playlists: playlistsUi, setPlaylists } = useLibraryUiStore();
+  const selectedId = playlistsUi.selectedId;
+  const [isCreating, setIsCreating] = useState(false);
+  const toast = useToast();
+  const deletePlaylistMutation = useDeletePlaylist();
+  const { data: playlists = [], isLoading } = usePlaylists();
+
+  const effectiveId = selectedId !== null && playlists.some((p) => p.id === selectedId) ? selectedId : null;
+  const selected = playlists.find((p) => p.id === effectiveId) ?? null;
+
+  function setSelectedId(id: number | null) {
+    setPlaylists({ selectedId: id });
+    if (id !== null) setIsCreating(false);
+  }
+
+  const handleDelete = (playlist: Playlist) => {
+    if (!window.confirm(t("playlists.confirm_delete", { name: playlist.name }))) return;
+    deletePlaylistMutation.mutate(playlist.id, {
+      onSuccess: () => {
+        toast.success(t("playlists.toast_deleted"));
+        setSelectedId(null);
+      },
+      onError: () => toast.error(t("playlists.toast_delete_error")),
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 animate-pulse">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-gray-100 dark:bg-gray-700 rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (selected) {
+    return (
+      <>
+        <PlaylistPanel
+          key={selected.id}
+          playlist={selected}
+          allCollections={allCollections}
+          onDelete={() => handleDelete(selected)}
+          deleteLoading={deletePlaylistMutation.isPending}
+          onClose={() => setSelectedId(null)}
+        />
+        {selected.collections.length > 0 && (
+          <div className="sm:hidden fixed bottom-14 left-0 right-0 z-40 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700">
+            <Link to={`/play/${selected.id}?src=pl`} className="block">
+              <Button className="w-full rounded-none justify-center" size="md">
+                <PiShootingStarThin className="w-8 h-8 mr-2" /> {t("playlists.panel_practice").toUpperCase()}
+              </Button>
+            </Link>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  if (isCreating) {
+    return <NewPlaylistPanel allCollections={allCollections} onClose={() => setIsCreating(false)} />;
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("playlists.title")}</h2>
+        <Button size="sm" onClick={() => setIsCreating(true)}>
+          {t("playlists.new_btn")}
+        </Button>
+      </div>
+      {playlists.length === 0 ? (
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+          <p className="text-lg mb-2">{t("playlists.empty_title")}</p>
+          <Button size="sm" onClick={() => setIsCreating(true)}>
+            {t("playlists.create_first_btn")}
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {playlists.map((p) => (
+            <BundleCard key={p.id} playlist={p} onClick={() => setSelectedId(p.id)} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ViewToggleBtn({ compact, onToggle }: { compact: boolean; onToggle: () => void }) {
   const { t } = useTranslation();
   const btnBase = "p-1.5 rounded transition-colors";
@@ -468,7 +617,7 @@ function AllCollectionsView({ search }: { search: string }) {
 
   return (
     <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : "pb-[10rem] sm:pb-auto"}>
-      <div className="hidden sm:flex items-center justify-between mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900">
+      <div className="hidden sm:flex items-center justify-between mb-2 sticky top-[70px] py-2 z-20 bg-white dark:bg-gray-800">
         {data && totalPages > 1 ? (
           <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
         ) : (
@@ -550,6 +699,10 @@ function CardsView({
     setMyLibrary({ viewMode: "recent" });
   }
 
+  function switchToBundles() {
+    setMyLibrary({ viewMode: "bundles" });
+  }
+
   function switchToAll() {
     setMyLibrary({ viewMode: "all", allPage: 1 });
   }
@@ -559,9 +712,9 @@ function CardsView({
   }
 
   return (
-    <div className="flex gap-0 min-h-0">
+    <div className="flex min-h-0">
       {/* Left: category list — desktop only */}
-      <div className="hidden sm:flex flex-col w-60 shrink-0 gap-0.5 p-2 mr-4 self-start border-r ">
+      <div className="hidden sm:flex flex-col w-60 shrink-0 gap-0.5 p-3 border-r border-gray-200 dark:border-gray-700 bg-gray-200 dark:bg-zinc-800/60 rounded-bl-xl">
         {recents.length > 0 && (
           <button
             onClick={switchToRecent}
@@ -573,6 +726,17 @@ function CardsView({
             <MdAccessTime /> <span className="ml-2 truncate">{t("collections.recent_nav")}</span>
           </button>
         )}
+
+        <button
+          onClick={switchToBundles}
+          className={`text-left flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+            viewMode === "bundles"
+              ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+          }`}>
+          <BundlesIcon className="shrink-0" />
+          <span className="ml-2 truncate">{t("nav.playlists")}</span>
+        </button>
 
         <button
           onClick={switchToAll}
@@ -587,7 +751,7 @@ function CardsView({
           </div>
         </button>
 
-        <div className="border-t border-gray-200 dark:border-gray-700 my-1 mb-3" />
+        <div className="border-t border-gray-300 dark:border-gray-700 my-1 mb-3 w-50" />
 
         {visibleCategories.map(({ category, collections }) => (
           <button
@@ -607,19 +771,21 @@ function CardsView({
       </div>
 
       {/* Right: content area */}
-      <div className="flex-1 min-w-0">
-        {viewMode === "all" ? (
+      <div className="flex-1 min-w-0 p-4">
+        {viewMode === "bundles" ? (
+          <BundlesView allCollections={allCollections} />
+        ) : viewMode === "all" ? (
           <AllCollectionsView search={search} />
         ) : viewMode === "recent" ? (
           <>
-            <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900">
+            <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-white dark:bg-gray-800">
               <ViewToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
             </div>
             <RecentView allCollections={allCollections} search={search} compact={compact} />
           </>
         ) : (
           <>
-            <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-gray-50 dark:bg-gray-900 ">
+            <div className="hidden sm:flex justify-end mb-2 sticky top-[72px] py-2 z-20 bg-white dark:bg-gray-800">
               <ViewToggleBtn compact={compact} onToggle={() => setMyLibrary({ compactCards: !compact })} />
             </div>
 
@@ -716,7 +882,7 @@ function LibraryTabsBar({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-0">
+    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 sm:border-b border-gray-200 dark:border-gray-700 mb-0 sm:bg-gray-200 sm:dark:bg-zinc-800/60 rounded-t-xl sm:px-3 sm:pt-2">
       <div className="hidden sm:flex items-center sm:w-auto shrink-0">
         <span className="px-5 py-2.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 -mb-px cursor-default select-none">
           {t("collections.my_library")}
@@ -731,7 +897,7 @@ function LibraryTabsBar({
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap pb-2 w-full sm:w-auto sm:ml-auto">
+      <div className="hidden sm:flex items-center gap-2 flex-wrap pb-2 w-full sm:w-auto sm:ml-auto">
         <input
           type="search"
           value={search}
@@ -836,17 +1002,22 @@ export function CollectionsPage() {
   const effectiveId =
     selectedId !== null && validIds.has(selectedId) ? selectedId : (visibleCategories[0]?.category.id ?? null);
 
-  const hasNoResults = !isLoading && totalCollections > 0 && visibleCategories.length === 0 && viewMode !== "all";
-  const showContent = !isLoading && totalCollections > 0;
+  const hasNoResults =
+    !isLoading &&
+    totalCollections > 0 &&
+    visibleCategories.length === 0 &&
+    viewMode !== "all" &&
+    viewMode !== "bundles";
+  const showContent = !isLoading && (totalCollections > 0 || viewMode === "bundles");
 
   return (
     <div className="pb-2">
       {/* ── Sticky header block ── */}
-      <div className="sticky top-0 pt-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
+      <div className="sticky top-0 rounded-xl pt-1 sm:-top-6 z-20 bg-white dark:bg-gray-800 -mx-3 px-3 sm:pt-0 sm:mx-0 sm:px-0">
         <LibraryTabsBar search={search} onSearch={setSearch} active={activeFilter} onChange={setActiveFilter} />
 
         {allTags.length > 0 && (
-          <div className="hidden sm:flex gap-2 overflow-x-auto items-center border-b border-slate-200/80 dark:border-slate-700/80 py-2">
+          <div className="hidden sm:flex gap-2 overflow-x-auto items-center border-b border-slate-200/80 dark:border-slate-700/80 py-2 sm:px-3 bg-gray-100 dark:bg-zinc-900/60">
             <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">{t("collections.tags_label")}</span>
             {allTags.map((tag) => (
               <button
@@ -872,7 +1043,11 @@ export function CollectionsPage() {
               <span className="truncate text-sm font-medium text-indigo-700 dark:text-indigo-300">
                 {viewMode === "all"
                   ? t("collections.all_collections_count", { count: totalCollections })
-                  : (visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? "")}
+                  : viewMode === "recent"
+                    ? t("collections.recent_nav")
+                    : viewMode === "bundles"
+                      ? t("nav.playlists")
+                      : (visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? "")}
               </span>
               <IoIosArrowForward size={14} className="shrink-0 text-indigo-400 dark:text-indigo-500" />
             </button>
@@ -883,7 +1058,7 @@ export function CollectionsPage() {
       </div>
 
       {/* ── Content ── */}
-      <div className="mt-4">
+      <div className="">
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -892,7 +1067,7 @@ export function CollectionsPage() {
           </div>
         )}
 
-        {!isLoading && totalCollections === 0 && (
+        {!isLoading && totalCollections === 0 && viewMode !== "bundles" && (
           <div className="text-center py-16 text-gray-400 dark:text-gray-500">
             <p className="text-lg mb-2">{t("collections.empty_title")}</p>
             <Link to="/collections/new">
@@ -933,10 +1108,12 @@ export function CollectionsPage() {
             ? `${t("collections.all_collections_count", { count: totalCollections })} `
             : viewMode === "recent"
               ? `${t("collections.recent_nav")} `
-              : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} `
+              : viewMode === "bundles"
+                ? `${t("nav.playlists")} `
+                : `${visibleCategories.find((e) => e.category.id === effectiveId)?.category.name ?? ""} `
         }
         tabIcon={<HiOutlineBookmarkSquare className="text-[22px]" strokeWidth="1.8" />}
-        topValue="top-[102px] w-72 flex flex-row nowrap"
+        topValue="top-[83px] w-72 flex flex-row nowrap"
         title={t("collections.filters_title")}
         hasActiveIndicator={
           activeFilter !== "All" ||
@@ -982,6 +1159,19 @@ export function CollectionsPage() {
                 }`}>
                 <MdAccessTime />
                 <span className="italic ml-2 truncate">{t("collections.recent_nav")}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setMyLibrary({ viewMode: "bundles" });
+                  setFilterOpen(false);
+                }}
+                className={`text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center ${
+                  viewMode === "bundles"
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium border-l-[5px] border-l-indigo-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}>
+                <BundlesIcon />
+                <span className="ml-2 truncate">{t("nav.playlists")}</span>
               </button>
               <button
                 onClick={() => {

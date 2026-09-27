@@ -168,7 +168,9 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
 
       <div className="flex items-center justify-between gap-2 mt-auto sm:pt-1">
         {" "}
-        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{t("collections.card_count", { count: col.cardCount ?? 0 })}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+          {t("collections.card_count", { count: col.cardCount ?? 0 })}
+        </span>
         <div className="flex items-center gap-2 min-w-0">
           {" "}
           <Link
@@ -178,9 +180,13 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
             <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
           </Link>
           {isMine ? (
-            <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium shrink-0">{t("public_library.your_collection")}</span>
+            <span className="text-xs text-indigo-400 dark:text-indigo-500 font-medium shrink-0">
+              {t("public_library.your_collection")}
+            </span>
           ) : isCopied ? (
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">{t("public_library.copied")}</span>
+            <span className="text-xs text-green-600 dark:text-green-400 font-medium shrink-0">
+              {t("public_library.copied")}
+            </span>
           ) : (
             <Button
               size="sm"
@@ -203,7 +209,7 @@ function PublicCollectionCard({ col, search, isMine, isCopied, onCopy, copyPendi
 function LibraryTabsBar({ search, onSearch }: { search: string; onSearch: (v: string) => void }) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-gray-200 dark:border-gray-700 mb-0">
+    <div className="flex flex-wrap items-end gap-x-4 gap-y-2 mb-0 border-b border-gray-200 dark:border-gray-700 bg-gray-200 dark:bg-gray-800/60 rounded-t-lg sm:px-3 sm:pt-2">
       <div className="hidden sm:flex shrink-0">
         <Link
           to="/library"
@@ -281,13 +287,13 @@ export function PublicLibraryPage() {
   };
 
   return (
-    <div>
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
       {/* ── Sticky header block ── */}
-      <div className="sticky top-0 pt-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:-mx-6 sm:px-6">
+      <div className="sticky top-0 pt-3 sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 -mx-3 px-3 sm:mx-0 sm:pt-0 sm:px-0 rounded-t-lg">
         <LibraryTabsBar search={search} onSearch={(v) => setPublicLibrary({ search: v, activeTag: null, page: 1 })} />
 
         {allTagNames.length > 0 && (
-          <div className="hidden sm:flex flex-wrap gap-1.5 py-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="hidden sm:flex flex-wrap gap-1.5 py-2 border-b border-slate-200/80 dark:border-slate-700/80 py-2 sm:px-3 bg-gray-100">
             {allTagNames.map((tag) => (
               <button
                 key={tag}
@@ -304,7 +310,7 @@ export function PublicLibraryPage() {
         )}
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 sm:px-6">
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -315,7 +321,9 @@ export function PublicLibraryPage() {
 
         {!isLoading && filtered.length === 0 && (
           <p className="text-center text-gray-400 py-16">
-            {search || activeTag !== null ? t("public_library.no_results_search") : t("public_library.no_results_empty")}
+            {search || activeTag !== null
+              ? t("public_library.no_results_search")
+              : t("public_library.no_results_empty")}
           </p>
         )}
 
@@ -356,7 +364,9 @@ export function PublicLibraryPage() {
         hasActiveFilters={activeTag !== null}>
         {allTagNames.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("collections.tags_section")}</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              {t("collections.tags_section")}
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {allTagNames.map((tag) => (
                 <button

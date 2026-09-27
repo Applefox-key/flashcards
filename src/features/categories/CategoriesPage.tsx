@@ -101,11 +101,11 @@ export function CategoriesPage() {
     const count = getCollectionCount(id);
     const msg =
       count === 0
-        ? t('categories_page.confirm_delete_no_collections', { name })
-        : t('categories_page.confirm_delete_with_collections', { name, count });
+        ? t("categories_page.confirm_delete_no_collections", { name })
+        : t("categories_page.confirm_delete_with_collections", { name, count });
     if (!window.confirm(msg)) return;
     deleteCategory.mutate(id, {
-      onSuccess: () => toast.success(t('categories_page.toast_deleted')),
+      onSuccess: () => toast.success(t("categories_page.toast_deleted")),
     });
   }
 
@@ -118,17 +118,24 @@ export function CategoriesPage() {
     try {
       parsed = JSON.parse(await file.text());
     } catch {
-      toast.error(t('categories_page.toast_invalid_json'));
+      toast.error(t("categories_page.toast_invalid_json"));
       return;
     }
 
-    const data = parsed as { version?: number; categoryName?: string; collections?: { name: string; note?: string; cards: { question: string; answer: string; note?: string }[] }[] };
+    const data = parsed as {
+      version?: number;
+      categoryName?: string;
+      collections?: { name: string; note?: string; cards: { question: string; answer: string; note?: string }[] }[];
+    };
     if (!data.categoryName || !Array.isArray(data.collections)) {
-      toast.error(t('categories_page.toast_invalid_format'));
+      toast.error(t("categories_page.toast_invalid_format"));
       return;
     }
 
-    if (!window.confirm(t('categories_page.confirm_restore', { name: data.categoryName, count: data.collections.length }))) return;
+    if (
+      !window.confirm(t("categories_page.confirm_restore", { name: data.categoryName, count: data.collections.length }))
+    )
+      return;
 
     setIsRestoring(true);
     try {
@@ -142,146 +149,141 @@ export function CategoriesPage() {
         });
       }
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success(t('categories_page.toast_restored', { name: data.categoryName, count: data.collections.length }));
+      toast.success(t("categories_page.toast_restored", { name: data.categoryName, count: data.collections.length }));
     } catch {
-      toast.error(t('categories_page.toast_restore_failed'));
+      toast.error(t("categories_page.toast_restore_failed"));
     } finally {
       setIsRestoring(false);
     }
   }
 
   return (
-    <div className="pt-3 sm:pt-0">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
       {/* Header */}
-      <div className="hidden sm:flex items-center sticky sm:-top-6 z-20 bg-gray-50 dark:bg-gray-900 justify-between mb-6">
-        <h1 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white">{t('categories_page.title')}</h1>
+      <div className="sticky sm:-top-6 z-20 bg-gray-200 dark:bg-gray-800/60 border-b border-gray-200 dark:border-gray-700 px-5 py-2 flex items-center justify-between">
+        <h1 className="text-sm font-semibold text-gray-900 dark:text-white">{t("categories_page.title")}</h1>
         <div className="flex items-center gap-2">
-          <input
-            ref={restoreInputRef}
-            type="file"
-            accept=".json"
-            className="hidden"
-            onChange={handleRestoreFile}
-          />
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => restoreInputRef.current?.click()}
-            disabled={isRestoring}>
-            {isRestoring ? t('categories_page.restoring') : t('categories_page.restore_btn')}
+          <input ref={restoreInputRef} type="file" accept=".json" className="hidden" onChange={handleRestoreFile} />
+          <Button size="sm" variant="secondary" onClick={() => restoreInputRef.current?.click()} disabled={isRestoring}>
+            {isRestoring ? t("categories_page.restoring") : t("categories_page.restore_btn")}
           </Button>
           {!addingNew && (
             <Button size="sm" onClick={() => setAddingNew(true)}>
-              {t('categories_page.new_btn')}
+              {t("categories_page.new_btn")}
             </Button>
           )}
         </div>
       </div>
 
-      {/* Inline add form */}
-      {addingNew && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-indigo-300 dark:border-indigo-600 px-4 py-3 flex items-center gap-3 mb-3 shadow-sm">
-          <input
-            ref={newInputRef}
-            type="text"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={handleAddKeyDown}
-            placeholder={t('categories_page.name_placeholder')}
-            className="flex-1 text-sm outline-none bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-          />
-          <Button size="sm" onClick={handleAdd} disabled={createCategory.isPending || !newName.trim()}>
-            {t('categories_page.add_btn')}
-          </Button>
-          <button
-            onClick={() => {
-              setAddingNew(false);
-              setNewName("");
-            }}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            {t('categories_page.cancel_btn')}
-          </button>
-        </div>
-      )}
+      <div className="p-4 sm:p-5">
+        {/* Inline add form */}
+        {addingNew && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-indigo-300 dark:border-indigo-600 px-4 py-3 flex items-center gap-3 mb-3 shadow-sm">
+            <input
+              ref={newInputRef}
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={handleAddKeyDown}
+              placeholder={t("categories_page.name_placeholder")}
+              className="flex-1 text-sm outline-none bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+            />
+            <Button size="sm" onClick={handleAdd} disabled={createCategory.isPending || !newName.trim()}>
+              {t("categories_page.add_btn")}
+            </Button>
+            <button
+              onClick={() => {
+                setAddingNew(false);
+                setNewName("");
+              }}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              {t("categories_page.cancel_btn")}
+            </button>
+          </div>
+        )}
 
-      {/* Loading */}
-      {isLoading && (
-        <div className="flex flex-col gap-2">
-          {[1, 2, 3].map((i) => (
-            <CategorySkeleton key={i} />
-          ))}
-        </div>
-      )}
+        {/* Loading */}
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {[1, 2, 3].map((i) => (
+              <CategorySkeleton key={i} />
+            ))}
+          </div>
+        )}
 
-      {/* Empty state */}
-      {!isLoading && categories.length === 0 && !addingNew && (
-        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-          <p className="text-lg mb-2">{t('categories_page.empty_title')}</p>
-          <p className="text-sm">{t('categories_page.empty_subtitle')}</p>
-        </div>
-      )}
+        {/* Empty state */}
+        {!isLoading && categories.length === 0 && !addingNew && (
+          <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+            <p className="text-lg mb-2">{t("categories_page.empty_title")}</p>
+            <p className="text-sm">{t("categories_page.empty_subtitle")}</p>
+          </div>
+        )}
 
-      {/* Category list */}
-      {!isLoading && (
-        <div className="flex flex-col gap-2">
-          {categories.map((cat) => {
-            const count = getCollectionCount(cat.id);
-            const isEditing = editingId === cat.id;
+        {/* Category list */}
+        {!isLoading && (
+          <div className="flex flex-col gap-1">
+            {categories.map((cat) => {
+              const count = getCollectionCount(cat.id);
+              const isEditing = editingId === cat.id;
 
-            return (
-              <div
-                key={cat.id}
-                className="group flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-600 transition-colors">
-                {isEditing ? (
-                  <>
-                    <input
-                      ref={editInputRef}
-                      type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      onKeyDown={handleEditKeyDown}
-                      className="flex-1 text-sm outline-none border-b border-indigo-400 text-gray-900 dark:text-gray-100 bg-transparent pb-0.5"
-                    />
-                    <button
-                      onClick={handleSaveEdit}
-                      disabled={editCategory.isPending || !editName.trim()}
-                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors disabled:opacity-50">
-                      {t('categories_page.save_btn')}
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                      {t('categories_page.cancel_btn')}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to={`/categories/${cat.id}`}
-                      className="flex-1 font-medium text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                      {cat.name}
-                    </Link>
-                    <span className="text-xs text-gray-400 dark:text-gray-500">
-                      {t('categories_page.count_collections', { count })}
-                    </span>
-                    <button
-                      onClick={() => startEdit(cat.id, cat.name)}
-                      className="text-xs text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors opacity-0 group-hover:opacity-100">
-                      {t('categories_page.edit_btn')}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(cat.id, cat.name)}
-                      className="text-xs text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                      {t('categories_page.delete_btn')}
-                    </button>
-                  </>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-      <MobileFab onClick={() => setAddingNew(true)} label={t('categories_page.fab_label')} />
+              return (
+                <div
+                  key={cat.id}
+                  className="group flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 
+                  dark:border-gray-700 border-l-[5px] border-l-indigo-200 dark:border-l-indigo-800 
+                  hover:border-indigo-200 dark:hover:border-indigo-600 hover:border-l-indigo-400 hover:shadow-md hover:shadow-indigo-500/10 hover:scale-[1.01]
+                  dark:hover:border-l-indigo-500 transition-all duration-150">
+                  {isEditing ? (
+                    <>
+                      <input
+                        ref={editInputRef}
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={handleEditKeyDown}
+                        className="flex-1 text-sm outline-none border-b border-indigo-400 text-gray-900 dark:text-gray-100 bg-transparent pb-0.5"
+                      />
+                      <button
+                        onClick={handleSaveEdit}
+                        disabled={editCategory.isPending || !editName.trim()}
+                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors disabled:opacity-50">
+                        {t("categories_page.save_btn")}
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                        {t("categories_page.cancel_btn")}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to={`/categories/${cat.id}`}
+                        className="flex-1 text-sm font-medium  text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        {cat.name}
+                      </Link>
+                      <span className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium shrink-0">
+                        {t("categories_page.count_collections", { count })}
+                      </span>
+                      <button
+                        onClick={() => startEdit(cat.id, cat.name)}
+                        className="text-xs text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors opacity-0 group-hover:opacity-100">
+                        {t("categories_page.edit_btn")}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(cat.id, cat.name)}
+                        className="text-xs text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                        {t("categories_page.delete_btn")}
+                      </button>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      <MobileFab onClick={() => setAddingNew(true)} label={t("categories_page.fab_label")} />
     </div>
   );
 }

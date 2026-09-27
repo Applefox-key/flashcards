@@ -10,7 +10,7 @@ interface MyLibraryState {
   expanded: number[]
   compactCards: boolean
   selectedCategoryId: number | null
-  viewMode: 'by-category' | 'all' | 'recent'
+  viewMode: 'by-category' | 'all' | 'recent' | 'bundles'
   allPage: number
 }
 

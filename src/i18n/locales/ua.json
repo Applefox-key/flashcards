@@ -729,7 +729,9 @@
     "confirm_delete": "Видалити тег «{{name}}»? Його буде видалено з усіх колод.",
     "toast_deleted": "Тег видалено",
     "assign_no_collections": "Колод не знайдено.",
+    "assign_modal_title": "Застосувати тег до колекцій",
     "assign_save_btn": "Зберегти",
+    "assign_saving_btn": "Збереження…",
     "assign_cancel_btn": "Скасувати",
     "toast_assignments_saved": "Призначення збережено",
     "toast_assignments_error": "Не вдалося зберегти призначення"

@@ -300,7 +300,7 @@
     "private_label": "privado",
     "public_collection": "mazo público",
     "private_collection": "mazo privado",
-    "no_tags": "sin etiquetas",
+    "no_tags": "Añadir etiquetas",
     "layout_standard_badge": "tarjetas estándar",
     "layout_document_badge": "tarjetas de documento",
     "edit_tags_title": "Editar etiquetas",
@@ -695,7 +695,9 @@
     "confirm_delete": "¿Eliminar la etiqueta «{{name}}»? Se eliminará de todos los mazos.",
     "toast_deleted": "Etiqueta eliminada",
     "assign_no_collections": "No se encontraron mazos.",
+    "assign_modal_title": "Asignar etiqueta a mazos",
     "assign_save_btn": "Guardar",
+    "assign_saving_btn": "Guardando…",
     "assign_cancel_btn": "Cancelar",
     "toast_assignments_saved": "Asignaciones guardadas",
     "toast_assignments_error": "Error al guardar asignaciones"

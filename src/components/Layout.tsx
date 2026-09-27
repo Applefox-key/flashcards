@@ -190,18 +190,14 @@ export function Layout() {
             </>
           ) : (
             <>
-              {(activeSection === "playlists" || activeSection === "categories" || activeSection === "tags") && (
+              {(activeSection === "categories" || activeSection === "tags") && (
                 <span className="sm:hidden text-base font-semibold text-gray-800 dark:text-gray-100 absolute left-1/2 -translate-x-1/2">
-                  {activeSection === "playlists"
-                    ? t("nav.playlists")
-                    : activeSection === "categories"
-                      ? t("nav.categories")
-                      : t("nav.tags")}
+                  {activeSection === "categories" ? t("nav.categories") : t("nav.tags")}
                 </span>
               )}
               <NavLink
                 to="/library"
-                className={`text-lg font-bold text-indigo-600 dark:text-indigo-400 ${activeSection === "playlists" || activeSection === "categories" || activeSection === "tags" ? "hidden sm:inline" : "absolute left-1/2 -translate-x-1/2 sm:static sm:translate-x-0"}`}>
+                className={`text-lg font-bold text-indigo-600 dark:text-indigo-400 ${activeSection === "categories" || activeSection === "tags" ? "hidden sm:inline" : "absolute left-1/2 -translate-x-1/2 sm:static sm:translate-x-0"}`}>
                 FlashMinds
               </NavLink>
             </>
@@ -214,11 +210,6 @@ export function Layout() {
               {t("nav.library")}
             </NavLink>
             <NavLink
-              to="/playlists"
-              className={`px-3 py-1.5 rounded text-sm font-medium ${activeSection === "playlists" ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
-              {t("nav.playlists")}
-            </NavLink>
-            <NavLink
               to="/categories"
               className={`px-3 py-1.5 rounded text-sm font-medium ${activeSection === "categories" ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`}>
               {t("nav.categories")}
@@ -229,15 +220,6 @@ export function Layout() {
               {t("nav.tags")}
             </NavLink>
           </nav>
-
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              `hidden sm:inline px-3 py-1.5 rounded text-sm font-medium ${isActive ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}`
-            }
-            title={t("nav.about")}>
-            <span className="text-xs">{t("nav.about")}</span>
-          </NavLink>
 
           <div className="ml-auto flex items-center justify-end gap-3">
             {/* DarkModeToggle — desktop only */}
@@ -366,12 +348,6 @@ export function Layout() {
                   className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
                   {t("nav.publicLibrary")}
                 </NavLink>{" "}
-                <NavLink
-                  to="/playlists"
-                  onClick={toggleSidebar}
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 py-1">
-                  {t("nav.playlists")}
-                </NavLink>
                 <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1" />
                 <NavLink
                   to="/categories"
@@ -452,7 +428,7 @@ export function Layout() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className={`h-full max-w-[1600px] mx-auto w-full ${isGamePage ? "sm:px-3" : "px-3"} bg-gray-50 dark:bg-gray-900`}>
+            className={`h-full max-w-[1600px] mx-auto w-full h-fit ${isGamePage ? "sm:px-3 bg-gray-50 dark:bg-gray-900" : isCollectionDetailPage ? "px-0 bg-gray-50 dark:bg-gray-900" : "px-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl"}`}>
             <Outlet />
           </motion.div>
         </main>
@@ -508,9 +484,9 @@ export function Layout() {
         <nav
           className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-          <NavLink
-            to="/library"
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "library" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
+          <button
+            onClick={() => { if (myLibrary.viewMode === "bundles") setMyLibrary({ viewMode: "recent" }); navigate("/library"); }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "library" && myLibrary.viewMode !== "bundles" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
             <svg
               width="22"
               height="22"
@@ -524,10 +500,10 @@ export function Layout() {
               <path d="M16 7V5a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v2" />
             </svg>
             <span className="text-[10px] leading-none font-medium">{t("nav.library")}</span>
-          </NavLink>
-          <NavLink
-            to="/playlists"
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "playlists" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
+          </button>
+          <button
+            onClick={() => { setMyLibrary({ viewMode: "bundles" }); navigate("/library"); }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "library" && myLibrary.viewMode === "bundles" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
             <svg
               width="22"
               height="22"
@@ -537,12 +513,12 @@ export function Layout() {
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
+              <polygon points="12 2 2 7 12 12 22 7 12 2" />
+              <polyline points="2 17 12 22 22 17" />
+              <polyline points="2 12 12 17 22 12" />
             </svg>
             <span className="text-[10px] leading-none font-medium">{t("nav.playlists")}</span>
-          </NavLink>
+          </button>
           <NavLink
             to="/categories"
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "categories" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>

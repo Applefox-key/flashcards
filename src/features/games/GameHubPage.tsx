@@ -1,15 +1,17 @@
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
+import { TbCards, TbListCheck, TbPencil, TbArrowsLeftRight, TbClock, TbPuzzle } from "react-icons/tb";
+import type { IconType } from "react-icons";
 import { useGameCards } from "./useGameCards";
 
-const ACTIVITIES = [
-  { type: "flashcard", icon: "🃏", minCards: 1, color: "indigo" },
-  { type: "test", icon: "✓", minCards: 4, color: "green" },
-  { type: "write", icon: "✏️", minCards: 1, color: "blue" },
-  { type: "pairs", icon: "⇄", minCards: 2, color: "purple" },
-  { type: "timed", icon: "⏱", minCards: 1, color: "amber" },
-  { type: "parts", icon: "🔤", minCards: 1, color: "coral" },
+const ACTIVITIES: { type: string; Icon: IconType; minCards: number; color: string }[] = [
+  { type: "flashcard", Icon: TbCards, minCards: 1, color: "indigo" },
+  { type: "test", Icon: TbListCheck, minCards: 4, color: "green" },
+  { type: "write", Icon: TbPencil, minCards: 1, color: "blue" },
+  { type: "pairs", Icon: TbArrowsLeftRight, minCards: 2, color: "purple" },
+  { type: "timed", Icon: TbClock, minCards: 1, color: "amber" },
+  { type: "parts", Icon: TbPuzzle, minCards: 1, color: "coral" },
 ];
 
 const COLOR_MAP: Record<string, { bg: string; border: string; icon: string; text: string }> = {
@@ -190,7 +192,7 @@ export function GameHubPage() {
                       : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 opacity-50 cursor-not-allowed"
                   }`}>
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl">{activity.icon}</span>
+                    <activity.Icon size={26} className={enough ? c.icon : "text-gray-400 dark:text-gray-500"} />
                     <div className="flex flex-col gap-1 flex-1">
                       <span className={`font-semibold text-sm ${enough ? c.text : "text-gray-600 dark:text-gray-400"}`}>
                         {t(`game_hub.activities.${activity.type}.label`)}

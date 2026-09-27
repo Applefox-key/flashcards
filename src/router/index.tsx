@@ -13,9 +13,6 @@ import { PublicLibraryPage } from "@/features/collections/PublicLibraryPage";
 import { CollectionDetailPage } from "@/features/collections/CollectionDetailPage";
 import { CollectionEditPage } from "@/features/collections/CollectionEditPage";
 import { CollectionCreatePage } from "@/features/collections/CollectionCreatePage";
-import { PlaylistsPage } from "@/features/playlists/PlaylistsPage";
-import { PlaylistDetailPage } from "@/features/playlists/PlaylistDetailPage";
-import { PlaylistCardsPage } from "@/features/playlists/PlaylistCardsPage";
 import { GamePage } from "@/features/games/GamePage";
 import { GameHubPage } from "@/features/games/GameHubPage";
 import { AboutPage } from "@/features/about/AboutPage";
@@ -65,9 +62,9 @@ export const router = createBrowserRouter([
               { path: "collections/:id/edit", element: <CollectionEditPage /> },
               { path: "collections/:id/stats", element: <CollectionStatsPage /> },
               { path: "collections/new", element: <CollectionCreatePage /> },
-              { path: "playlists", element: <PlaylistsPage /> },
-              { path: "playlists/:id", element: <PlaylistDetailPage /> },
-              { path: "playlists/:id/cards", element: <PlaylistCardsPage /> },
+              { path: "playlists", element: <Navigate to="/library" replace /> },
+              { path: "playlists/:id", element: <Navigate to="/library" replace /> },
+              { path: "playlists/:id/cards", element: <Navigate to="/library" replace /> },
               { path: "play/:id", element: <GameHubPage /> },
               { path: "play/:type/:id", element: <GamePage /> },
               { path: "profile", element: <ProfilePage /> },
