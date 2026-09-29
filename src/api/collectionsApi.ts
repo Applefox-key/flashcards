@@ -2,6 +2,7 @@ import apiClient from './axios'
 import type {
   Collection,
   CollectionWithContent,
+  CollectionWithCardMatches,
   CollectionCreateRequest,
   CollectionCreateWithCardsRequest,
 } from '@/types'
@@ -73,6 +74,19 @@ export const collectionsApi = {
 
   deleteAllCards: async (id: number): Promise<void> => {
     await apiClient.delete(`/collections/${id}/content`)
+  },
+
+  searchByCards: async (
+    search: string,
+    options?: { categoryId?: number; tagId?: number; isFavorite?: boolean; isPublic?: boolean },
+  ): Promise<CollectionWithCardMatches[]> => {
+    const params: Record<string, unknown> = { q: search };
+    if (options?.categoryId != null) params.categoryId = options.categoryId;
+    if (options?.tagId != null) params.tagId = options.tagId;
+    if (options?.isFavorite) params.isFavorite = 1;
+    if (options?.isPublic) params.isPublic = 1;
+    const res = await apiClient.get('/collections/search-cards', { params });
+    return res.data.data;
   },
 
   getPaginated: async (

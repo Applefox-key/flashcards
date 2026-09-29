@@ -43,6 +43,16 @@ export interface Collection {
   stats?: CollectionStats
 }
 
+export interface CollectionCardMatch {
+  id: number
+  question: string
+  answer: string
+}
+
+export interface CollectionWithCardMatches extends Collection {
+  matchedCards: CollectionCardMatch[]
+}
+
 export interface Content {
   id: number
   question: string

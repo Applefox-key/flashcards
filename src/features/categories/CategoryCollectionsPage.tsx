@@ -39,7 +39,7 @@ function CollectionRow({ collection }: { collection: Collection }) {
         ))}
       </div>
       {!!collection.isFavorite && (
-        <span className="text-rose-400" title={t('category_collections.fav_title')}>
+        <span className="text-rose-400" title={t("category_collections.fav_title")}>
           ♥
         </span>
       )}
@@ -49,7 +49,7 @@ function CollectionRow({ collection }: { collection: Collection }) {
         </span>
       )}
       <span className="text-xs text-gray-400 dark:text-gray-500">
-        {t('category_collections.card_count', { count: collection.cardCount ?? 0 })}
+        {t("category_collections.card_count", { count: collection.cardCount ?? 0 })}
       </span>
     </Link>
   );
@@ -63,13 +63,13 @@ type FilterTag = (typeof FILTER_TAGS)[number];
 function TagFilterBar({ active, onChange }: { active: FilterTag; onChange: (t: FilterTag) => void }) {
   const { t } = useTranslation();
   const labels: Record<FilterTag, string> = {
-    All: t('category_collections.filter_all'),
-    Favorites: t('category_collections.filter_favorites'),
-    Public: t('category_collections.filter_public'),
+    All: t("category_collections.filter_all"),
+    Favorites: t("category_collections.filter_favorites"),
+    Public: t("category_collections.filter_public"),
   };
   return (
     <div className="flex gap-2 mb-6 flex-wrap items-center">
-      <span className="text-xs text-gray-500">{t('category_collections.filter_label')}</span>
+      <span className="text-xs text-gray-500">{t("category_collections.filter_label")}</span>
       {FILTER_TAGS.map((tag) => (
         <button
           key={tag}
@@ -104,13 +104,9 @@ export function CategoryCollectionsPage() {
     if (!categoryData) return;
     setIsSaving(true);
     try {
-      const responses = await Promise.all(
-        categoryData.collections.map((col) => collectionsApi.getWithContent(col.id))
-      );
+      const responses = await Promise.all(categoryData.collections.map((col) => collectionsApi.getWithContent(col.id)));
       // API returns Array<{ collection: Collection, content: Content[] }>, not a flat CollectionWithContent
-      const withContent = responses.map(
-        (r) => (r as unknown as { collection: Collection; content: Content[] }[])[0]
-      );
+      const withContent = responses.map((r) => (r as unknown as { collection: Collection; content: Content[] }[])[0]);
       const payload = {
         version: 1,
         categoryName: categoryData.name,
@@ -130,7 +126,7 @@ export function CategoryCollectionsPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("[Save category]", err);
-      toast.error(t('category_collections.toast_save_error'));
+      toast.error(t("category_collections.toast_save_error"));
     } finally {
       setIsSaving(false);
     }
@@ -167,7 +163,7 @@ export function CategoryCollectionsPage() {
             </span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white min-w-0 truncate">
-            {t('category_collections.category_label')}{" "}
+            {t("category_collections.category_label")}{" "}
             {isLoading ? (
               <span className="inline-block h-7 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             ) : (
@@ -177,7 +173,7 @@ export function CategoryCollectionsPage() {
           {!isLoading && (
             <span className="text-sm text-gray-400 dark:text-gray-500 shrink-0">
               <span className="hidden sm:inline">
-                {t('category_collections.count_collections', { count: collections.length })}
+                {t("category_collections.count_collections", { count: collections.length })}
               </span>
               <span className="sm:hidden">{collections.length}</span>
             </span>
@@ -185,12 +181,12 @@ export function CategoryCollectionsPage() {
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-3">
           <Button size="sm" variant="secondary" onClick={handleSave} disabled={isSaving || isLoading}>
-            {isSaving ? t('category_collections.saving') : t('category_collections.save_btn')}
+            {isSaving ? t("category_collections.saving") : t("category_collections.save_btn")}
           </Button>
           <Link to="/collections/new">
             <Button size="sm">
-              <span className="hidden sm:inline">{t('category_collections.new_collection_btn')}</span>
-              <span className="sm:hidden">{t('category_collections.new_collection_short')}</span>
+              <span className="hidden sm:inline">{t("category_collections.new_collection_btn")}</span>
+              <span className="sm:hidden">{t("category_collections.new_collection_short")}</span>
             </Button>
           </Link>
         </div>
@@ -212,8 +208,8 @@ export function CategoryCollectionsPage() {
         <div className="text-center py-16 text-gray-400">
           <p className="text-lg">
             {collections.length === 0
-              ? t('category_collections.empty_no_collections')
-              : t('category_collections.empty_no_match')}
+              ? t("category_collections.empty_no_collections")
+              : t("category_collections.empty_no_match")}
           </p>
         </div>
       )}

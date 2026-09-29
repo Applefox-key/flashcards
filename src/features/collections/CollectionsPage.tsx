@@ -8,13 +8,13 @@ import { collectionsApi } from "@/api";
 import { useIsDemo } from "@/hooks/useIsDemo";
 import { useDemoStore } from "@/demo/demoStore";
 import { useCategoriesWithCollections } from "@/hooks/useCategoryHooks";
-import { useCollections, useCollectionsPaginated } from "@/hooks/useCollectionHooks";
+import { useCollections, useCollectionsPaginated, useCollectionsSearchByCards } from "@/hooks/useCollectionHooks";
 import { useCollectionTags } from "@/features/collections/hooks/useCollectionTags";
 import { useLibraryUiStore } from "@/store/libraryUiStore";
 import { CollectionProgressBar } from "@/components/CollectionProgressBar";
 import { StudyDot, getAccentBorderClass } from "@/components/StudyDot";
 import { MobileFab } from "@/components/MobileFab";
-import type { Collection, CollectionTag, CollectionStats, Playlist } from "@/types";
+import type { Collection, CollectionTag, CollectionStats, CollectionWithCardMatches, Playlist } from "@/types";
 import { PiShootingStarThin } from "react-icons/pi";
 import { SideDrawer } from "@/components/SideDrawer";
 import { CiImageOn } from "react-icons/ci";
@@ -145,7 +145,7 @@ function CollectionCard({
 
       {/* Hover popup: first 3 cards */}
       {!compact && preview && preview.cards.length > 0 && (
-        <div className="absolute top-full left-0 mt-1.5 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 w-full pointer-events-none">
+        <div className="absolute top-full left-0  mt-1.5 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 delay-500 w-full pointer-events-none">
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-indigo-200 dark:border-indigo-700/70 shadow-xl shadow-indigo-500/15 dark:shadow-indigo-500/10 p-3">
             <div className="flex flex-col gap-1.5">
               {preview.cards.map((card) => (
@@ -179,7 +179,7 @@ function CollectionCard({
       <Link
         to={`/play/${collection.id}`}
         onClick={(e) => e.stopPropagation()}
-        className="flex justify-center items-center opacity-0 absolute bottom-0 text-center right-0 w-full group-hover:opacity-100 transition-opacity shrink-0 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1.5 rounded-b-xl gap-1.5">
+        className="flex justify-center items-center opacity-0 invisible absolute bottom-0 text-center right-0 w-full group-hover:delay-500 group-hover:visible group-hover:opacity-100 transition-[opacity,visibility] shrink-0 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1.5 rounded-b-xl gap-1.5">
         <PiShootingStarThin className="w-4 h-4" /> {t("collections.practice_btn")}
       </Link>
     </div>
@@ -577,6 +577,122 @@ function Pagination({
   );
 }
 
+function CardMatchCard({
+  collection,
+  search,
+  compact,
+}: {
+  collection: CollectionWithCardMatches;
+  search: string;
+  compact: boolean;
+}) {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  if (compact) {
+    return (
+      <div
+        onClick={() => navigate(`/collections/${collection.id}`, { state: { cardSearch: search } })}
+        className="group relative sm:max-w-[1000px] flex flex-col gap-0 px-4 py-2.5 cursor-pointer hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors border border-gray-100 dark:border-gray-700 border-l-[5px] border-l-amber-400 last:border-b-0 first:rounded-t-xl last:rounded-b-xl">
+        <div className="flex items-center gap-3">
+          <span className="flex-1 font-medium text-sm text-gray-800 dark:text-gray-100 truncate">
+            {collection.name}
+          </span>
+          <Link
+            to={`/play/${collection.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-0 inset-y-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-r-md whitespace-nowrap">
+            <PiShootingStarThin className="w-4 h-4 mr-2" /> {t("collections.practice_btn")}
+          </Link>
+        </div>
+        {collection.matchedCards.length > 0 && (
+          <div className="flex flex-col gap-0.5 mt-1">
+            {collection.matchedCards.map((card) => (
+              <div key={card.id} className="grid grid-cols-2 gap-3 text-xs">
+                <span className="truncate text-gray-600 dark:text-gray-300">{highlight(card.question, search)}</span>
+                <span className="truncate text-gray-400 dark:text-gray-500">{highlight(card.answer, search)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={() => navigate(`/collections/${collection.id}`, { state: { cardSearch: search } })}
+      className="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-l-[5px] border-l-amber-400 p-4 flex flex-col gap-2 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-150">
+      <div className="font-semibold text-gray-800 dark:text-gray-100 text-sm uppercase tracking-wide truncate pr-2">
+        {collection.name}
+      </div>
+      {collection.matchedCards.length > 0 && (
+        <div className="flex flex-col gap-1 border-t border-gray-100 dark:border-gray-700 pt-2">
+          {collection.matchedCards.map((card) => (
+            <div key={card.id} className="grid grid-cols-2 gap-2 text-xs">
+              <span className="truncate text-gray-700 dark:text-gray-200">{highlight(card.question, search)}</span>
+              <span className="truncate text-gray-400 dark:text-gray-500">{highlight(card.answer, search)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <Link
+        to={`/play/${collection.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="flex justify-center items-center opacity-0 absolute bottom-0 text-center right-0 w-full group-hover:opacity-100 transition-opacity shrink-0 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1.5 rounded-b-xl gap-1.5">
+        <PiShootingStarThin className="w-4 h-4" /> {t("collections.practice_btn")}
+      </Link>
+    </div>
+  );
+}
+
+function CardMatchSection({ search }: { search: string }) {
+  const { t } = useTranslation();
+  const { myLibrary } = useLibraryUiStore();
+  const compact = myLibrary.compactCards ?? false;
+  const viewMode = myLibrary.viewMode ?? "recent";
+  const activeFilter = myLibrary.activeFilter;
+
+  const searchOptions = {
+    categoryId:
+      viewMode === "by-category" && myLibrary.selectedCategoryId != null ? myLibrary.selectedCategoryId : undefined,
+    tagId: myLibrary.activeTagId ?? undefined,
+    isFavorite: activeFilter === "Favorites" ? true : undefined,
+    isPublic: activeFilter === "Public" ? true : undefined,
+  };
+
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data: matches = [], isLoading } = useCollectionsSearchByCards(debouncedSearch, searchOptions);
+
+  if (!debouncedSearch || isLoading || matches.length === 0) return null;
+
+  return (
+    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 px-1">
+        {t("collections.found_in_cards")}
+      </p>
+      {compact ? (
+        <div className="border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 sm:max-w-[1000px] sm:m-auto overflow-hidden">
+          {matches.map((col) => (
+            <CardMatchCard key={col.id} collection={col} search={debouncedSearch} compact={true} />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+          {matches.map((col) => (
+            <CardMatchCard key={col.id} collection={col} search={debouncedSearch} compact={false} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AllCollectionsView({ search }: { search: string }) {
   const { t } = useTranslation();
   const { myLibrary, setMyLibrary } = useLibraryUiStore();
@@ -616,7 +732,7 @@ function AllCollectionsView({ search }: { search: string }) {
   }
 
   return (
-    <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : "pb-[10rem] sm:pb-auto"}>
+    <div className={isFetching && !isLoading ? "opacity-60 transition-opacity duration-150" : ""}>
       <div className="hidden sm:flex items-center justify-between mb-2 sticky top-[70px] py-2 z-20 bg-white dark:bg-gray-800">
         {data && totalPages > 1 ? (
           <Pagination page={page} totalPages={totalPages} onChange={(p) => setMyLibrary({ allPage: p })} />
@@ -771,7 +887,7 @@ function CardsView({
       </div>
 
       {/* Right: content area */}
-      <div className="flex-1 min-w-0 p-4">
+      <div className="flex-1 min-w-0 p-4 pb-[10rem] sm:pb-auto">
         {viewMode === "bundles" ? (
           <BundlesView allCollections={allCollections} />
         ) : viewMode === "all" ? (
@@ -815,6 +931,7 @@ function CardsView({
             </div>
           </>
         )}
+        {viewMode !== "bundles" && search && <CardMatchSection search={search} />}
       </div>
     </div>
   );

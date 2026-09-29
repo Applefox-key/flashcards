@@ -138,7 +138,8 @@
     "filter_public": "Public",
     "recently_visited": "Continue studying",
     "recent_nav": "Recent",
-    "no_recents": "No recently visited decks"
+    "no_recents": "No recently visited decks",
+    "found_in_cards": "Found in cards"
   },
   "paste_cards": {
     "title": "Paste cards",

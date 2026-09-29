@@ -138,7 +138,8 @@
     "filter_public": "Públicas",
     "recently_visited": "Continuar estudiando",
     "recent_nav": "Recientes",
-    "no_recents": "No hay mazos visitados recientemente"
+    "no_recents": "No hay mazos visitados recientemente",
+    "found_in_cards": "Encontrado en tarjetas"
   },
   "paste_cards": {
     "title": "Pegar tarjetas",

@@ -140,7 +140,8 @@
     "filter_public": "Publiczne",
     "recently_visited": "Kontynuuj naukę",
     "recent_nav": "Ostatnie",
-    "no_recents": "Brak ostatnio odwiedzonych zestawów"
+    "no_recents": "Brak ostatnio odwiedzonych zestawów",
+    "found_in_cards": "Znaleziono w kartach"
   },
   "paste_cards": {
     "title": "Wklej karty",

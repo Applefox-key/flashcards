@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Masonry from "react-masonry-css";
 import { useTranslation } from "react-i18next";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   useCollectionWithContent,
@@ -610,7 +610,22 @@ function ratingBorderClass(rate?: number): string {
       return "border-l-[5px] border-l-gray-200 dark:border-l-gray-200";
   }
 }
-
+function cardNoteClass(rate?: number): string {
+  switch (rate) {
+    case 5:
+      return "bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300 ";
+    case 4:
+      return "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 ";
+    case 3:
+      return "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 ";
+    case 2:
+      return "bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300";
+    case 1:
+      return "bg-violet-100 text-violet-800 dark:bg-violet-950/50 dark:text-violet-300";
+    default:
+      return "bg-slate-100 text-slate-700 dark:bg-slate-900/50 dark:hover:bg-slate-900 dark:text-slate-300";
+  }
+}
 function CardListRow({
   card,
   collectionId,
@@ -913,7 +928,7 @@ function CardItemCompact({
       />
       <div
         onClick={() => onView(card)}
-        className={`justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group cursor-pointer ${ratingBorderClass(card.rate)}`}>
+        className={`relative justify-between bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-3 flex flex-col gap-2 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors group cursor-pointer ${ratingBorderClass(card.rate)}`}>
         <div className="sm:flex sm:items-start sm:gap-2">
           <div className="sm:flex-1 sm:min-w-0">
             <p className="text-xs text-gray-400 mb-0.5">{t("collection_detail.question_label")}</p>
@@ -921,6 +936,12 @@ function CardItemCompact({
               {card.question}
             </p>
           </div>
+          {card.note && (
+            <p
+              className={`absolute top-1 right-1 py-1 px-3  rounded-lg text-xs transition-all truncate max-w-[45%] hover:max-w-full hover:whitespace-normal hover:shadow-md cursor-pointer  hover:top-0 hover:right-0  hover:border hover:border-indigo-200 dark:hover:border-indigo-700 hover:text-lg ${cardNoteClass(card.rate)}`}>
+              {highlightNote(card.note, card.question, card.answer)}
+            </p>
+          )}
           {card.imgQ && card.imgQ !== "null" && card.imgQ !== "" ? (
             <div className="mt-1 sm:mt-0 sm:shrink-0 sm:w-20">
               <CardImg filename={card.imgQ} collectionId={collectionId} alt="question" />
@@ -1001,6 +1022,7 @@ export function CollectionDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const collectionId = Number(id);
   const toast = useToast();
   const trackVisit = useRecentCollectionsStore((s) => s.trackVisit);
@@ -1016,7 +1038,7 @@ export function CollectionDetailPage() {
   const deleteCollection = useDeleteCollection();
   const deleteAllCards = useDeleteAllCards();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState((location.state as { cardSearch?: string } | null)?.cardSearch ?? "");
   const [displayMode, setDisplayMode] = useState<"cards" | "list">("cards");
   const [compact, setCompact] = useState(true);
   const [compactMenuOpen, setCompactMenuOpen] = useState(false);

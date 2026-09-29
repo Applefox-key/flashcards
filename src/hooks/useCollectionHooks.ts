@@ -83,6 +83,25 @@ export function useDeleteAllCards() {
   return isDemo ? d : r
 }
 
+export function useCollectionsSearchByCards(
+  search: string,
+  options?: { categoryId?: number; tagId?: number; isFavorite?: boolean; isPublic?: boolean },
+) {
+  const isDemo = useIsDemo()
+  return useQuery({
+    queryKey: [
+      'collections', 'search-cards', search,
+      options?.categoryId ?? null,
+      options?.tagId ?? null,
+      options?.isFavorite ?? false,
+      options?.isPublic ?? false,
+    ],
+    queryFn: () => collectionsApi.searchByCards(search, options),
+    enabled: !isDemo && search.length >= 1,
+    staleTime: 30_000,
+  })
+}
+
 export function useCollectionsPaginated(page: number, limit: number, search?: string, isFavorite?: boolean, isPublic?: boolean, tagId?: number) {
   const isDemo = useIsDemo()
   const demoCollections = useDemoStore((s) => s.collections)
