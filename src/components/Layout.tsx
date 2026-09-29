@@ -266,12 +266,14 @@ export function Layout() {
                         <div
                           key={app.name}
                           className="flex flex-col gap-1 p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 cursor-default">
-                          <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-1">{app.icon}</div>
+                          <div className="flex items-center nowrap justify-between">
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-1">{app.icon}</div>
+                            <span className="text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded px-1.5 py-0.5 w-fit mt-0.5">
+                              {t("layout.current")}
+                            </span>
+                          </div>
                           <span className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{app.name}</span>
                           <span className="text-xs text-indigo-400 leading-tight">{t(app.descKey)}</span>
-                          <span className="text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded px-1.5 py-0.5 w-fit mt-0.5">
-                            {t("layout.current")}
-                          </span>
                         </div>
                       ) : (
                         <a
@@ -485,7 +487,10 @@ export function Layout() {
           className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
           <button
-            onClick={() => { if (myLibrary.viewMode === "bundles") setMyLibrary({ viewMode: "recent" }); navigate("/library"); }}
+            onClick={() => {
+              if (myLibrary.viewMode === "bundles") setMyLibrary({ viewMode: "recent" });
+              navigate("/library");
+            }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "library" && myLibrary.viewMode !== "bundles" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
             <svg
               width="22"
@@ -502,7 +507,10 @@ export function Layout() {
             <span className="text-[10px] leading-none font-medium">{t("nav.library")}</span>
           </button>
           <button
-            onClick={() => { setMyLibrary({ viewMode: "bundles" }); navigate("/library"); }}
+            onClick={() => {
+              setMyLibrary({ viewMode: "bundles" });
+              navigate("/library");
+            }}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 ${activeSection === "library" && myLibrary.viewMode === "bundles" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"}`}>
             <svg
               width="22"
