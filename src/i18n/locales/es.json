@@ -419,7 +419,7 @@
       "flashcard": { "label": "Tarjetas", "desc": "Repasa las tarjetas a tu propio ritmo. Valora cuánto conoces cada una." },
       "test":      { "label": "Opción múltiple", "desc": "Elige la respuesta correcta entre 4 opciones. Las tarjetas difíciles aparecen más a menudo." },
       "write":     { "label": "Escribe la respuesta", "desc": "Escribe la respuesta de memoria. Usa el botón de pista si te atascas." },
-      "pairs":     { "label": "Emparejar", "desc": "Encuentra las tarjetas de pregunta y respuesta que coincidan. Trabaja en grupos de 6." },
+      "pairs":     { "label": "Emparejar", "desc": "Encuentra las tarjetas de pregunta y respuesta que coincidan." },
       "timed":     { "label": "Tarjetas cronometradas", "desc": "Tarjetas que avanzan automáticamente. Ideal para repasos rápidos." },
       "parts":     { "label": "Puzzle de palabras", "desc": "Reconstruye la respuesta pulsando las palabras en el orden correcto." }
     }

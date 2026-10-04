@@ -419,7 +419,7 @@
       "flashcard": { "label": "Flashcards", "desc": "Flip through cards at your own pace. Rate how well you know each one." },
       "test":      { "label": "Multiple choice", "desc": "Pick the correct answer from 4 options. Harder cards appear more often." },
       "write":     { "label": "Write the answer", "desc": "Type the answer from memory. Use the hint button if you get stuck." },
-      "pairs":     { "label": "Match pairs", "desc": "Find matching question and answer cards. Works in batches of 6." },
+      "pairs":     { "label": "Match pairs", "desc": "Find matching question and answer cards." },
       "timed":     { "label": "Timed cards", "desc": "Flashcards that auto-advance. Great for quick review." },
       "parts":     { "label": "Word puzzle", "desc": "Reconstruct the answer by tapping words in the correct order." }
     }

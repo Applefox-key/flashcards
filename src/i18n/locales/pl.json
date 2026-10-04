@@ -441,7 +441,7 @@
       "flashcard": { "label": "Fiszki", "desc": "Przeglądaj fiszki we własnym tempie. Oceń, jak dobrze znasz każdą z nich." },
       "test":      { "label": "Wybór wielokrotny", "desc": "Wybierz poprawną odpowiedź spośród 4 opcji. Trudniejsze fiszki pojawiają się częściej." },
       "write":     { "label": "Napisz odpowiedź", "desc": "Wpisz odpowiedź z pamięci. Użyj przycisku podpowiedzi, jeśli utkniesz." },
-      "pairs":     { "label": "Dopasuj pary", "desc": "Znajdź pasujące fiszki z pytaniem i odpowiedzią. Działa partiami po 6." },
+      "pairs":     { "label": "Dopasuj pary", "desc": "Znajdź pasujące fiszki z pytaniem i odpowiedzią." },
       "timed":     { "label": "Fiszki na czas", "desc": "Fiszki przełączają się automatycznie. Świetne do szybkiego powtórzenia." },
       "parts":     { "label": "Puzzle słowne", "desc": "Odtwórz odpowiedź, dotykając słów we właściwej kolejności." }
     }
