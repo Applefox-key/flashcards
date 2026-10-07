@@ -569,7 +569,8 @@
     "go_back_btn": "Volver",
     "label_question": "Pregunta",
     "label_answer": "Respuesta",
-    "finish_btn": "Terminar"
+    "finish_btn": "Terminar",
+    "continue_btn": "Continuar →"
   },
   "playlists": {
     "title": "Colecciones",

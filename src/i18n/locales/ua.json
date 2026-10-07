@@ -596,7 +596,8 @@
     "go_back_btn": "Назад",
     "label_question": "Питання",
     "label_answer": "Відповідь",
-    "finish_btn": "Завершити"
+    "finish_btn": "Завершити",
+    "continue_btn": "Далі →"
   },
   "playlists": {
     "title": "Добірки",

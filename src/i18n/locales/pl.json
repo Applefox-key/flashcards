@@ -595,7 +595,8 @@
     "go_back_btn": "Wróć",
     "label_question": "Pytanie",
     "label_answer": "Odpowiedź",
-    "finish_btn": "Zakończ"
+    "finish_btn": "Zakończ",
+    "continue_btn": "Dalej →"
   },
   "playlists": {
     "title": "Pakiety",

@@ -7,6 +7,7 @@ import { ResultEndless } from "./ResultEndless";
 import { ResultOneshotCards } from "./ResultOneshotCards";
 import { ImageThumb } from "@/components/ImageThumb";
 import type { Content } from "@/types";
+import { HighlightedNote } from "@/components/HighlightedNote";
 
 interface Props {
   cards: Content[];
@@ -43,6 +44,7 @@ export function TestGame({
   const [score, setScore] = useState({ r: 0, w: 0, t: 0 });
   const [wrongCardIds, setWrongCardIds] = useState<Set<number>>(new Set());
   const [done, setDone] = useState(false);
+  const [pendingContinue, setPendingContinue] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     if (initialized || Object.keys(probs).length === 0) return;
@@ -114,7 +116,9 @@ export function TestGame({
     }));
     if (!correct) setWrongCardIds((prev) => new Set([...prev, current.id]));
     const rem = remaining;
-    setTimeout(() => {
+
+    const advance = () => {
+      setPendingContinue(null);
       if (mode !== "oneshot" && !correct) {
         setOptions(buildTestOptions(deck, capturedCurrent));
         setChosen(null);
@@ -122,7 +126,13 @@ export function TestGame({
         return;
       }
       pickNext(rem, nextProbs);
-    }, 1000);
+    };
+
+    if (current.note) {
+      setPendingContinue(() => advance);
+    } else {
+      setTimeout(advance, 1000);
+    }
   }
 
   function handleFinish() {
@@ -268,7 +278,19 @@ export function TestGame({
         </div>
 
         {answerState !== "idle" && current.note && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">{current.note}</p>
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center italic">
+              <HighlightedNote note={current.note} question={current.question} answer={current.answer} />
+              {/* {highlightNote(current.note, current.question, current.answer)} */}
+            </p>
+            {pendingContinue && (
+              <button
+                onClick={pendingContinue}
+                className="text-sm px-5 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-medium transition-colors">
+                {t("test_game.continue_btn")}
+              </button>
+            )}
+          </div>
         )}
       </div>
 
